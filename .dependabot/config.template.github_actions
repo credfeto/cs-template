@@ -7,3 +7,7 @@
        - "credfeto"
     default_assignees:
        - "credfeto"
+    allowed_updates:
+       - match:
+          update_type: all
+          dependency_type: indirect
