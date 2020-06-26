@@ -11,3 +11,13 @@
        - match:
           update_type: all
           dependency_type: indirect
+    automerged_updates:
+      - match:
+          update_type: all
+          dependency_type: "development"
+      - match:
+          update_type: "security:patch"
+      - match:
+          update_type: "semver:patch"
+      - match:
+          update_type: "semver:minor"
