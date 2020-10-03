@@ -1,5 +1,6 @@
 version: 2
 update_configs:
+
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
