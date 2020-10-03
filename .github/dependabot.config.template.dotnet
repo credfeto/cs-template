@@ -1,8 +1,6 @@
-version: 2
-updates:
-- package-ecosystem: github-actions
+- package-ecosystem: nuget
   directory: "/"
-  schedule:
+  schedule: 
     interval: daily
     time: "03:00"
     timezone: "Europe/London"
@@ -13,10 +11,12 @@ updates:
   - credfeto
   allow:
   - dependency-type: all
+  ignore:
+  - dependency-name: "Yoti"
   commit-message:
     prefix: "[FF-1429]"
   rebase-strategy: "auto"
   labels:
-  - "github-actions"
+  - "dotnet"
   - "dependencies"
   - "Changelog Not Required"

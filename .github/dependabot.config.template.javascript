@@ -1,6 +1,4 @@
-version: 2
-updates:
-- package-ecosystem: github-actions
+- package-ecosystem: npm
   directory: "/"
   schedule:
     interval: daily
@@ -17,6 +15,6 @@ updates:
     prefix: "[FF-1429]"
   rebase-strategy: "auto"
   labels:
-  - "github-actions"
-  - "dependencies"
-  - "Changelog Not Required"
+   - "npm"
+   - "dependencies"
+   - "Changelog Not Required"

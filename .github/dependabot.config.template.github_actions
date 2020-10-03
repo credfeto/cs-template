@@ -1,5 +1,3 @@
-version: 2
-updates:
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
@@ -17,6 +15,6 @@ updates:
     prefix: "[FF-1429]"
   rebase-strategy: "auto"
   labels:
-  - "github-actions"
-  - "dependencies"
-  - "Changelog Not Required"
+   - "github-actions"
+   - "dependencies"
+   - "Changelog Not Required"
