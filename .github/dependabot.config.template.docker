@@ -15,6 +15,6 @@
     prefix: "[FF-1429]"
   rebase-strategy: "auto"
   labels:
-   - "docker"
-   - "dependencies"
-   - "Changelog Not Required"
+  - "docker"
+  - "dependencies"
+  - "Changelog Not Required"

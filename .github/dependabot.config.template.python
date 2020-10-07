@@ -1,4 +1,4 @@
-- package-ecosystem: npm
+- package-ecosystem: pip
   directory: "/"
   schedule:
     interval: daily
@@ -15,6 +15,6 @@
     prefix: "[FF-1429]"
   rebase-strategy: "auto"
   labels:
-  - "npm"
+  - "python"
   - "dependencies"
   - "Changelog Not Required"
