@@ -17,11 +17,6 @@ on:
 
 jobs:
   auto-merge:
-    needs:
-      - all
-      - other
-      - required
-      - jobs
     runs-on: ubuntu-latest
     steps:
       - name: auto-merge
