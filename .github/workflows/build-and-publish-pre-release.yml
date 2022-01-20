@@ -32,7 +32,7 @@ jobs:
     - name: Check file existence
       id: check_files
       working-directory: ./src
-      run: [ -f *.sln ] && [ -f **/*.csproj ] && [ -f global.json ] && echo ''::set-output name=files_exist::true' || echo "::set-output name=files_exist::false"
+      run: [ -f *.sln ] && [ -f **/*.csproj ] && [ -f global.json ] && echo '::set-output name=files_exist::true' || echo ''::set-output name=files_exist::false'
     - if: steps.check_files.outputs.files_exists == 'true'
       name: Determine .net core version
       uses: credfeto/action-dotnet-version-detect@v1.2.0
