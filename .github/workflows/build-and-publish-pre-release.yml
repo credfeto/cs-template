@@ -47,7 +47,6 @@ jobs:
       run: dotnet new tool-manifest
     - name: Install Build Version Tool
       run: dotnet tool install --local FunFair.BuildVersion
-#        --version 3.0.1.193-master
     - name: Install Multi-Push Tool
       run: dotnet tool install --local Credfeto.Package.Push
     - name: Set Define Build Version
@@ -71,7 +70,8 @@ jobs:
         dotnet pack --configuration Release /p:Version=${{ env.BUILD_VERSION }} --no-restore --output ../dist
       env:
         ReleaseNotes: ${{ steps.release-notes.outputs.content }}
-    - name: Update Release Notes
+    - if: ${{ github.actor != 'dependabot[bot]' }}
+      name: Update Release Notes
       run: |
         dotnet changelog --changelog CHANGELOG.md --extract RELEASE_NOTES.md --version ${{ env.BUILD_VERSION }}
     - if: ${{ github.actor != 'dependabot[bot]' }}
