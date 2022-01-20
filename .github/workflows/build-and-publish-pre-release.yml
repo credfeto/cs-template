@@ -61,8 +61,7 @@ jobs:
       run: dotnet tool install --local Credfeto.Changelog.Cmd
     - if: steps.check_files.outputs.files_exists == 'true'
       name: Create Release Notes
-      run: |
-        dotnet changelog --changelog CHANGELOG.md --extract RELEASE_NOTES.md --version ${{ env.BUILD_VERSION }}
+      run: dotnet changelog --changelog CHANGELOG.md --extract RELEASE_NOTES.md --version ${{ env.BUILD_VERSION }}
     - if: steps.check_files.outputs.files_exists == 'true'
       id: release-notes
       uses: juliangruber/read-file-action@v1
