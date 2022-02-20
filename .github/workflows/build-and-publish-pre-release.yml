@@ -105,7 +105,7 @@ jobs:
     - if: ${{ env.OCTOPUS_DEPLOY_PACKAGE != '' }}
       name: Zip Packages for Octopus
       working-directory: ./src/server-dist
-      run: zip -9r ../../${{ env.OCTOPUS_DEPLOY_PACKAGE != '' }}.${{ env.BUILD_VERSION }}.${{ env.BUILD_VERSION }}.zip .
+      run: zip -9r ../../${{ env.OCTOPUS_DEPLOY_PACKAGE }}.${{ env.BUILD_VERSION }}.${{ env.BUILD_VERSION }}.zip .
     - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' && env.OCTOPUS_DEPLOY_PACKAGE != '' }}
       name: Push package to Octopus 
       run: octo push --package *.zip  --server="${{ env.OCTOPUS_SERVER }}" --apiKey="${{ env.OCTOPUS_API_KEY}}" --enableServiceMessages --debug --overwrite-mode=IgnoreIfExists    
