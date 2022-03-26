@@ -98,6 +98,10 @@ jobs:
       env:
         ReleaseNotes: ${{ steps.release-notes.outputs.content }}
     - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
+      name: Show Test files
+      working-directory: ./test-results
+      run: ls -lar
+    - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' && always() }}
       name: Generate xunit test results
       id: xunit-viewer
       uses: AutoModality/action-xunit-viewer@v1
