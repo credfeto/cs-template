@@ -94,7 +94,7 @@ jobs:
     - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
       name: Test with dotnet
       working-directory: ./src
-      run: dotnet test --no-build --no-restore -noConsoleLogger --configuration Release /p:Version=${{ env.BUILD_VERSION }} --filter FullyQualifiedName\!~Integration --results-directory ../test-results 
+      run: dotnet test --no-build --no-restore -noConsoleLogger --configuration Release /p:Version=${{ env.BUILD_VERSION }} --filter FullyQualifiedName\!~Integration --logger:"trx;LogFilePrefix=testResults" --results-directory ../test-results 
       env:
         ReleaseNotes: ${{ steps.release-notes.outputs.content }}
     - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
