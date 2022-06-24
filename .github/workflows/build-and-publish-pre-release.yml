@@ -92,10 +92,23 @@ jobs:
       uses: juliangruber/read-file-action@v1
       with:
         path: RELEASE_NOTES.md
+
+    # BUILD DOTNET
+    - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.sln', '**/*.csproj', '**/*.props') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
+      name: Restore dotnet packages
+      working-directory: ./src
+      run: dotnet restore
     - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
       name: Build with dotnet
       working-directory: ./src
-      run: dotnet build --configuration Release /p:Version=${{ env.BUILD_VERSION }}
+      run: dotnet build --no-restore --configuration Release /p:Version=${{ env.BUILD_VERSION }}
       env:
         ReleaseNotes: ${{ steps.release-notes.outputs.content }}
 
