@@ -75,4 +75,7 @@ jobs:
       - if: ${{ steps.detection.outputs.defaultbranch != matrix.branch && steps.find-pull-request.outputs.number == '' && steps.aheadbehind.output.behind != 0 }}
         name: Rebase
         run: echo "Rebase?"
-          
+      - if: ${{ steps.detection.outputs.defaultbranch != matrix.branch && steps.find-pull-request.outputs.number == '' }}
+        run: |
+          echo "Ahead: ${{steps.aheadbehind.output.ahead}"
+          echo "Behind: ${{steps.aheadbehind.output.behind}"
