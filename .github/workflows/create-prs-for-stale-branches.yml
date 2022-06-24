@@ -16,7 +16,7 @@ jobs:
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
 
-  ci:
+  check-branch:
     needs: build-matrix
     runs-on: ubuntu-latest
     strategy:
