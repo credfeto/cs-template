@@ -29,4 +29,4 @@ jobs:
       #     token: ${{ secrets.SOURCE_PUSH_TOKEN }}
 
       - run: |
-          echo 'Found: ${{ matrix.branch }}''
+          echo 'Found: ${{ matrix.branch }}'
