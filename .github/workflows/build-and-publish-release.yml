@@ -46,19 +46,14 @@ jobs:
       name: Determine .net core version
       uses: credfeto/action-dotnet-version-detect@v1.2.1
     - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
-      name: Setup .NET Core (Old)
-      uses: actions/setup-dotnet@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        dotnet-version: 5.0.403
-    - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
       name: Setup .NET Core
       uses: actions/setup-dotnet@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+        dotnet-version: |
+            5.0.x
+            ${{ env.DOTNET_VERSION }}
     - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
       name: Install dotnet workload - Mac OS
       run: dotnet workload install macos --skip-manifest-update

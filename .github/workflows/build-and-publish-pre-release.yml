@@ -58,7 +58,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+        dotnet-version: |
+            5.0.x
+            ${{ env.DOTNET_VERSION }}
     - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
       name: Install dotner workload - Mac OS
       run: dotnet workload install macos --skip-manifest-update
