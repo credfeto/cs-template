@@ -59,9 +59,20 @@ jobs:
           number: ${{ steps.find-pull-request.outputs.number }}
           sha: ${{ steps.find-pull-request.outputs.head-sha }}
       - if: ${{ steps.detection.outputs.defaultbranch != matrix.branch && steps.find-pull-request.outputs.number == '' }}
+        id: aheadbehind
+        name: Check Ahead\Behind Status
         run: |
           echo "Check to see if ${{steps.detection.outputs.defaultbranch}} is ahead or behind ${{matrix.branch}}..."
           git rev-list --left-right --count  origin/${{steps.detection.outputs.defaultbranch}}...origin/${{matrix.branch}} | awk '{
                       print "${{matrix.branch}} is behind ${{steps.detection.outputs.defaultbranch}} by "$1" commit(s)"
+                      print "::set-output name=behind::"$1
                       print "${{matrix.branch}} is ahead of ${{steps.detection.outputs.defaultbranch}} by "$2" commit(s)"
+                      print "::set-output name=ahead::"$2
                       }'
+      - if: ${{ steps.detection.outputs.defaultbranch != matrix.branch && steps.find-pull-request.outputs.number == '' && steps.aheadbehind.output.ahead != 0 }}
+        name: Create PR
+        run: echo "Create PR"
+      - if: ${{ steps.detection.outputs.defaultbranch != matrix.branch && steps.find-pull-request.outputs.number == '' && steps.aheadbehind.output.behind != 0 }}
+        name: Rebase
+        run: echo "Rebase?"
+          
