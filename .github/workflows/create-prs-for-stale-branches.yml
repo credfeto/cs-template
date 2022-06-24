@@ -58,7 +58,7 @@ jobs:
         env:
           number: ${{ steps.find-pull-request.outputs.number }}
           sha: ${{ steps.find-pull-request.outputs.head-sha }}
-      - if: ${{ steps.detection.outputs.defaultbranch != matrix.branch && number == '' }}
+      - if: ${{ steps.detection.outputs.defaultbranch != matrix.branch && steps.find-pull-request.outputs.number == '' }}
         run: |
           echo "Need to check to see if branch is ahead or behind..."
           git rev-list --left-right --count  ${{steps.detection.outputs.defaultbranch}}...${{matrix.branch}} | awk '{
