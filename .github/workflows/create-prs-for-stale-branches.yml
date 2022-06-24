@@ -11,6 +11,11 @@ jobs:
   build-matrix:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.SOURCE_PUSH_TOKEN }}
+
       - id: set-matrix
         run: echo "::set-output name=branches::$(git branch --remote --format='%(refname:short)' | grep -Po 'origin/\K[^.*]*' | grep -vE 'HEAD|main' | jq -R -s -c 'split("\n")[:-1]')"
     outputs:
