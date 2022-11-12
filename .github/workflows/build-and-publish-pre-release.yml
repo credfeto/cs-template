@@ -8,10 +8,6 @@ on:
     branches-ignore:
       - 'release/*'
       - 'hotfix/*'
-#    pull_request:
-#      - opened
-#      - edited
-#      - synchronize
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
