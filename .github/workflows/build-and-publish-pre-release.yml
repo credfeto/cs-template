@@ -49,9 +49,9 @@ jobs:
       - name: Fetch tags and master
         run: |
           git fetch --tags
-          echo REF: $GITHUB_REF
-          echo SHA: $GITHUB_SHA
-          echo GIT_BRANCH=$GITHUB_REF >> $GITHUB_ENV
+          echo "REF: $GITHUB_REF"
+          echo "SHA: $GITHUB_SHA"
+          echo "GIT_BRANCH=$GITHUB_REF" >> "$GITHUB_ENV"
           git branch --remote
       - name: Check file existence
         id: check_files
@@ -130,13 +130,6 @@ jobs:
         run: dotnet test --no-build --no-restore -noConsoleLogger --configuration Release /p:Version=${{ env.BUILD_VERSION }} --filter FullyQualifiedName\!~Integration --logger:"trx;LogFilePrefix=testResults" --results-directory ../test-results
         env:
           ReleaseNotes: ${{ steps.release-notes.outputs.content }}
-      # - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' && always() }}
-      #   name: Convert tests results to GitHub checks
-      #   uses: NasAmin/trx-parser@v0.2.0
-      #   id: trx-parser
-      #   with:
-      #     TRX_PATH: ${{ github.workspace }}/test-results #This should be the path to your TRX files
-      #     REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       ## NUGET PACKAGES
       - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' && env.NUGET_API_KEY != '' }}
