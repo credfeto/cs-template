@@ -40,9 +40,9 @@ jobs:
       - name: Fetch tags and master
         run: |
           git fetch --tags
-          echo REF: $GITHUB_REF
-          echo SHA: $GITHUB_SHA
-          echo GIT_BRANCH=$GITHUB_REF >> "$GITHUB_ENV"
+          echo "REF: $GITHUB_REF"
+          echo "SHA: $GITHUB_SHA"
+          echo "GIT_BRANCH=$GITHUB_REF >> "$GITHUB_ENV""
           git branch --remote
       - name: Check file existence
         id: check_files
