@@ -44,8 +44,8 @@ jobs:
         id: check_files
         run: |
           echo "Hash: ${{hashfiles('**/*.sln', '**/*.csproj', '**/*.cs')}}"
-          if [[ -d src && -f src/global.json && '${{ hashfiles('**/*.sln', '**/*.csproj', '**/*.cs') }}' != '' ]]; then echo 'FILES_EXIST=true' >> $GITHUB_OUTPUT; else echo 'FILES_EXIST=false' >> $GITHUB_OUTPUT; fi
-          if [[ -d src && -f src/global.json && '${{ hashfiles('**/*.sln', '**/*.csproj', '**/*.cs') }}' != '' ]]; then echo 'Exists: true'; else echo 'Exists: false'; fi
+          [[ -d src && -f src/global.json && '${{ hashfiles('**/*.sln', '**/*.csproj', '**/*.cs') }}' != '' ]] && echo 'FILES_EXIST=true' >> $GITHUB_OUTPUT || echo 'FILES_EXIST=false' >> $GITHUB_OUTPUT
+          [[ -d src && -f src/global.json && '${{ hashfiles('**/*.sln', '**/*.csproj', '**/*.cs') }}' != '' ]] && echo 'Exists: true' || echo 'Exists: false'
       - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
         name: Determine .net core version
         uses: credfeto/action-dotnet-version-detect@v1.3.0
