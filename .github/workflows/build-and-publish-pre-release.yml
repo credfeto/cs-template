@@ -6,12 +6,16 @@ on:
       - 'src/**/*'
       - '.github/workflows/build*.yml'
     branches-ignore:
-     - 'release/*'
-     - 'hotfix/*'
+      - 'release/*'
+      - 'hotfix/*'
     pull_request:
-     - opened
-     - edited
-     - synchronize
+      - opened
+      - edited
+      - synchronize
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write

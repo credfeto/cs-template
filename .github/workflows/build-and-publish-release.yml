@@ -2,9 +2,13 @@ name: .NET [Release]
 
 on:
   push:
-     branches:
-       - 'release/*'
-       - 'hotfix/*'
+    branches:
+      - 'release/*'
+      - 'hotfix/*'
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
