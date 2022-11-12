@@ -84,7 +84,7 @@ jobs:
           version: latest
       - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
         name: Set Define Build Version
-        run: dotnet buildversion --BuildNumber $GITHUB_RUN_NUMBER
+        run: dotnet buildversion --BuildNumber "$GITHUB_RUN_NUMBER"
       - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
         name: Create Release Notes
         run: dotnet changelog --changelog CHANGELOG.md --extract RELEASE_NOTES.md --version ${{ env.BUILD_VERSION }}
