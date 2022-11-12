@@ -48,7 +48,7 @@ jobs:
         id: check_files
         run: |
           echo "Hash: ${{hashfiles('**/*.sln', '**/*.csproj', '**/*.cs')}}"
-          [[ -d src && -f src/global.json && '${{ hashfiles('**/*.sln', '**/*.csproj', '**/*.cs') }}' != '' ]] && echo 'FILES_EXIST=true' >> $GITHUB_OUTPUT || echo 'FILES_EXIST=false' >> $GITHUB_OUTPUT
+          [[ -d src && -f src/global.json && '${{ hashfiles('**/*.sln', '**/*.csproj', '**/*.cs') }}' != '' ]] && echo 'FILES_EXIST=true' >> "$GITHUB_OUTPUT" || echo 'FILES_EXIST=false' >> "$GITHUB_OUTPUT"
           [[ -d src && -f src/global.json && '${{ hashfiles('**/*.sln', '**/*.csproj', '**/*.cs') }}' != '' ]] && echo 'Exists: true' || echo 'Exists: false'
       - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' }}
         name: Determine .net core version
@@ -123,13 +123,6 @@ jobs:
         run: dotnet test --no-build --no-restore -noConsoleLogger --configuration Release /p:Version=${{ env.BUILD_VERSION }} --filter FullyQualifiedName\!~Integration --logger:"trx;LogFilePrefix=testResults" --results-directory ../test-results
         env:
           ReleaseNotes: ${{ steps.release-notes.outputs.content }}
-      # - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' && always() }}
-        # name: Convert tests results to github checks
-        # uses: NasAmin/trx-parser@v0.2.0
-        # id: trx-parser
-        # with:
-        #   TRX_PATH: ${{ github.workspace }}/test-results #This should be the path to your TRX files
-        #   REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       ## NUGET PACKAGES
       - if: ${{ steps.check_files.outputs.FILES_EXIST == 'true' && env.NUGET_API_KEY != '' }}
