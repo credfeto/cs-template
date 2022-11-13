@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: jamminroot/todo-2-gh-issue@1.2.1
+      - uses: jamminroot/todo-2-gh-issue@master
         with:
           TOKEN: ${{ secrets.SOURCE_PUSH_TOKEN }}
           TODO_PATTERN: "(?<=\\/\\/ ?TODO[ :]).+"
