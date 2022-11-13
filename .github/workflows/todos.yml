@@ -15,17 +15,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: jamminroot/todo-2-gh-issue@master
+      - uses: derjuulsn/todo-issue@main
         with:
-          TOKEN: ${{ secrets.SOURCE_PUSH_TOKEN }}
-          TODO_PATTERN: "(?<=\\/\\/ ?TODO[ :]).+"
-          GH_LABEL: "TODO"
-          TRIM: ",: \""
-          TIMEOUT: 1000
-          LINES_BEFORE: 2
-          LINES_AFTER: 5
-          LABELS_PATTERN: "(?<=\\[).+?(?=\\])"
-          LABELS_REPLACE_PATTERN: "\\[(.+?)\\]"
-          IGNORED_LINES_LENGTH: 255
-          FILE_PATTERN: ".*cs"
-        id: "todo"
+          excludePattern: '(node_modules/)'
+          autoAssign: 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.SOURCE_PUSH_TOKEN }}
