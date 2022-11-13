@@ -24,7 +24,7 @@ jobs:
         with:
           excludePattern: '(node_modules/)'
           autoAssign: 'true'
-          keywords: 'TODO,FIX_ME'
+          keywords: 'TODO'
           blobLines: 7
           blobLinesBefore: 2
           caseSensitive: false
