@@ -28,6 +28,7 @@ jobs:
       OCTOPUS_DEPLOY_TO: ${{secrets.OCTOPUS_DEPLOYTO_PRERELEASE}}
       OCTOPUS_SERVER: ${{secrets.OCTOPUS_SERVER}}
       OCTOPUS_API_KEY: ${{secrets.OCTOPUS_API_KEY}}
+      OCTOPUS_SPACE_NAME: "${{secrets.OCTOPUS_SPACE}}"
       NUGET_API_KEY: ${{secrets.NUGET_API_KEY}}
       NUGET_FEED: ${{secrets.NUGET_FEED}}
       NUGET_ADDITIONAL_RESTORE_FEED: ${{secrets.NUGET_ADDITIONAL_RESTORE_FEED}}
@@ -165,6 +166,7 @@ jobs:
         env:
           OCTOPUS_URL: "${{env.OCTOPUS_SERVER}}"
           OCTOPUS_API_KEY: "${{env.OCTOPUS_API_KEY}}"
+          OCTOPUS_SPACE: "${{env.OCTOPUS_SPACE_NAME}}"
         #run: octo push --package "${{env.OCTOPUS_DEPLOY_PACKAGE_ZIP}}-x64.${{env.BUILD_VERSION}}.zip" --package "${{env.OCTOPUS_DEPLOY_PACKAGE_ZIP}}-arm64.${{env.BUILD_VERSION}}.zip" --server="${{env.OCTOPUS_SERVER}}" --apiKey="${{env.OCTOPUS_API_KEY}}" --enableServiceMessages --debug --overwrite-mode=IgnoreIfExists
 
 
@@ -174,6 +176,7 @@ jobs:
         env:
           OCTOPUS_URL: "${{env.OCTOPUS_SERVER}}"
           OCTOPUS_API_KEY: "${{env.OCTOPUS_API_KEY}}"
+          OCTOPUS_SPACE: "${{env.OCTOPUS_SPACE_NAME}}"
         #env --server="${{secrets.OCTOPUS_SERVER}}" --apiKey="${{secrets.OCTOPUS_API_KEY}}"
         #run: octo create-release --project"${{env.OCTOPUS_PROJECT}}" --version="${{env.BUILD_VERSION}}" --channel="${{env.OCTOPUS_CHANNEL}}" --package="${{env.OCTOPUS_DEPLOY_PACKAGE_ZIP}}-x64:${{env.BUILD_VERSION}}" --package="${{env.OCTOPUS_DEPLOY_PACKAGE_ZIP}}-arm64:${{env.BUILD_VERSION}}" --deployTo="${{env.OCTOPUS_DEPLOY_TO}}" --server="${{secrets.OCTOPUS_SERVER}}" --apiKey="${{secrets.OCTOPUS_API_KEY}}" --enableServiceMessages --debug --releaseNotesFile="RELEASE_NOTES.md"
 
@@ -183,4 +186,5 @@ jobs:
         env:
           OCTOPUS_URL: "${{env.OCTOPUS_SERVER}}"
           OCTOPUS_API_KEY: "${{env.OCTOPUS_API_KEY}}"
+          OCTOPUS_SPACE: "${{env.OCTOPUS_SPACE_NAME}}"
         # ??  --deployTo="${{env.OCTOPUS_DEPLOY_TO}}"
