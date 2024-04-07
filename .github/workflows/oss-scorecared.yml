@@ -1,4 +1,4 @@
-name: "Scorecard analysis workflow"
+name: "Security: Scorecard analysis"
 on:
   # Only the default branch is supported.
   branch_protection_rule:
