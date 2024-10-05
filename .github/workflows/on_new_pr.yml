@@ -26,6 +26,11 @@ jobs:
     # Specifically check that dependabot (or another trusted party) created this pull-request, and that it has been labelled correctly.
     if: contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
     - uses: alexwilson/enable-github-automerge-action@2.0.0
       with:
         github-token: ${{secrets.SOURCE_PUSH_TOKEN}}
@@ -40,6 +45,11 @@ jobs:
 
     if: contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@v2
+      with:
+        egress-policy: audit
+
     - uses: hmarr/auto-approve-action@v4
       with:
         github-token: ${{secrets.SOURCE_PUSH_TOKEN}}
