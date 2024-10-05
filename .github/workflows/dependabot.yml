@@ -23,6 +23,6 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Rebase"
-        uses: bbeesley/gha-auto-dependabot-rebase@v1.5.0
+        uses: bbeesley/gha-auto-dependabot-rebase@14e431d94caa3bf4c44bf9c58003612adae91188 # v1.5.0
         env:
           GITHUB_TOKEN: ${{secrets.SOURCE_PUSH_TOKEN}}

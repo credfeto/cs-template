@@ -32,7 +32,7 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Info"
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('Branch: ${{env.HEAD_REF}}');
@@ -54,20 +54,20 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 1
           fetch-tags: true
 
       - name: "Find PR For branch"
-        uses: juliangruber/find-pull-request-action@v1.9.0
+        uses: juliangruber/find-pull-request-action@48b6133aa6c826f267ebd33aa2d29470f9d9e7d0 # v1.9.0
         id: findPr
         with:
           branch: ${{github.ref_name}}
 
       - name: "Existing PR Information"
         if: steps.findPr.outputs.number != ''
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('Pull request already exists with id: ${{steps.findPr.outputs.number}}');
@@ -76,7 +76,7 @@ jobs:
       - name: "Read PR Template"
         if: steps.findPr.outputs.number == ''
         id: pr-template
-        uses: juliangruber/read-file-action@v1.1.7
+        uses: juliangruber/read-file-action@b549046febe0fe86f8cb4f93c24e284433f9ab58 # v1.1.7
         with:
           path: ./.github/PULL_REQUEST_TEMPLATE.md
 
@@ -87,7 +87,7 @@ jobs:
 
       - name: "Check Repo Visibility"
         if: steps.findPr.outputs.number == ''
-        uses: credfeto/action-repo-visibility@v1.2.0
+        uses: credfeto/action-repo-visibility@a1045e23f0fd73f914ea1cb03b1844c52620fd75 # v1.2.0
         id: visibility
         with:
           repository: ${{env.REPO}}
@@ -102,7 +102,7 @@ jobs:
         run: echo "CREATE_DRAFT=false" >> "$GITHUB_ENV"
 
       - name: "Status"
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('Repo: ${{env.REPO}}');
@@ -115,7 +115,7 @@ jobs:
       - name: "Create Pull Request"
         if: steps.findPr.outputs.number == ''
         id: open-pr
-        uses: repo-sync/pull-request@v2.12
+        uses: repo-sync/pull-request@572331753c3787dee4a6c0b6719c889af9646b81 # v2.12
         with:
           source_branch: ""                     # If blank, default: triggered branch
           destination_branch: "main"            # If blank, default: master
@@ -128,7 +128,7 @@ jobs:
 
       - name: "New PR Details"
         if: steps.findPr.outputs.number == ''
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('URL: ${{steps.open-pr.outputs.pr_url}}');
@@ -137,7 +137,7 @@ jobs:
 
       - name: "Sync Labels"
         if: steps.findPr.outputs.number == ''
-        uses: actions/labeler@v5
+        uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
         with:
           repo-token: ${{secrets.SOURCE_PUSH_TOKEN}}
           configuration-path: .github/labeler.yml

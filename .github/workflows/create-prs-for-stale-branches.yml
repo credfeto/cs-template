@@ -40,7 +40,7 @@ jobs:
         run: sudo apt install -y jq
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -77,7 +77,7 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -86,7 +86,7 @@ jobs:
 
       - name: "Check Repo Visibility"
         if: github.repository_owner != 'funfair-tech'
-        uses: credfeto/action-repo-visibility@v1.2.0
+        uses: credfeto/action-repo-visibility@a1045e23f0fd73f914ea1cb03b1844c52620fd75 # v1.2.0
         id: visibility
         with:
           repository: ${{github.repository}}
@@ -107,7 +107,7 @@ jobs:
       # On Default branch
       - name: "On Default Branch"
         if: steps.detection.outputs.defaultbranch == matrix.branch
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info("On Default branch - don't do anything");
@@ -115,14 +115,14 @@ jobs:
       # On Non-Default branch
       - name: "On Non-Default branch"
         if: steps.detection.outputs.defaultbranch != matrix.branch
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('On non-default branch');
 
       - name: "Find Existing PR"
         if: steps.detection.outputs.defaultbranch != matrix.branch
-        uses: juliangruber/find-pull-request-action@v1.9.0
+        uses: juliangruber/find-pull-request-action@48b6133aa6c826f267ebd33aa2d29470f9d9e7d0 # v1.9.0
         id: find-pull-request
         with:
           branch: "${{env.BRANCH}}"
@@ -173,7 +173,7 @@ jobs:
           && steps.aheadbehind.outputs.ahead != 0
           && steps.aheadbehind.outputs.dayssinceupdate > 7
         id: pr-template
-        uses: juliangruber/read-file-action@v1.1.7
+        uses: juliangruber/read-file-action@b549046febe0fe86f8cb4f93c24e284433f9ab58 # v1.1.7
         with:
           path: ./.github/PULL_REQUEST_TEMPLATE.md
 
@@ -184,7 +184,7 @@ jobs:
           && steps.aheadbehind.outputs.ahead != 0
           && steps.aheadbehind.outputs.dayssinceupdate > 7
         id: open-pr
-        uses: repo-sync/pull-request@v2.12
+        uses: repo-sync/pull-request@572331753c3787dee4a6c0b6719c889af9646b81 # v2.12
         with:
           source_branch: ${{matrix.branch}}       # If blank, default: triggered branch
           destination_branch: ${{steps.detection.outputs.defaultbranch}}            # If blank, default: master
@@ -201,7 +201,7 @@ jobs:
           && steps.find-pull-request.outputs.number == ''
           && steps.aheadbehind.outputs.ahead != 0
           && steps.aheadbehind.outputs.dayssinceupdate > 7
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('URL: ${{steps.open-pr.outputs.pr_url}}');
@@ -210,7 +210,7 @@ jobs:
 
       - name: "Update PR Labels"
         if: steps.open-pr.outputs.pr_number != ''
-        uses: actions/labeler@v5
+        uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
         with:
           repo-token: ${{secrets.SOURCE_PUSH_TOKEN}}
           configuration-path: .github/labeler.yml
@@ -224,7 +224,7 @@ jobs:
           && steps.aheadbehind.outputs.behind != 0
           && steps.aheadbehind.outputs.ahead != 0
           && steps.aheadbehind.outputs.dayssinceupdate > 7
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('Rebase?');
@@ -235,7 +235,7 @@ jobs:
           && steps.find-pull-request.outputs.number == ''
           && steps.aheadbehind.outputs.ahead == '0'
           && steps.aheadbehind.outputs.dayssinceupdate > 60
-        uses: dawidd6/action-delete-branch@v3.1.0
+        uses: dawidd6/action-delete-branch@d1efac9a6f7a9b408d4e8ff663a99c1fbac17b3f # v3.1.0
         with:
           github_token: ${{secrets.SOURCE_PUSH_TOKEN}}
           branches: ${{matrix.branch}}
@@ -244,7 +244,7 @@ jobs:
         if: |-
           steps.detection.outputs.defaultbranch != matrix.branch
           && steps.find-pull-request.outputs.number == ''
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('Ahead: ${{steps.aheadbehind.outputs.ahead}}');

@@ -27,7 +27,7 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Info"
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('Branch: ${{env.HEAD_REF}}');
@@ -44,7 +44,7 @@ jobs:
 #        shell: bash
 #        run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 #      - name: "Checkout Source"
-#        uses: actions/checkout@v4.1.1
+#        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 #        with:
 #          fetch-depth: 0
 #          fetch-tags: true
@@ -68,7 +68,7 @@ jobs:
 
       - name: "Checkout Source"
         if: (github.actor != 'dependabot[bot]' && !endsWith(github.repository , '-template'))
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -80,7 +80,7 @@ jobs:
 
       - name: "Report unchanged"
         if: (github.actor != 'dependabot[bot]' && !endsWith(github.repository , '-template')) && env.CHANGES == '0'
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.setFailed('Changelog has not changed')
@@ -96,21 +96,21 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
 
       - name: "Get version from global.json"
         if: (github.actor != 'dependabot[bot]' && !endsWith(github.repository , '-template'))
-        uses: credfeto/action-dotnet-version-detect@v1.3.0
+        uses: credfeto/action-dotnet-version-detect@d572bbd7285038bda731c8a4f237b9b8e64a9954 # v1.3.0
         with:
           file: src/global.json
           fallback: 8.0.*
 
       - name: "Install dotnet"
         if: (github.actor != 'dependabot[bot]' && !endsWith(github.repository , '-template'))
-        uses: actions/setup-dotnet@v4.0.1
+        uses: actions/setup-dotnet@6bd8b7f7774af54e05809fcc5431931b3eb1ddee # v4.0.1
         env:
           GITHUB_TOKEN: ${{secrets.SOURCE_PUSH_TOKEN}}
           DDOTNET_ROOT: "${{github.workspace}}/.dotnet/${{github.sha}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
@@ -132,7 +132,7 @@ jobs:
             ${{env.DOTNET_VERSION}}
 
       - name: "Check Runner details"
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('Name: ${{runner.name}}');
@@ -211,13 +211,13 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
 
       - name: "Check for leaks"
-        uses: DariuszPorowski/github-action-gitleaks@v2.0.9
+        uses: DariuszPorowski/github-action-gitleaks@5c3e70f794d4c928460daf621eff608f477c2510 # v2.0.9
         id: gitleaks
         with:
           config: .gitleaks.toml
@@ -237,13 +237,13 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
 
       - name: "Check for merge conflicts"
-        uses: olivernybroe/action-conflict-finder@v4.0
+        uses: olivernybroe/action-conflict-finder@78f7add155e0bf97e9c71cb0383ef5691f72868c # v4.0
 
   has-no-file-or-folder-case-sensitivity-issues:
     if: github.event.pull_request.draft == false
@@ -255,13 +255,13 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
 
       - name: "Check for case conflicts"
-        uses: credfeto/action-case-checker@v1.3.0
+        uses: credfeto/action-case-checker@cb652aeab29ed363bbdb7d9ee1bfcc010c46cac5 # v1.3.0
 
   no-ignored-files:
     if: github.event.pull_request.draft == false
@@ -273,13 +273,13 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
 
       - name: "Check for ignored files"
-        uses: credfeto/action-no-ignored-files@v1.2.0
+        uses: credfeto/action-no-ignored-files@4fccae50720d89bef0cd9dc99a85a19b765d2e70 # v1.2.0
 
   dependency-review:
     # Check that there are no dependencies with security problems in the PR
@@ -292,7 +292,7 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Check repo visibility"
-        uses: credfeto/action-repo-visibility@v1.2.0
+        uses: credfeto/action-repo-visibility@a1045e23f0fd73f914ea1cb03b1844c52620fd75 # v1.2.0
         id: visibility
         with:
           # optional parameter defaults to the current repo
@@ -302,14 +302,14 @@ jobs:
 
       - name: "Checkout Source"
         if: steps.visibility.outputs.is_public == 'true'
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
 
       - name: 'Dependency Review'
         if: steps.visibility.outputs.is_public == 'true'
-        uses: actions/dependency-review-action@v4.3.4
+        uses: actions/dependency-review-action@5a2ce3f5b92ee19cbb1541a4984c76d921601d7c # v4.3.4
 
   no-merge-commits:
     # Check that there are no merge commits in the PR
@@ -322,13 +322,13 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
 
       - name: "Check for merge commits"
-        uses: greenled/no-merge-commits-check@v1.0.1
+        uses: greenled/no-merge-commits-check@15835aad5ff322aef34eb9d189e40838a53625ec # v1.0.1
 
   lint-code:
     if: |-
@@ -342,13 +342,13 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
 
       - name: "Run Linter"
-        uses: github/super-linter@v7
+        uses: github/super-linter@b807e99ddd37e444d189cfd2c2ca1274d8ae8ef1 # v7
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{secrets.SOURCE_PUSH_TOKEN}}

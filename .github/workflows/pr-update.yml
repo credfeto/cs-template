@@ -26,7 +26,7 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Info"
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('Branch: ${{env.HEAD_REF}}');
@@ -50,7 +50,7 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Add Labels"
-        uses: actions/labeler@v5
+        uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
         with:
           repo-token: ${{secrets.SOURCE_PUSH_TOKEN}}
           configuration-path: .github/labeler.yml
@@ -70,6 +70,6 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Assign PR to the creator"
-        uses: thomaseizinger/assign-pr-creator-action@v1.0.0
+        uses: thomaseizinger/assign-pr-creator-action@d7f25d4e70a3f34aaccb7bae2b316adeb46459c7 # v1.0.0
         with:
           repo-token: ${{secrets.SOURCE_PUSH_TOKEN}}

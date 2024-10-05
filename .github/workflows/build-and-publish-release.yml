@@ -27,20 +27,20 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
 
       - name: "Check Repo Visibility"
-        uses: credfeto/action-repo-visibility@v1.2.0
+        uses: credfeto/action-repo-visibility@a1045e23f0fd73f914ea1cb03b1844c52620fd75 # v1.2.0
         id: visibility
         with:
           repository: ${{github.repository}}
           token: ${{secrets.SOURCE_PUSH_TOKEN}}
 
       - name: "Check Runner details"
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('Name: ${{runner.name}}');
@@ -137,7 +137,7 @@ jobs:
           CREATE_RELEASE: true
 
       - name: "Build Version"
-        uses: actions/github-script@v7.0.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.info('Version: \u001b[38;5;6m${{env.BUILD_VERSION}}');

@@ -34,17 +34,17 @@ jobs:
         run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
 
       - name: "Checkout Source"
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
           token: ${{secrets.SOURCE_PUSH_TOKEN}}
 
       - name: "Reformat"
-        uses: credfeto/action-sql-format@v1.5.1
+        uses: credfeto/action-sql-format@a589d1a958e830252184d84b67e651efcfeb34e0 # v1.5.1
 
       - name: "Commit Changes"
-        uses: stefanzweifel/git-auto-commit-action@v5.0.1
+        uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
         with:
           commit_message: "[Reformat] SQL Files to common format"
           file_pattern: "*.sql"
