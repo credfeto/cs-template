@@ -48,8 +48,9 @@ jobs:
         uses: ./.github/actions/generate-pr-description
         with:
           base_sha: ${{ github.event.pull_request.base.sha }}
-          head_sha:  ${{ github.event.pull_request.head.sha }}
+          head_sha: ${{ github.event.pull_request.head.sha }}
           github_token: ${{ github.token }}
+          pr_title: ${{ github.event.pull_request.title }}
 
       - name: "Apply template and insert description"
         uses: actions/github-script@v8
