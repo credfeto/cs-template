@@ -36,6 +36,7 @@ jobs:
       pull-requests: write
       contents: read
       models: read
+      issues: read
     steps:
       - name: "Checkout"
         uses: actions/checkout@v6.0.2

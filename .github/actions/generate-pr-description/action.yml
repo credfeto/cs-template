@@ -15,7 +15,7 @@ inputs:
     description: 'Head commit SHA (what to compare to)'
     required: true
   github_token:
-    description: 'GitHub token — requires contents:read and models:read'
+    description: 'GitHub token — requires contents:read, models:read, and issues:read'
     required: true
   pr_title:
     description: 'Pull request title (used to extract issue references)'
@@ -40,7 +40,7 @@ runs:
         script: |
           const BASE_SHA = '${{ inputs.base_sha }}';
           const HEAD_SHA = '${{ inputs.head_sha }}';
-          const PR_TITLE = '${{ inputs.pr_title }}';
+          const PR_TITLE = ${{ toJson(inputs.pr_title) }};
 
           // ── Get changed files and commits via GitHub compare API ──────────
           let files = [];
@@ -88,9 +88,7 @@ runs:
           // First pass: keyword-prefixed references (closes/fixes/resolves #N).
           // Second pass: bare references (#N) — the Set deduplicates overlaps.
           const issueNumbers = new Set();
-          const allText = [PR_TITLE, ...commits.map((c) => c.commit.message)].join(
-            '\n',
-          );
+          const allText = [PR_TITLE, ...commitMessages].join('\n');
           const keywordIssueRe =
             /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
           const bareIssueRe = /#(\d+)/gi;
@@ -120,8 +118,14 @@ runs:
                   .slice(0, MAX_ISSUE_BODY_LINES)
                   .join('\n')
                   .trim();
+                const indentedBodyPreview = bodyPreview
+                  ? bodyPreview
+                      .split('\n')
+                      .map((line) => `  ${line}`)
+                      .join('\n')
+                  : '';
                 issueDetails.push(
-                  `#${num}: ${issue.title}${bodyPreview ? `\n  ${bodyPreview}` : ''}`,
+                  `#${num}: ${issue.title}${indentedBodyPreview ? `\n${indentedBodyPreview}` : ''}`,
                 );
               } catch {
                 // Issue may not exist or is not accessible — skip silently
