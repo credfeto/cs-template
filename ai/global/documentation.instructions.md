@@ -30,6 +30,7 @@
 ## Additional Documentation
 
 - Documentation should be generated and maintained for repositories other than `git@github.com:credfeto/cs-template.git`.
+- The `git@github.com:credfeto/cs-template.git` repository must not contain a `docs` folder — documentation is explicitly for derived repositories only.
 - Documentation and architecture diagrams other than `README.md` and `CHANGELOG.md` should be placed in the `docs` folder.
 - Documentation should be kept up-to-date as changes are applied and be created when missing.
 - Do not specify every detail (e.g. package version numbers, every single file) in architecture diagrams — folder structure is sufficient.
