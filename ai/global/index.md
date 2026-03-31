@@ -18,4 +18,5 @@ This is an index of global instructions that apply to all projects.
 | [code-quality.instructions.md](code-quality.instructions.md) | 100% code coverage, dead code removal, compile-time configuration testing |
 | [packages.instructions.md](packages.instructions.md) | Secure package versions, avoiding deprecated or obsolete packages |
 | [api.instructions.md](api.instructions.md) | `.http` test files for exposed API endpoints |
+| [performance.instructions.md](performance.instructions.md) | Performance considerations: speed as priority, reducing memory allocations |
  
