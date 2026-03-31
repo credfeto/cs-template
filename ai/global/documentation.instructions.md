@@ -4,7 +4,15 @@
 
 ## README
 
-- Keep `README.md` up to date with how the project is supposed to be used and developed.
+- `README.md` must contain a clear description of what the repository is for and be kept up to date as things change.
+- If the `README.md` still contains template placeholder content (e.g. describes itself as a template), it must be rewritten automatically to reflect the actual repository when work begins.
+- `README.md` must include the following links and badges where applicable:
+  - GitHub Actions workflow badges for **debug** and **release** builds/tests (as appropriate for the repository).
+  - Link to the head of any project documentation (e.g. `docs/`).
+  - Link to build instructions in the documentation.
+  - Link to the contributing guide — use the standard filename (`CONTRIBUTING.md`).
+  - Link to the security policy — use the standard filename (`SECURITY.md`).
+  - Link to `CHANGELOG.md`.
 
 ## CHANGELOG
 
