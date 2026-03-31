@@ -2,6 +2,15 @@
 
 [Back to Global Instructions Index](index.md)
 
+## GitHub Issues
+
+- If the GitHub CLI (`gh`) is available, it must be used to manage issues as part of every piece of work.
+- Before starting work, either:
+  - Find an existing issue that is a **100% match** for the task — confirm with the user before linking to it, or
+  - Create a new issue that includes the original prompt and a clear description of what needs to be done.
+- If the task is significantly complex, break it into sub-issues and work on each one individually — close each sub-issue as soon as the relevant commit has been pushed to the working branch.
+- Issue numbers must be referenced in commit messages and branch names where applicable (see branch naming rules above).
+
 ## Branching
 
 - All new work must be done in a branch. Never commit directly to `main`.
