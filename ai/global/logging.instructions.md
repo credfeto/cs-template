@@ -2,9 +2,15 @@
 
 [Back to Global Instructions Index](index.md)
 
-## Structured Logging
+## Source-Generated Logging
 
-- All logging must use structured logging — log data as key-value pairs or structured objects, not concatenated strings.
+- Where the language or framework provides source-generated or compile-time logging (e.g. `LoggerMessage` source generators in .NET), use it in preference to runtime string-based logging — it is faster, allocation-free, and enforces structure at compile time.
+- Logging methods must not be placed directly on the class being logged — they must be separated into a dedicated internal static logging extension class:
+  - The logging class must be placed in a `LoggingExtensions` sub-namespace relative to the class it serves.
+  - The logging class must be named after the class it serves, suffixed with `LoggingExtensions` — e.g. for a class `Foo`, the logging class is `FooLoggingExtensions`.
+  - The logging class must be `internal` and `static`.
+
+## Structured Logging- All logging must use structured logging — log data as key-value pairs or structured objects, not concatenated strings.
 - This ensures logs are machine-readable and queryable in log aggregation tools.
 
 ## Log Levels
