@@ -23,6 +23,7 @@
 - All new work must be done in a branch. Never commit directly to `main`.
 - Before making any changes, ensure the current branch is `main` and is up-to-date with `origin`.
 - Until there is an explicit change in task, continue working in the same branch.
+- Before starting any new piece of work on an existing branch, check whether `origin/main` has been updated — if it has, rebase the branch onto `origin/main` before continuing, resolving any conflicts in a way that retains the intent of the current branch's work.
 
 ## Branch Naming
 
