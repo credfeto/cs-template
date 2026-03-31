@@ -23,4 +23,6 @@ This is an index of global instructions that apply to all projects.
 | [gitignore.instructions.md](gitignore.instructions.md) | `.gitignore` ownership, additional ignore files, and consistency checks |
 | [language.instructions.md](language.instructions.md) | UK English for documentation and comments; platform convention for code identifiers |
 | [security.instructions.md](security.instructions.md) | No secrets in code, input validation, output sanitisation, threat modelling, vulnerability scanning |
+| [error-handling.instructions.md](error-handling.instructions.md) | Explicit error handling, no swallowed exceptions, propagation and safe surfacing of errors |
+| [logging.instructions.md](logging.instructions.md) | Structured logging, log levels, what to log and what not to log (no PII, no secrets) |
  
