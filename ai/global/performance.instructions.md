@@ -28,3 +28,10 @@
 - For performance-critical code, write benchmarks as tests.
 - Record a baseline result that new changes must match or improve upon — a regression against the baseline is not acceptable.
 - Benchmarks should be committed alongside the code they measure.
+
+## Optimisation Workflow
+
+- Before starting any optimisation work, ensure both tests and benchmarks exist and pass — do not begin optimising without them.
+- Commit and push the tests and benchmarks first, as a standalone commit, even before any optimisation is attempted — this is a worthwhile exercise in its own right.
+- Only commit the optimisation itself if it produces a measurable gain against the recorded baseline.
+- If no gain is achieved, discard the optimisation change but keep the tests and benchmarks.
