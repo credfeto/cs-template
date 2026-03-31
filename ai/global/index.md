@@ -25,4 +25,5 @@ This is an index of global instructions that apply to all projects.
 | [security.instructions.md](security.instructions.md) | No secrets in code, input validation, output sanitisation, threat modelling, vulnerability scanning |
 | [error-handling.instructions.md](error-handling.instructions.md) | Explicit error handling, no swallowed exceptions, propagation and safe surfacing of errors |
 | [logging.instructions.md](logging.instructions.md) | Structured logging, log levels, what to log and what not to log (no PII, no secrets) |
+| [dotnet.instructions.md](dotnet.instructions.md) | .NET-specific: solution structure, test assembly naming, FunFair.Test.Common, FunFair.BuildCheck |
  
