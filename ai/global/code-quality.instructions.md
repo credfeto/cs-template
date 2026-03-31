@@ -16,7 +16,11 @@
 
 - If code cannot be reached by any code path (dead code), remove it rather than writing tests around it.
 
-## Compile-Time Configuration
+## Refactoring
+
+- After code is written and tested, review it to determine whether refactoring is needed.
+- Refactoring must be done in a separate commit from the original code and test changes — never mix refactoring with feature or fix work.
+- Tests must continue to pass after any refactoring commit.
 
 - Compile-time configuration (e.g. environment-specific constants, feature flags resolved at build time) must be covered by a unit test rather than verified with a runtime check.
 - This keeps production code clean and free of defensive assertions that only exist for testing purposes.
