@@ -28,9 +28,11 @@
 - Tests must not be brittle — they should test behaviour, not implementation details, so that refactoring production code does not unnecessarily break tests.
 - Avoid hardcoding values or assumptions that are likely to change; use constants, builders, or factory helpers where appropriate.
 
+## Refactoring
+
 - After code is written and tested, review it to determine whether refactoring is needed.
 - Refactoring must be done in a separate commit from the original code and test changes — never mix refactoring with feature or fix work.
 - Tests must continue to pass after any refactoring commit.
 
-- Compile-time configuration (e.g. environment-specific constants, feature flags resolved at build time) must be covered by a unit test rather than verified with a runtime check.
+## Compile-Time Configuration (e.g. environment-specific constants, feature flags resolved at build time) must be covered by a unit test rather than verified with a runtime check.
 - This keeps production code clean and free of defensive assertions that only exist for testing purposes.
