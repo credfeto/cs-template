@@ -21,4 +21,5 @@ This is an index of global instructions that apply to all projects.
 | [performance.instructions.md](performance.instructions.md) | Performance considerations: speed as priority, reducing memory allocations |
 | [sql.instructions.md](sql.instructions.md) | SQL linting requirements before every commit |
 | [gitignore.instructions.md](gitignore.instructions.md) | `.gitignore` ownership, additional ignore files, and consistency checks |
+| [language.instructions.md](language.instructions.md) | UK English for documentation and comments; platform convention for code identifiers |
  
