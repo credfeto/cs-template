@@ -16,7 +16,11 @@
 
 - If code cannot be reached by any code path (dead code), remove it rather than writing tests around it.
 
-## Refactoring
+## Test Quality
+
+- Tests must be held to the same code quality standards as production code — they are not exempt from readability, maintainability, or refactoring rules.
+- Tests must not be brittle — they should test behaviour, not implementation details, so that refactoring production code does not unnecessarily break tests.
+- Avoid hardcoding values or assumptions that are likely to change; use constants, builders, or factory helpers where appropriate.
 
 - After code is written and tested, review it to determine whether refactoring is needed.
 - Refactoring must be done in a separate commit from the original code and test changes — never mix refactoring with feature or fix work.
