@@ -5,7 +5,7 @@
 ## Code Coverage
 
 - 100% code coverage must be maintained by tests.
-- How tests are organised should be detailed in the local AI instructions for each repository.
+- How tests are organised in non-.NET projects should be detailed in the local AI instructions for each repository.
 
 ## Pre-Commit
 
