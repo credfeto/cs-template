@@ -22,3 +22,9 @@
 - Use low-allocation APIs and patterns when processing strings or buffers, where the language or runtime provides them.
 - Cache computed values that are expensive to recalculate and do not change within a given scope.
 - Be mindful of implicit conversions, wrapping, or type coercions that incur overhead on hot paths.
+
+## Benchmarks
+
+- For performance-critical code, write benchmarks as tests.
+- Record a baseline result that new changes must match or improve upon — a regression against the baseline is not acceptable.
+- Benchmarks should be committed alongside the code they measure.
