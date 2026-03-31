@@ -4,6 +4,11 @@
 
 These rules apply to all .NET solutions derived from this template.
 
+## Asynchronous Code
+
+- Prefer `ValueTask` and `ValueTask<T>` over `Task` and `Task<T>` wherever possible — they avoid heap allocations in the common synchronous-completion path.
+- Only use `Task`/`Task<T>` where `ValueTask` is not supported or where the method is known to always complete asynchronously.
+
 ## Project and Solution Structure
 
 - All projects must be added to the solution file (`.slnx` or `.sln`).
