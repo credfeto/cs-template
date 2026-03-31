@@ -10,10 +10,7 @@
 
 - Maintain `CHANGELOG.md` in [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format to track changes and updates to the project.
 - Purely documentation changes should not be added to the changelog.
-- Use the `Credfeto.Changelog.Cmd` dotnet tool to update the changelog:
-  ```
-  dotnet changelog -f CHANGELOG.md -a <ChangeType> -m "<reason for change>"
-  ```
+- Use appropriate tooling for the project to update the changelog where available; refer to local AI instructions for the specific tool and command to use.
 - Each task should be updated in `CHANGELOG.md`, **unless**:
   - This is the `git@github.com:credfeto/cs-template.git` repository — the `CHANGELOG.md` there is expected to be kept blank, ready for new repositories using the template.
   - It is purely a documentation change and does not affect any production code.
