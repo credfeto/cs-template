@@ -16,6 +16,7 @@
   - Create a new issue that includes the original prompt and a clear description of what needs to be done.
 - If the task is significantly complex, break it into sub-issues and work on each one individually — close each sub-issue as soon as the relevant commit has been pushed to the working branch.
 - Issue numbers must be referenced in commit messages and branch names where applicable (see branch naming rules above).
+- If work on an issue is abandoned for any reason (e.g. benchmarks show no gain, investigation reveals the change is not worthwhile), comment on the issue with the findings before closing or leaving it — do not abandon an issue silently.
 
 ## Branching
 
