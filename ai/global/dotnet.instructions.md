@@ -21,6 +21,20 @@ These rules apply to all .NET solutions derived from this template.
 - All projects must be added to the solution file (`.slnx` or `.sln`).
 - All projects must pass the latest release of the `FunFair.BuildCheck` dotnet tool before committing.
 
+### Running FunFair.BuildCheck
+
+Run from the solution root:
+
+```
+dotnet buildcheck
+```
+
+For available options:
+
+```
+dotnet buildcheck --help
+```
+
 ## Test Assembly Naming
 
 Test projects must follow a consistent naming convention relative to the assembly under test:
