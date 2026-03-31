@@ -16,6 +16,12 @@
 
 - If code cannot be reached by any code path (dead code), remove it rather than writing tests around it.
 
+## Immutability
+
+- Code should prefer immutable objects wherever possible.
+- Immutability is especially important in asynchronous and multi-threaded code, where mutable shared state is a common source of bugs.
+- This rule may only be broken for performance reasons, and only when explicitly requested — any such exception should be noted in a comment explaining why mutability was necessary.
+
 ## Test Quality
 
 - Tests must be held to the same code quality standards as production code — they are not exempt from readability, maintainability, or refactoring rules.
