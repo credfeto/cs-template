@@ -12,6 +12,7 @@ Precedence is given to local instructions over global instructions.
 ## Management Rules
 
 - Whenever an instruction to remember to do something is given, update the appropriate memory file and this index.
+- Whenever adding a new rule, check all existing instruction files and the index for consistency — update anything that conflicts with, duplicates, or is made stale by the new rule.
 - Whenever these files change, re-evaluate memory against it.
 - If there is a massive difference between memory and these files, stop and ask for clarification.
 - If a memory file's description diverges from the source code, update it to reflect the changes.
