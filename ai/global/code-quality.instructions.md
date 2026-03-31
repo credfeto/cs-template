@@ -7,6 +7,11 @@
 - 100% code coverage must be maintained by tests.
 - How tests are organised should be detailed in the local AI instructions for each repository.
 
+## Pre-Commit
+
+- Unit tests must be written and must pass before every commit.
+- Never commit code that causes existing tests to fail.
+
 ## Dead Code
 
 - If code cannot be reached by any code path (dead code), remove it rather than writing tests around it.
