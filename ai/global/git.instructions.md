@@ -6,8 +6,17 @@
 
 - All new work must be done in a branch. Never commit directly to `main`.
 - Before making any changes, ensure the current branch is `main` and is up-to-date with `origin`.
-- Create a branch for each change, e.g. `git checkout -b feature/my-change`.
 - Until there is an explicit change in task, continue working in the same branch.
+
+## Branch Naming
+
+- Branch names must follow the format `<type>/<name>`, mirroring Conventional Commits types, e.g.:
+  - `feature/add-user-auth`
+  - `fix/null-pointer-on-login`
+  - `chore/update-dependencies`
+  - `refactor/simplify-payment-flow`
+- If the branch relates to a GitHub issue, include the issue number in the name, e.g. `fix/123-null-pointer-on-login`.
+- If working on a branch that fixes multiple GitHub issues (e.g. a feature with several related bug fixes), each individual commit that fixes an issue should reference that issue number in the commit message body.
 
 ## Commits
 
