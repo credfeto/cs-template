@@ -12,13 +12,13 @@
 ## Design
 
 - Prefer algorithms and data structures with better time and space complexity when there is a realistic choice.
-- Avoid unnecessary object allocations — reuse instances, prefer value types where appropriate, and use pooling for frequently allocated objects.
-- Avoid copying data unnecessarily — prefer passing by reference, using spans, or working in-place where safe to do so.
+- Avoid unnecessary object allocations — reuse instances and use pooling for frequently allocated objects where the language and runtime support it.
+- Avoid copying data unnecessarily — work in-place or pass by reference where safe to do so.
 - Avoid blocking calls on hot paths — prefer asynchronous operations to keep threads free.
 
 ## Code
 
-- Avoid LINQ in performance-critical paths where it introduces unnecessary allocations or overhead; use loops or spans instead.
-- Use `StringBuilder`, `Span<T>`, `Memory<T>`, and similar low-allocation APIs when processing strings or buffers.
+- Avoid high-level abstractions (e.g. functional pipelines, heavy reflection, dynamic dispatch) in performance-critical paths where they introduce unnecessary overhead; prefer lower-level constructs instead.
+- Use low-allocation APIs and patterns when processing strings or buffers, where the language or runtime provides them.
 - Cache computed values that are expensive to recalculate and do not change within a given scope.
-- Be mindful of boxing — avoid it on hot paths by using generic constraints or value types directly.
+- Be mindful of implicit conversions, wrapping, or type coercions that incur overhead on hot paths.
