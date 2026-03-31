@@ -12,7 +12,7 @@ These rules apply to all .NET solutions derived from this template.
 ## Cancellation
 
 - All async methods must accept and pass down a `CancellationToken` from the caller wherever the API supports it.
-- Never create a new `CancellationToken` internally when one has been provided by the caller — propagate the caller's token.
+- Never create a new `CancellationToken` internally when one has been provided by the caller, unless there is an explicit and documented reason (e.g. combining the caller's token with a timeout using `CancellationTokenSource.CreateLinkedTokenSource`).
 - Prefer overloads that accept a `CancellationToken` over those that do not.
 - Do not pass `CancellationToken.None` unless there is an explicit and documented reason why cancellation must be suppressed.
 
