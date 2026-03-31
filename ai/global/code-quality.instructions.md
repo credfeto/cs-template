@@ -22,6 +22,12 @@
 - Immutability is especially important in asynchronous and multi-threaded code, where mutable shared state is a common source of bugs.
 - This rule may only be broken for performance reasons, and only when explicitly requested — any such exception should be noted in a comment explaining why mutability was necessary.
 
+## Parameterised Tests
+
+- Prefer parameterised tests over duplicated test methods — use the equivalent of xUnit's `[Theory]` with `[InlineData]` or equivalent data-driven mechanisms wherever the language and test framework support it.
+- Each variant of a behaviour should be a data point, not a separate test method.
+- This applies to all languages and test frameworks; use whatever the idiomatic equivalent is (e.g. `@ParameterizedTest` in JUnit, `pytest.mark.parametrize` in pytest, `it.each` in Jest).
+
 ## Test Quality
 
 - Tests must be held to the same code quality standards as production code — they are not exempt from readability, maintainability, or refactoring rules.
