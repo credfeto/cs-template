@@ -2,11 +2,28 @@
 
 [Back to Global Instructions Index](index.md)
 
+## Pre-Commit Branch Check
+
+- Always verify the current branch before staging or committing — run `git branch --show-current` and confirm it is the expected working branch.
+- Never commit if the current branch is `main`.
+- If the current branch has switched back to `main` and the upstream branch no longer exists (i.e. it has been merged and deleted), this is a strong signal that a new branch is needed before continuing work — create one before making any further changes.
+
+## GitHub Issues
+
+- If the GitHub CLI (`gh`) is available, it must be used to manage issues as part of every piece of work.
+- Before starting work, either:
+  - Find an existing issue that is a **100% match** for the task — confirm with the user before linking to it, or
+  - Create a new issue that includes the original prompt and a clear description of what needs to be done.
+- If the task is significantly complex, break it into sub-issues and work on each one individually — close each sub-issue as soon as the relevant commit has been pushed to the working branch.
+- Issue numbers must be referenced in commit messages and branch names where applicable (see branch naming rules above).
+- If work on an issue is abandoned for any reason (e.g. benchmarks show no gain, investigation reveals the change is not worthwhile), comment on the issue with the findings before closing or leaving it — do not abandon an issue silently.
+
 ## Branching
 
 - All new work must be done in a branch. Never commit directly to `main`.
 - Before making any changes, ensure the current branch is `main` and is up-to-date with `origin`.
 - Until there is an explicit change in task, continue working in the same branch.
+- Before starting any new piece of work on an existing branch, check whether `origin/main` has been updated — if it has, rebase the branch onto `origin/main` before continuing, resolving any conflicts in a way that retains the intent of the current branch's work.
 
 ## Branch Naming
 
