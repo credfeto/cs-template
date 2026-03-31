@@ -1,7 +1,7 @@
 # Global instructions
 
 This is an index of global instructions that apply to all projects.
-- Ensure consistency in across all projects.
+- Ensure consistency across all projects.
 - This file should be considered an index of global instructions.
 - Each file other than this one should be named in the format `<category>.instructions.md` Where `<category>` is the category of the file and all related rules should be listed there.
 - `<category>.instructions.md` files should be placed in this directory.
