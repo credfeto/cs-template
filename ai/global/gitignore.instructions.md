@@ -2,6 +2,15 @@
 
 [Back to Global Instructions Index](index.md)
 
+## IDE Files
+
+- IDE-specific files and folders must never be committed to source control.
+- This includes (but is not limited to):
+  - `.idea/` — JetBrains IDEs (IntelliJ, Rider, etc.)
+  - `.vscode/` — Visual Studio Code
+  - `.vs/` — Visual Studio
+- These should be covered by the root `.gitignore` in `git@github.com:credfeto/cs-template.git`. If any are missing, update the root there.
+
 ## Root `.gitignore`
 
 - The root `.gitignore` is the global baseline and must only be edited in `git@github.com:credfeto/cs-template.git`.
