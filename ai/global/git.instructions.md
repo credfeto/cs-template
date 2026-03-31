@@ -2,6 +2,12 @@
 
 [Back to Global Instructions Index](index.md)
 
+## Pre-Commit Branch Check
+
+- Always verify the current branch before staging or committing — run `git branch --show-current` and confirm it is the expected working branch.
+- Never commit if the current branch is `main`.
+- If the current branch has switched back to `main` and the upstream branch no longer exists (i.e. it has been merged and deleted), this is a strong signal that a new branch is needed before continuing work — create one before making any further changes.
+
 ## GitHub Issues
 
 - If the GitHub CLI (`gh`) is available, it must be used to manage issues as part of every piece of work.
