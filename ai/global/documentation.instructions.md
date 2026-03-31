@@ -34,3 +34,4 @@
 - Documentation and architecture diagrams other than `README.md` and `CHANGELOG.md` should be placed in the `docs` folder.
 - Documentation should be kept up-to-date as changes are applied and be created when missing.
 - Do not specify every detail (e.g. package version numbers, every single file) in architecture diagrams — folder structure is sufficient.
+- Where diagrams are generated, prefer vector formats (e.g. SVG) over raster formats (e.g. PNG, JPEG).
