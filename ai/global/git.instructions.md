@@ -17,6 +17,7 @@
   - Dead/unreachable code removal must be a separate commit from test changes, made only after running tests on the entire handler or app to confirm no code path accesses it; removing several methods or functions should be done one per commit.
   - For shared code removal, first verify the entire codebase does not access it — this can only be done once all apps and handlers have 100% code coverage; each shared removal is its own commit.
   - Never amend an existing commit; always create a new one.
+- After every commit, push the changes to `origin` immediately.
 
 ## Commit Message Format
 
