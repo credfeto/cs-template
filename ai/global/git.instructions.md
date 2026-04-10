@@ -2,6 +2,24 @@
 
 [Back to Global Instructions Index](index.md)
 
+## Git Identity Check (MANDATORY before any commit)
+
+Before making any git commit, verify the configured identity is correct and GPG signing is enabled:
+
+```bash
+CURRENT_EMAIL=$(git config user.email)
+if [ "$CURRENT_EMAIL" = "andy@nanoclaw.ai" ] || [ -z "$CURRENT_EMAIL" ]; then
+  echo "ERROR: Git is configured with the wrong identity ($CURRENT_EMAIL). Aborting."
+  exit 1
+fi
+if [ "$(git config commit.gpgsign)" != "true" ]; then
+  echo "ERROR: GPG signing is not enabled. Aborting."
+  exit 1
+fi
+```
+
+**If either check fails: stop all work immediately, do not commit, and report the misconfiguration.**
+
 ## Pre-Commit Branch Check
 
 - Always verify the current branch before staging or committing — run `git branch --show-current` and confirm it is the expected working branch.
