@@ -168,3 +168,49 @@ jobs:
           script: |
             core.info('Version: \u001b[38;5;6m${{env.BUILD_VERSION}}');
             core.notice('Version: ${{env.BUILD_VERSION}}');
+
+  buildcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Initialise Workspace"
+        if: runner.environment == 'self-hosted'
+        shell: bash
+        run: sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"
+
+      - name: "Checkout Source"
+        uses: actions/checkout@v6.0.2
+        with:
+          clean: true
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: "Check file existence"
+        id: check_files
+        shell: bash
+        run: |
+          {
+          [[ -d src && -f src/global.json && '${{hashfiles('**/*.sln', '**/*.slnx')}}' != '' ]] && echo 'SLN_EXIST=true' || echo 'SLN_EXIST=false';
+          } >> "$GITHUB_OUTPUT"
+
+      - name: "Install dotnet"
+        if: steps.check_files.outputs.SLN_EXIST == 'true'
+        uses: ./.github/actions/dotnet-install
+        with:
+          GITHUB_TOKEN: ${{secrets.SOURCE_PUSH_TOKEN}}
+          NUGET_PUBLIC_RESTORE_FEED: ${{vars.NUGET_PUBLIC_RESTORE_FEED || 'https://api.nuget.org/v3/index.json'}}
+          NUGET_ADDITIONAL_RESTORE_FEED_RELEASE: ${{vars.NUGET_ADDITIONAL_RESTORE_FEED_RELEASE}}
+          NUGET_ADDITIONAL_RESTORE_FEED_PRERELEASE: ${{vars.NUGET_ADDITIONAL_RESTORE_FEED_PRERELEASE}}
+
+      - name: "Install FunFair.BuildCheck"
+        if: steps.check_files.outputs.SLN_EXIST == 'true'
+        uses: ./.github/actions/dotnet-tool
+        with:
+          TOOL_NAME: "FunFair.BuildCheck"
+          TOOL_VERSION: "latest"
+
+      - name: "Run Build Check"
+        if: steps.check_files.outputs.SLN_EXIST == 'true'
+        uses: ./.github/actions/dotnet-build-check
+        with:
+          RELEASE: "false"

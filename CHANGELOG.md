@@ -10,6 +10,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 
 ## [Unreleased]
 ### Added
+- build: run FunFair.BuildCheck as a parallel job in CI builds for faster feedback on project-structure violations
 ### Fixed
 ### Changed
 ### Deprecated
