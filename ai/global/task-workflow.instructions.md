@@ -23,7 +23,9 @@
 
 - **When additional work needs to be added to an open PR** (e.g. addressing review comments, adding missing coverage, fixing CI failures), convert it to a draft immediately before starting: `gh pr ready <number> --undo`.
 - Keep the PR in draft for the entire duration of that work — do not flip it back early.
-- **Only convert back to ready for review once all work is complete** and Code Tester and Code Reviewer are both satisfied: `gh pr ready <number>`.
+- **Only convert back to ready for review once all work is complete** and Code Tester and Code Reviewer are both satisfied.
+- Before marking ready, rebase the branch onto `origin/main` to eliminate any merge conflicts: `git fetch origin && git rebase origin/main`. Resolve any conflicts before proceeding.
+- Once rebased and clean, mark ready: `gh pr ready <number>`.
 
 ## Large Multi-Handler / Multi-App Tasks
 
