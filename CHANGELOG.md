@@ -10,7 +10,6 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 
 ## [Unreleased]
 ### Added
-- Added template rule escalation process to global git instructions: when working in a non-template repo, gaps in template rules should be raised as `AI-Work` issues in `credfeto/cs-template`.
 ### Fixed
 ### Changed
 ### Deprecated
