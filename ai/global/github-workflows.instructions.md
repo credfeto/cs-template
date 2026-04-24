@@ -229,3 +229,26 @@ A group should become a composite action instead when:
 All local composite actions live under `.github/actions/<name>/action.yml`. Name the directory to describe what the action does (e.g. `read-file`, `approve-pr`, `find-pull-request`).
 
 When the same step pattern appears in more than one workflow or composite action, extract it into a local composite action — do not copy-paste.
+
+### Infrastructure steps that repeat across every job
+
+Boilerplate setup blocks that appear at the top of nearly every job are high-value extraction targets even though they have no inputs or outputs — removing 2–3 duplicate lines from 30 jobs is still worth it. Examples:
+
+- Workspace ownership fix + active environment variables (`sudo chown` + `ACTIVE_RUNNER_NAME`/`ACTIVE_HOSTNAME`/`ACTIVE_USER`) → `.github/actions/setup-job`
+- Secret presence check → inline `github-script` step or a thin local action that takes the token as an input and fails with a clear ❌ message if empty
+
+When extracting pure-infrastructure steps, the action may have no declared `outputs:` and take only optional inputs for minor variants (e.g. an `include-temp` flag for jobs that also need `TEMP`/`TMP` set).
+
+### Unifying invocations that differ only in how a value is sourced
+
+When the same third-party action is called in multiple places with identical parameters except for one value that is sourced differently (e.g. `pr-number` comes from an event payload in one caller and from a previous step output in another), extract it into a local action that always requires that value as an explicit input. Each caller then passes its own source:
+
+```yaml
+# pull_request trigger — PR is the current event
+pr-number: ${{github.event.pull_request.number}}
+
+# push trigger — PR was just created
+pr-number: ${{steps.open-pr.outputs.pr_number}}
+```
+
+This makes all invocations consistent and removes the implicit context-dependent behaviour from the third-party action.
