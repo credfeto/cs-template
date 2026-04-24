@@ -76,10 +76,21 @@ Do not attempt to replace these with github-script — they require specialised 
 
 ## Version Pinning
 
-All `uses:` references must be pinned to a specific released version. Never use `@latest`, `@main`, or `@master`.
+All `uses:` references must be pinned to a specific released version tag. Never use `@latest`, `@main`, `@master`, or a bare major version tag (e.g. `@v6`).
 
 Correct: `uses: actions/github-script@v9.0.0`
 Wrong:   `uses: actions/github-script@latest`
+Wrong:   `uses: actions/labeler@v6`
+
+## Keeping Actions Up to Date
+
+Whenever you add or modify a `uses:` reference — whether in a workflow file or a composite action — check that all actions referenced in that file are on the latest released version:
+
+1. For each `uses:` in the file, run `gh api repos/<owner>/<action>/releases/latest --jq '.tag_name'` to find the current latest release.
+2. If the pinned version is behind, update it in the same commit as the other changes to that file.
+3. Do not leave a file with a mix of updated and stale versions after touching it.
+
+This applies to all actions in the file, not just the one being added or changed.
 
 ## Bash Steps
 
