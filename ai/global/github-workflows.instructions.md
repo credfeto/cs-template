@@ -119,7 +119,20 @@ Simple, single-purpose steps that do not call external APIs and are short enough
 
 ## Dead Steps
 
-If a step's output is never referenced by any subsequent step or job output, remove the step entirely. Do not leave unreferenced steps in workflows or composite actions.
+A step is dead and should be removed only if **both** of the following are true:
+
+1. Its output is never referenced by any subsequent step or job output.
+2. It has no meaningful side effect of its own — i.e. it does not configure the environment, install tools, run a check that can fail the job, or produce an artifact.
+
+Steps with side effects must be kept even when their outputs are not referenced. Examples of steps that have side effects and are never dead:
+
+- `aws-actions/configure-aws-credentials` — configures shell environment with credentials
+- `actions/setup-dotnet` / `actions/setup-node` — installs a runtime
+- `trufflesecurity/trufflehog` — fails the job if secrets are found
+- `super-linter/super-linter` — fails the job on lint errors
+- Any step that writes to `$GITHUB_ENV` as its primary purpose
+
+A step whose *only* purpose is to produce an output that nothing reads — for example a visibility check with no `id:` and no downstream `steps.<id>.outputs.*` references — is dead and should be removed.
 
 ## Checkout Configuration
 
