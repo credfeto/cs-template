@@ -272,7 +272,7 @@ All local composite actions live under `.github/actions/<name>/action.yml`. Name
 
 When the same step pattern appears in more than one workflow or composite action, extract it into a local composite action — do not copy-paste.
 
-> **Local composite actions are resolved from the local filesystem.** A job can only use a local action (`uses: ./.github/actions/...`) after `actions/checkout` has run — the action file does not exist on disk before that. Never place a local action call before the checkout step; keep any pre-checkout steps as inline `run:` bash steps.
+> **Any `uses:` step — whether a local action (`./.github/actions/...`) or a remote action (`actions/github-script`, etc.) — must only appear after `actions/checkout` has run in that job.** Keep all pre-checkout steps as inline `run:` bash steps. This includes secret-presence checks, workspace ownership fixes, and environment variable setup.
 
 ### Infrastructure steps that repeat across every job
 
