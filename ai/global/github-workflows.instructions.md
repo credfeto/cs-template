@@ -7,13 +7,12 @@
 When adding or reviewing a `uses:` reference in a workflow or composite action, categorise it as follows:
 
 - **Always allowed**: `actions/*` and `github/*` (official GitHub-owned actions)
-- **Always allowed**: `credfeto/*` (project-owned actions)
-- **Convert to github-script**: actions that perform simple GitHub REST or GraphQL API operations — see [Converting to github-script](#converting-to-github-script)
-- **Acceptable as-is**: actions that require specialised external tooling that cannot be expressed via the GitHub API — see [Cannot Convert](#actions-that-cannot-be-converted)
+- **Convert to github-script or local action**: all other third-party actions — see the sections below for guidance on which conversion to apply
+- **Acceptable as-is**: actions that require specialised external tooling that cannot be expressed via the GitHub API or a simple bash step — see [Cannot Convert](#actions-that-cannot-be-converted)
 
-Do not add new third-party actions without first determining which category they fall into.
+Do not add new third-party actions without first determining which category they fall into. When encountering existing third-party actions (including `credfeto/*`), replace them with local equivalents where practical.
 
-## Converting to github-script
+## Converting to github-script (wrap in local composite action)
 
 Use `actions/github-script` to replace third-party actions that perform any of the following:
 
@@ -24,6 +23,7 @@ Use `actions/github-script` to replace third-party actions that perform any of t
 - Assigning a user to a PR or issue
 - Enabling auto-merge on a PR (via GraphQL)
 - Checking PR commits for merge commits
+- Checking repository visibility (public vs private)
 
 When converting, always wrap the `actions/github-script` step in a **local composite action** placed at `.github/actions/<name>/action.yml`. Do not inline the script directly in workflow files — use the local action instead. This keeps the conversion reusable and the workflow files clean.
 
@@ -63,24 +63,36 @@ runs:
           core.setOutput('my-output', result);
 ```
 
+## Simple Bash Replacements
+
+Some third-party actions perform tasks simple enough to replace with a bash step directly — no `github-script` needed:
+
+- **Merge conflict markers**: `git grep -rl '^<<<<<<< ' --` — fails if any file contains conflict markers
+- **Case sensitivity conflicts**: `git ls-files | sort -f | awk 'BEGIN{prev=""} tolower($0)==tolower(prev){print prev; print $0} {prev=$0}'`
+- **Tracked files matching `.gitignore`**: `git ls-files -i --exclude-standard`
+- **Dotnet SDK version from global.json**: `jq -r '.sdk.version' src/global.json` — read once, set `DOTNET_VERSION` env var; fall back to a default if the file is absent
+
+When replacing an action with a bash step, keep the step name consistent with what it was before so PR history is legible.
+
 ## Actions That Cannot Be Converted
 
-Do not attempt to replace these with github-script — they require specialised tooling that the GitHub API does not provide:
+Do not attempt to replace these with github-script or bash — they require specialised tooling that the GitHub API does not provide:
 
 - **Docker toolchain**: `docker/build-push-action`, `docker/login-action`, `docker/setup-buildx-action`, `docker/setup-qemu-action`
 - **AWS credential management**: `aws-actions/configure-aws-credentials`
-- **Git operations** (rebase, auto-commit, conflict detection): `stefanzweifel/git-auto-commit-action`, `bbeesley/gha-auto-dependabot-rebase`, `olivernybroe/action-conflict-finder`
+- **Git operations** (rebase, auto-commit): `stefanzweifel/git-auto-commit-action`, `bbeesley/gha-auto-dependabot-rebase`
 - **Security scanning**: `trufflesecurity/trufflehog`
 - **Multi-language linting**: `super-linter/super-linter`
 - **Complex config-driven label sync**: `crazy-max/ghaction-github-labeler`
 
 ## Version Pinning
 
-All `uses:` references must be pinned to a specific released version tag. Never use `@latest`, `@main`, `@master`, or a bare major version tag (e.g. `@v6`).
+All `uses:` references must be pinned to a specific released version tag. Never use `@latest`, `@main`, `@master`, or a bare major version tag (e.g. `@v6`). Branch references are also forbidden — they can change without notice.
 
 Correct: `uses: actions/github-script@v9.0.0`
 Wrong:   `uses: actions/github-script@latest`
 Wrong:   `uses: actions/labeler@v6`
+Wrong:   `uses: some-owner/some-action@fix/some-branch`
 
 ## Keeping Actions Up to Date
 
@@ -108,6 +120,17 @@ Simple, single-purpose steps that do not call external APIs and are short enough
 ## Dead Steps
 
 If a step's output is never referenced by any subsequent step or job output, remove the step entirely. Do not leave unreferenced steps in workflows or composite actions.
+
+## Checkout Configuration
+
+Minimise the checkout depth and tag fetching to exactly what the job requires:
+
+- **Default**: `fetch-depth: 1` — sufficient for jobs that only read files, run build tools, or scan the working tree
+- **Full history** (`fetch-depth: 0`): required only when the job uses `git diff --merge-base`, `git log`, `git rev-list`, or any command that traverses commit history (e.g. changelog diff checks, trufflehog, missing-release detection)
+- **`fetch-tags: true`**: required only when the job reads, creates, or compares tags
+- **`clean: true`**: include on self-hosted runners to ensure a clean workspace; may be omitted on GitHub-hosted runners if not needed
+
+Jobs that check static file content, scan for markers, or invoke build/lint tools never need deep history or tags.
 
 ## Permissions
 
