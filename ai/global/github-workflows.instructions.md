@@ -131,6 +131,8 @@ All steps must use a consistent field order. `name:` is always first; optional f
 
 ### `run` steps
 
+> **`shell:` is mandatory on every `run:` step. A `run:` step without `shell:` is invalid.**
+
 ```yaml
       - name: "Step Name"
         id: step-id           # only when output is referenced downstream
@@ -160,7 +162,7 @@ All steps must use a consistent field order. `name:` is always first; optional f
 - `name:` is always first.
 - `id:` immediately follows `name:`, and only appears when the step output is referenced by a later step or job output.
 - `if:` follows `id:` (or `name:` when there is no `id:`).
-- `shell: bash` is required on every `run:` step — never omit it.
+- **`shell: bash` is mandatory on every `run:` step — a `run:` step without `shell:` is invalid and must not be written or accepted in review.**
 - `env:` and `with:` values are **maps** (`KEY: value` pairs) — never use list syntax (`- key: value`).
 - All string values must be double-quoted.
 - Indentation is 2 spaces per YAML level throughout. Steps under `steps:` are indented 6 spaces (2 for the job body + 2 for the list item + 2 for the `-`). Fields within a step are indented 8 spaces.
