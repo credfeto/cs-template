@@ -292,3 +292,55 @@ pr-number: ${{steps.open-pr.outputs.pr_number}}
 ```
 
 This makes all invocations consistent and removes the implicit context-dependent behaviour from the third-party action.
+
+## Composite Action Inputs vs Environment Variables
+
+Composite actions must never silently depend on environment variables set by the caller. Relying on ambient env vars creates invisible contracts — the action appears to work until a job that doesn't set those vars calls it and it fails with an obscure error.
+
+### Prefer explicit inputs
+
+Declare every required value as a named input with `required: true`. The caller passes it explicitly via `with:`, making the dependency visible at the call site:
+
+```yaml
+# action.yml
+inputs:
+  github-token:
+    description: "GitHub token with write access"
+    required: true
+  pr-number:
+    description: "Pull request number"
+    required: true
+```
+
+```yaml
+# caller
+uses: ./.github/actions/my-action
+with:
+  github-token: ${{secrets.SOURCE_PUSH_TOKEN}}
+  pr-number: ${{github.event.pull_request.number}}
+```
+
+### When env vars cannot be avoided
+
+Some steps invoke external tools that read env vars by convention (e.g. `DOTNET_VERSION`, `NUGET_FEED`). If the action cannot express these as inputs, add a validation step as the **first step** in the action that checks each required env var and fails immediately with a clear ❌ message naming the missing variable:
+
+```yaml
+    - name: "Validate Environment"
+      uses: actions/github-script@v9.0.0
+      with:
+        script: |
+          const required = ['DOTNET_VERSION', 'NUGET_FEED'];
+          const missing = required.filter(k => !process.env[k]);
+          if (missing.length) {
+            core.setFailed(`❌ Required environment variables are not set: ${missing.join(', ')}`);
+          } else {
+            core.info('✅ All required environment variables are set');
+          }
+```
+
+**Rules:**
+
+- Prefer `inputs:` over env var dependencies in all cases — explicit is always better than implicit.
+- Never read an env var in an action step without either declaring it as an input or validating its presence first.
+- Validation must be the first step so failures are reported before any side effects occur.
+- The error message must name every missing variable — do not make the caller guess.
