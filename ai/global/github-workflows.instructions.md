@@ -157,6 +157,20 @@ Jobs that check static file content, scan for markers, or invoke build/lint tool
 - Use `cancel-in-progress: false` on workflows where in-progress runs must not be interrupted (e.g. release workflows, dependency merge).
 - Check required secrets with an explicit `run:` step before performing any operation that depends on them. Fail fast with a clear error message.
 
+## Collapsing Multi-Step Groups
+
+Before extracting a group of steps into a composite action, consider whether the group can be collapsed into a **single `actions/github-script` step** with a few inline `if` statements. If the combined logic fits in 20–30 lines and has no reuse value elsewhere, collapsing is preferable to creating a new composite action file.
+
+A group is a good candidate for collapsing when:
+- Each step is a conditional variant of the same operation (e.g. "do X if flag is set, else do Y")
+- The steps share no external tool requirements — only API calls or env-var writes
+- The resulting script body would be straightforward to read without comments
+
+A group should become a composite action instead when:
+- The same sequence appears in two or more workflows or actions
+- The group involves non-trivial inputs/outputs that callers need to vary
+- The steps mix `actions/github-script` with other `uses:` steps that cannot be inlined
+
 ## Composite Action Placement
 
 All local composite actions live under `.github/actions/<name>/action.yml`. Name the directory to describe what the action does (e.g. `read-file`, `approve-pr`, `find-pull-request`).
