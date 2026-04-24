@@ -1,4 +1,4 @@
-<-- Globally Maintained -->
+<!-- Globally Maintained -->
 # Local instructions
 
 This is an index of local instructions that apply to just this project. 
@@ -13,5 +13,5 @@ This is an index of local instructions that apply to just this project.
 
 ## Instruction Files
 
-<-- Locally Maintained -->
+<!-- Locally Maintained -->
 
