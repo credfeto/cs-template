@@ -125,6 +125,46 @@ Bash is acceptable only for steps that meet **all** of the following:
 
 If a bash step performing non-trivial logic appears in more than one workflow or composite action after the repository checkout step, extract it into a local composite action at `.github/actions/<name>/action.yml` rather than duplicating it.
 
+## Step Field Ordering
+
+All steps must use a consistent field order. `name:` is always first; optional fields follow in the order shown below. Omit any field that is not needed.
+
+### `run` steps
+
+```yaml
+      - name: "Step Name"
+        id: step-id           # only when output is referenced downstream
+        if: <condition>       # only when conditionally run
+        shell: bash
+        run: |
+          <commands>
+        env:
+          VARIABLE: "value"   # only when step-level env vars are needed
+```
+
+### `uses` steps
+
+```yaml
+      - name: "Step Name"
+        id: step-id           # only when output is referenced downstream
+        if: <condition>       # only when conditionally run
+        uses: owner/action@vX.Y.Z
+        env:
+          MY_VAR: ${{inputs.some-input}}  # pass user-controlled values via env to prevent injection
+        with:
+          setting: "value"
+```
+
+**Rules:**
+
+- `name:` is always first.
+- `id:` immediately follows `name:`, and only appears when the step output is referenced by a later step or job output.
+- `if:` follows `id:` (or `name:` when there is no `id:`).
+- `shell: bash` is required on every `run:` step — never omit it.
+- `env:` and `with:` values are **maps** (`KEY: value` pairs) — never use list syntax (`- key: value`).
+- All string values must be double-quoted.
+- Indentation is 2 spaces per YAML level throughout. Steps under `steps:` are indented 6 spaces (2 for the job body + 2 for the list item + 2 for the `-`). Fields within a step are indented 8 spaces.
+
 ## Step Output Formatting
 
 Make step output easy to scan at a glance. Use tick and cross characters to signal pass/fail state, and prefix status lines consistently:
