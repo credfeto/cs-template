@@ -104,18 +104,26 @@ Whenever you add or modify a `uses:` reference — whether in a workflow file or
 
 This applies to all actions in the file, not just the one being added or changed.
 
-## Bash Steps
+## Bash Steps vs github-script
 
-Prefer `actions/github-script` over inline bash (`run: |`) for any step that is non-trivial — i.e. anything beyond a single-line command or a straightforward secret/env check. In particular, use `actions/github-script` for:
+**Default to `actions/github-script`** for any step that does more than a single command. Bash is acceptable only for steps that are genuinely simpler as shell — see the exhaustive list of exceptions below.
+
+Use `actions/github-script` for:
 
 - Any step that calls the GitHub REST or GraphQL API
 - Any step that processes git log output to make API decisions (e.g. creating branches, detecting missing releases)
 - Any step that reads or writes files as part of a workflow (not as part of a build tool)
 - Any step that manipulates PR metadata (labels, assignees, draft state)
+- Any step with conditional logic that compares or transforms values before deciding what to do — `if/else` in JavaScript is clearer than nested bash conditionals
+- Any step that reads structured data (JSON, YAML) — use `JSON.parse` rather than `jq` pipelines
+
+Bash is acceptable only for steps that meet **all** of the following:
+- Single command or a small sequence with no branching logic
+- No GitHub API calls
+- No structured data parsing
+- The intent is immediately obvious without comments (e.g. `sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"`, `rm -fr "$HOME/.dotnet"`)
 
 If a bash step performing non-trivial logic appears in more than one workflow or composite action after the repository checkout step, extract it into a local composite action at `.github/actions/<name>/action.yml` rather than duplicating it.
-
-Simple, single-purpose steps that do not call external APIs and are short enough to be self-evident (e.g. `sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"`) may remain as bash.
 
 ## Step Output Formatting
 
