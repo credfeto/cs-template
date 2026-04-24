@@ -157,6 +157,19 @@ echo "⚠️ src/global.json not found — using fallback version: 10.0.*"
 
 Use `echo "::error::..."` (bash) or `core.setFailed(...)` (github-script) only for conditions that must fail the step. Use the tick/cross prefix in the message body for readability regardless of which output function is used.
 
+### Surfacing key values without log diving
+
+For any value that is important to see at a glance after a run (version numbers, deployed stack names, PR URLs, branch names), emit it with **both** `core.info` and `core.notice`. `core.notice` creates a job annotation that surfaces at the top of the run summary and in the PR checks UI — no log scrolling needed.
+
+```javascript
+// \u001b[38;5;6m = ANSI 256-colour cyan; colours the value in the step log
+// core.notice surfaces it as a job annotation visible in the run summary
+core.info(`Version: \u001b[38;5;6m${version}`);
+core.notice(`Version: ${version}`);
+```
+
+Use `core.notice` for values a human would want to see first: build version, deployment target, branch created, cache hit/miss status. Do not use it for internal diagnostic details that are only useful when debugging.
+
 ## Dead Steps
 
 A step is dead and should be removed only if **both** of the following are true:
