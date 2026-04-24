@@ -117,6 +117,38 @@ If a bash step performing non-trivial logic appears in more than one workflow or
 
 Simple, single-purpose steps that do not call external APIs and are short enough to be self-evident (e.g. `sudo chown -R "$USER:$USER" "$GITHUB_WORKSPACE"`) may remain as bash.
 
+## Step Output Formatting
+
+Make step output easy to scan at a glance. Use tick and cross characters to signal pass/fail state, and prefix status lines consistently:
+
+| State | Character | Usage |
+|-------|-----------|-------|
+| Pass / found / enabled | `✅` | Something is present, correct, or succeeded |
+| Fail / missing / disabled | `❌` | Something is absent, wrong, or failed |
+| Warning / skipped | `⚠️` | Something was skipped or needs attention |
+| Info / in-progress | `ℹ️` | Neutral informational output |
+
+### In `actions/github-script` steps
+
+```javascript
+core.info(`✅ Branch ${branchName} already exists`);
+core.info(`✅ Updated global.json to version ${version}`);
+core.info(`❌ Branch ${branchName} not found — creating`);
+core.setFailed(`❌ Found ${mergeCommits.length} merge commit(s). Please rebase.`);
+core.warning(`⚠️ No releases found — nothing to do`);
+```
+
+### In bash steps
+
+```bash
+echo "✅ No merge conflict markers found."
+echo "❌ Merge conflict markers found — resolve before merging."
+echo "✅ src/global.json found — detected SDK version: $version"
+echo "⚠️ src/global.json not found — using fallback version: 10.0.*"
+```
+
+Use `echo "::error::..."` (bash) or `core.setFailed(...)` (github-script) only for conditions that must fail the step. Use the tick/cross prefix in the message body for readability regardless of which output function is used.
+
 ## Dead Steps
 
 A step is dead and should be removed only if **both** of the following are true:
