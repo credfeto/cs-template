@@ -25,7 +25,7 @@ Two `.database` files together provide the local SQL Server connection:
 The `./testdb` script sources both automatically — do NOT pre-source them before calling `./testdb`. For ad-hoc `sqlcmd` use, source them first:
 
 ```sh
-source "$HOME/.database" && source .database && sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -d "$DB" ...
+. "$HOME/.database" && . .database && sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -d "$DB" ...
 ```
 
 ## Performance Optimization

@@ -94,7 +94,7 @@ Mechanical agents must not attempt to interpret or fix failures themselves. When
 The calling agent is responsible for diagnosis and repair. For example:
 - If a pre-commit hook fails during a commit, Committer sends the full hook output back to Code Writer and does not attempt to fix the code.
 - If a build fails during Code Tester's run, Code Tester sends the full compiler output back to Code Writer and does not attempt to fix the code.
-- If a rebase produces conflicts, Rebase Agent reports the conflict details to the Orchestrator rather than attempting to resolve them.
+- If a rebase produces conflicts other than CHANGELOG conflicts, Rebase Agent reports the conflict details to the Orchestrator rather than attempting to resolve them (CHANGELOG conflicts have a deterministic rule — see Rebase Agent definition).
 
 This keeps mechanical agents simple and predictable, and ensures all repair decisions are made by agents with the context and capability to make them correctly.
 
@@ -146,8 +146,9 @@ This keeps mechanical agents simple and predictable, and ensures all repair deci
 **Rebase Agent**
 
 - Rebases a named branch onto `origin/main`.
-- Resolves CHANGELOG conflicts by keeping entries from both sides (never discarding either).
-- Force-pushes with `--force-with-lease`.
+- CHANGELOG conflicts are the one deterministic exception to the failure-punt rule: always resolve them by keeping entries from both sides (never discarding either) — no judgement required.
+- Any other conflict must be reported verbatim to the Orchestrator — do not attempt to resolve it.
+- Force-pushes with `--force-with-lease` only after all conflicts are resolved.
 
 **CI Debugger**
 
@@ -218,15 +219,15 @@ This keeps mechanical agents simple and predictable, and ensures all repair deci
 
 ### Routing Rules
 
-| Work type | Agent sequence                                                                                                                                                                       |
-|---|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| New feature / bug fix / refactor | Code Writer → Code Tester (loop ≤5 with Code Writer) → Code Reviewer (loop ≤5, re-running Code Write and Code Tester each round) → Changelog → Committer → CI Monitor → PR Submitter |
-| `CHANGES_REQUESTED` on existing PR | Code Fixer → Code Tester (loop ≤5 with Code Fixer) → Code Reviewer (loop ≤5, re-running Code Write and Code Tester each round) → Changelog → Committer → CI Monitor → PR Submitter                  |
-| Coverage-only task | Code Writer (tests only) → Code Tester (loop ≤5 with Code Writer) → Code Reviewer (loop ≤5, re-running Code Write and Code Tester each round) → Changelog → Committer → CI Monitor → PR Submitter   |
-| Documentation-only | Code Writer (docs only) → PR Submitter                                                                                                                                               |
-| Rebase requested | Rebase Agent → PR Submitter                                                                                                                                                          |
-| CI failure (unknown cause) | CI Debugger                                                                                                                                                                          |
-| Dependabot / dependency update | Dependency Updater                                                                                                                                                                   |
+| Work type | Agent sequence |
+|---|---|
+| New feature / bug fix / refactor | Code Writer → Code Tester (loop ≤5 with Code Writer) → Code Reviewer (loop ≤5, re-running Code Writer and Code Tester each round) → Changelog → Committer → PR Submitter → CI Monitor |
+| `CHANGES_REQUESTED` on existing PR | Code Fixer → Code Tester (loop ≤5 with Code Fixer) → Code Reviewer (loop ≤5, re-running Code Fixer and Code Tester each round) → Changelog → Committer → PR Submitter → CI Monitor |
+| Coverage-only task | Code Writer (tests only) → Code Tester (loop ≤5 with Code Writer) → Code Reviewer (loop ≤5, re-running Code Writer and Code Tester each round) → Changelog → Committer → PR Submitter → CI Monitor |
+| Documentation-only | Code Writer (docs only) → PR Submitter |
+| Rebase requested | Rebase Agent → PR Submitter |
+| CI failure (unknown cause) | CI Debugger |
+| Dependabot / dependency update | Dependency Updater |
 
 ## Resuming Interrupted Work
 
