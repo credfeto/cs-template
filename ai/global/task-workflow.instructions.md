@@ -150,6 +150,7 @@ For complex files where it takes multiple rounds of changes:
 - Commits all pending code and test changes as one commit (Conventional Commits format, original prompt in body prefixed with `Prompt:`, GPG signed).
 - Commits `CHANGELOG.md` changes as a separate subsequent commit (also GPG signed).
 - Pushes all commits to `origin` immediately after using `git push`.
+- Does not open the PR — that is PR Submitter's responsibility.
 
 **Pre-commit hook failures:**
 
@@ -160,7 +161,20 @@ For complex files where it takes multiple rounds of changes:
   3. Report the failure details back to the agent that produced the change (Code Writer, Code Fixer, etc.) and wait for them to fix the code.
   4. Once the fix is received, re-stage the corrected files and retry the commit.
   5. If the same hook fails again after 3 fix-and-retry cycles, stop and escalate to the user — do not loop indefinitely.
-- Does not open the PR — that is handled downstream.
+
+**PR Submitter**
+
+- Runs after Committer has pushed all commits to `origin`.
+- Wait up to 1 minute for GitHub to automatically create a PR (e.g. via a branch protection rule or auto-PR workflow). Check with `gh pr list --head <branch>`.
+- If no PR exists after 1 minute, create one: `gh pr create --title "<title>" --body "<body>"`.
+- The PR title must follow Conventional Commits format and match the primary commit title on the branch.
+- The PR body must include:
+  - A brief summary of what changed and why.
+  - A `Closes #<n>` line for every GitHub issue being resolved by the branch. Find these by scanning commit messages and branch name for issue numbers.
+  - If the branch partially addresses an issue (i.e. does not fully resolve it), use `Related to #<n>` instead of `Closes #<n>`.
+- If a PR already exists (created automatically or from a previous run), update its body to reflect the current set of issues and the current state of the branch: `gh pr edit <number> --body "<updated body>"`.
+- Add yourself as assignee: `gh pr edit <number> --add-assignee @me`.
+- Do not mark the PR ready for review — leave that to the Code Reviewer or user.
 
 **Dependency Updater**
 
