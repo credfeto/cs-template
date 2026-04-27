@@ -175,6 +175,15 @@ For complex files where it takes multiple rounds of changes:
 - Mark the PR ready for review (`gh pr ready <number>`) **only if** Code Tester and Code Reviewer have both signed off on this round — i.e. the pipeline that reached PR Submitter passed through both agents without outstanding issues. Before doing so, rebase the branch onto `origin/main` and resolve any conflicts: `git fetch origin && git rebase origin/main`.
 - If the pipeline did not include Code Tester and Code Reviewer (e.g. a rebase-only run), leave the PR in whatever draft state it is currently in — do not flip it to ready.
 
+**CI Monitor** _(not currently enabled — implementation TBD)_
+
+- Runs after PR Submitter, once the PR is open and marked ready for review.
+- Watches all required status checks on the PR for CI failures: `gh pr checks <number> --watch`.
+- If all required checks pass, CI Monitor completes with no action.
+- If any required check fails, hand the failure off to CI Debugger: pass the PR number and the names of the failing checks so CI Debugger can read the full logs.
+- After CI Debugger has applied a fix and pushed, re-check all required checks — repeat until all pass or CI Debugger escalates to the user.
+- Does not attempt to fix failures itself — diagnosis and repair belong to CI Debugger.
+
 **Dependency Updater**
 
 - Reviews Dependabot PRs: checks if the update is a safe patch/minor bump with no security advisories and CI passing.
