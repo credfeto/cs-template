@@ -73,6 +73,31 @@ For complex files where it takes multiple rounds of changes:
 
 ## Multi-Agent Implementation and Review Pattern
 
+### General Agent Principles
+
+**Model selection**
+
+Agents that perform mechanical, well-defined tasks (running builds, committing, submitting PRs, monitoring CI, rebasing) must use a smaller/cheaper model. Agents that require judgement, creativity, or diagnosis (Code Writer, Code Reviewer, Code Fixer, CI Debugger, Orchestrator) use the full model.
+
+| Use full model | Use lesser model |
+|---|---|
+| Orchestrator, Code Writer, Code Reviewer, Code Fixer, CI Debugger, Dependency Updater | Code Tester, Committer, Changelog, Rebase Agent, PR Submitter, CI Monitor |
+
+**Failure handling — no self-repair**
+
+Mechanical agents must not attempt to interpret or fix failures themselves. When a hardcoded check fails, the agent must:
+
+1. Capture the full output of the failing step.
+2. Stop immediately — do not proceed with subsequent steps.
+3. Return the failure details verbatim to the calling agent so it can decide how to respond.
+
+The calling agent is responsible for diagnosis and repair. For example:
+- If a pre-commit hook fails during a commit, Committer sends the full hook output back to Code Writer and does not attempt to fix the code.
+- If a build fails during Code Tester's run, Code Tester sends the full compiler output back to Code Writer and does not attempt to fix the code.
+- If a rebase produces conflicts, Rebase Agent reports the conflict details to the Orchestrator rather than attempting to resolve them.
+
+This keeps mechanical agents simple and predictable, and ensures all repair decisions are made by agents with the context and capability to make them correctly.
+
 ### Agent Roles
 
 **Orchestrator**
@@ -146,6 +171,7 @@ For complex files where it takes multiple rounds of changes:
 - If either check fails: stops and reports the misconfiguration — does not proceed.
 - All commits **must be GPG signed** (`git commit -S`). If signing fails, stop and report.
 - Commits all pending code and test changes as one commit (Conventional Commits format, original prompt in body prefixed with `Prompt:`, GPG signed).
+- If a pre-commit hook fails: capture the full hook output, abort, and return it to Code Writer — do not attempt to fix the code or retry.
 - Commits `CHANGELOG.md` changes as a separate subsequent commit (also GPG signed).
 - Pushes all commits to `origin` immediately after using `git push`.
 - Does not open the PR — that is PR Submitter's responsibility.
