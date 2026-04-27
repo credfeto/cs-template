@@ -14,6 +14,8 @@
 
 ## Visual Indicators
 
+> These conventions apply to **standalone shell scripts only**. GitHub Actions `run:` steps use a different set of emoji indicators — see [github-workflows.instructions.md](github-workflows.instructions.md#step-output-formatting).
+
 Use consistent coloured prefixes for outcome messages so that success and failure are immediately visible in terminal output:
 
 - **Failure** — prefix with a red `✗`:
