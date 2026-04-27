@@ -23,9 +23,7 @@
 
 - **When additional work needs to be added to an open PR** (e.g. addressing review comments, adding missing coverage, fixing CI failures), convert it to a draft immediately before starting: `gh pr ready <number> --undo`.
 - Keep the PR in draft for the entire duration of that work — do not flip it back early.
-- **Only convert back to ready for review once all work is complete** and Code Tester and Code Reviewer are both satisfied.
-- Before marking ready, rebase the branch onto `origin/main` to eliminate any merge conflicts: `git fetch origin && git rebase origin/main`. Resolve any conflicts before proceeding.
-- Once rebased and clean, mark ready: `gh pr ready <number>`.
+- **Only convert back to ready for review once all work is complete** and Code Tester and Code Reviewer are both satisfied — this is done by PR Submitter at the end of the pipeline, not manually.
 
 ## Large Multi-Handler / Multi-App Tasks
 
@@ -174,7 +172,8 @@ For complex files where it takes multiple rounds of changes:
   - If the branch partially addresses an issue (i.e. does not fully resolve it), use `Related to #<n>` instead of `Closes #<n>`.
 - If a PR already exists (created automatically or from a previous run), update its body to reflect the current set of issues and the current state of the branch: `gh pr edit <number> --body "<updated body>"`.
 - Add yourself as assignee: `gh pr edit <number> --add-assignee @me`.
-- Do not mark the PR ready for review — leave that to the Code Reviewer or user.
+- Mark the PR ready for review (`gh pr ready <number>`) **only if** Code Tester and Code Reviewer have both signed off on this round — i.e. the pipeline that reached PR Submitter passed through both agents without outstanding issues. Before doing so, rebase the branch onto `origin/main` and resolve any conflicts: `git fetch origin && git rebase origin/main`.
+- If the pipeline did not include Code Tester and Code Reviewer (e.g. a rebase-only run), leave the PR in whatever draft state it is currently in — do not flip it to ready.
 
 **Dependency Updater**
 
