@@ -35,6 +35,14 @@ Whenever any instruction file is added or updated — in this repo or in the glo
 
 This applies to all rule types: coding conventions, test conventions, documentation structure, workflow rules, and AI instruction files themselves.
 
+## Instruction File Source Routing
+
+When an instruction file needs to be changed or a new rule needs to be added:
+
+- If the file originates from `funfair/funfair-server-template` and the required change is not already present in that repository, raise an issue on `funfair/funfair-server-template` to get it added there — do not make the change only in the current repository.
+- If the file originates from `credfeto/cs-template` and the required change is not already present in that repository, raise an issue on `credfeto/cs-template` to get it added there — do not make the change only in the current repository.
+- If neither of the above applies, make the change directly in the current repository.
+
 ## Large Multi-Handler / Multi-App Tasks
 
 When given a task that spans multiple handlers, apps, or components (e.g. "ensure 100% coverage for all handlers", "migrate all projects to a new package"):
