@@ -133,6 +133,13 @@ Use `.AddMockedService<IOptions<TOptions>>(static o => o.Value.Returns(new TOpti
 - All configuration/options classes (typically bound from `appsettings.json`) must have a `[DebuggerDisplay("...")]` attribute showing their key properties.
 - The `DebuggerDisplay` format string should show the most useful identifying information — typically a name, identifier, or URL.
 
+## Time Abstraction
+
+- Use `System.TimeProvider` (built into .NET 8+) in production code for all time-related abstractions.
+- **Never use** `Credfeto.Date.ICurrentTimeSource` or `FunFair.Common.Services.IDateTimeSource` — these are obsolete custom abstractions being removed.
+- In tests, use `FakeTimeProvider` from the `Microsoft.Extensions.TimeProvider.Testing` NuGet package — never roll a custom time mock or fake.
+- Whenever work touches code that uses `ICurrentTimeSource` or `IDateTimeSource`, migrate it to `TimeProvider`/`FakeTimeProvider` as part of that work.
+
 ## Warning Suppression
 
 - **Never use `#pragma warning disable <ID>`** — inline suppression hides problems without explanation and is invisible in code review.
