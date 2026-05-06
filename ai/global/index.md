@@ -23,7 +23,6 @@ Read all of these before starting any task, regardless of language or context.
 | [security.instructions.md](security.instructions.md) | No secrets in code, input validation, output sanitisation |
 | [error-handling.instructions.md](error-handling.instructions.md) | Explicit error handling, propagation, safe surfacing |
 | [logging.instructions.md](logging.instructions.md) | Structured logging, log levels, no PII/secrets |
-| [gitignore.instructions.md](gitignore.instructions.md) | `.gitignore` ownership and consistency |
 | [packages.instructions.md](packages.instructions.md) | Secure versions, managed vs native, deprecated packages |
 
 ## Load When Applicable
@@ -42,6 +41,7 @@ Load these only when the work involves the relevant technology or context.
 | [agent-roles.instructions.md](agent-roles.instructions.md) | You are acting as a named agent (Orchestrator, Code Writer, Code Tester, etc.) | Detailed per-agent responsibilities and behaviour |
 | [changelog.instructions.md](changelog.instructions.md) | You need to add or update a changelog entry, or you are the Changelog agent | Format, tooling (`dotnet changelog`), when to add entries, add/remove commands |
 | [git-commits.instructions.md](git-commits.instructions.md) | You are about to commit, or you are the Committer agent | Commit size rules, empty commit check, push cadence, Conventional Commits format |
+| [gitignore.instructions.md](gitignore.instructions.md) | Any `.gitignore` file is being created or modified | IDE file exclusions, root `.gitignore` ownership, consistency checks |
 
 ## Reference Files (Load on Demand)
 
