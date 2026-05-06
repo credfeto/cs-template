@@ -68,6 +68,14 @@ Use `AddMockedService<T>()` in tests deriving from `DependencyInjectionTestsBase
 - One type per file — class, record, struct, interface, or enum.
 - File name must match the type name exactly (e.g. `FooBar.cs` for `class FooBar`).
 
+## Value Types (struct / record struct)
+
+- Prefer `struct` or `record struct` over `class` for small, short-lived, immutable data — avoids heap allocations.
+- Use `struct` when: the type is logically a value (not an identity), is small (≤16 bytes is a useful guide), and is frequently created/discarded.
+- Prefer `readonly struct` or `readonly record struct` to enforce immutability and enable compiler optimisations.
+- Avoid mutable structs — unexpected copy semantics cause subtle bugs.
+- Do not use `struct` for types that need inheritance or will be boxed frequently.
+
 ## Debugger Diagnostics
 
 - All `struct` types must have `[DebuggerDisplay("...")]` showing key fields.
