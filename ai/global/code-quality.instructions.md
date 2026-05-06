@@ -53,4 +53,5 @@ Cover compile-time configuration (environment constants, build-time feature flag
 - Prefer clean code — readable, well-named, single-responsibility.
 - Cyclomatic complexity must stay below 20 per method; refactor if it exceeds this.
 - Keep cognitive complexity low — if a method is hard to read at a glance, simplify it.
-- Prefer weak (static) forms of connascence (Name, Type, Meaning) over strong (dynamic) forms (Execution, Timing, Identity) — see [connascence.io](https://connascence.io/). Where stronger connascence is unavoidable, keep it local (within a single method or class).
+- Prefer weak (static) connascence (Name, Type, Meaning) over strong (dynamic) forms (Execution, Timing, Identity) — see [connascence.io](https://connascence.io/).
+- Where stronger connascence is unavoidable, keep it local (within a single method or class).
