@@ -4,44 +4,31 @@
 
 Load this file when adding changelog entries or acting as the Changelog agent.
 
-## Format and Tooling
+## Rules
 
-- Maintain `CHANGELOG.md` in [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
-- The `Credfeto.Changelog.Cmd` dotnet tool is the **only** permitted way to modify `CHANGELOG.md` — never edit manually.
-- `CHANGELOG.md` must be excluded from markdownlint by ensuring it is listed in `.markdownlintignore` at the repo root. If `.markdownlintignore` does not exist, create it and add `CHANGELOG.md` as the first entry.
-- Changelog entries must be understandable by someone who has not read the code — describe what changed and why it matters, not how it was implemented.
+- Use `Credfeto.Changelog.Cmd` — never edit `CHANGELOG.md` manually.
+- `CHANGELOG.md` must be listed in `.markdownlintignore` at the repo root (create the file if absent).
+- Entries must describe what changed and why it matters — not how it was implemented.
 
-## When to Add an Entry
+## When to Skip
 
-Add a changelog entry for every task, **unless**:
+Do **not** add an entry if:
 
-- This is the `credfeto/cs-template` repository — the `CHANGELOG.md` there is kept blank for new repositories using the template.
-- It is purely a documentation change with no effect on production code.
-- It is an AI instructions change.
+- The repo is `credfeto/cs-template` (kept blank for template consumers).
+- The change is documentation-only with no effect on production code.
+- The change is to AI instruction files.
 
-## Adding an Entry
-
-Use the `-a` flag with one of the standard [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) change types:
+## Commands
 
 ```bash
-dotnet changelog -f CHANGELOG.md -a Added      -m "Brief description of what was added"
-dotnet changelog -f CHANGELOG.md -a Changed    -m "Brief description of what changed and why"
-dotnet changelog -f CHANGELOG.md -a Deprecated -m "Brief description of what is now deprecated"
-dotnet changelog -f CHANGELOG.md -a Removed    -m "Brief description of what was removed"
-dotnet changelog -f CHANGELOG.md -a Fixed      -m "Brief description of what was fixed"
-dotnet changelog -f CHANGELOG.md -a Security   -m "Brief description of the security fix"
-```
+# Add
+dotnet changelog -f CHANGELOG.md -a <Type> -m "<message>"
 
-## Removing an Entry
+# Remove
+dotnet changelog -f CHANGELOG.md -r <Type> -m "<exact message to remove>"
 
-Use the `-r` flag with the change type and the exact message to remove:
-
-```bash
-dotnet changelog -f CHANGELOG.md -r <ChangeType> -m "<exact message to remove>"
-```
-
-## All Other Operations
-
-```bash
+# Help
 dotnet changelog --help
 ```
+
+Valid types: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Deployment Changes`
