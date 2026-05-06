@@ -6,16 +6,15 @@ These rules apply to all .NET solutions derived from this template.
 
 ## Build and Test Before Commit (MANDATORY)
 
-- Before every commit, run:
+Run `dotnet build` and `dotnet test` before every commit. See [git.instructions.md](git.instructions.md#build-and-test-verification-mandatory-before-any-commit-or-push) for the general rule — the same stop/ask-the-user behaviour applies.
 
-  ```bash
-  dotnet build
-  dotnet test
-  ```
+## Source-Generated Logging
 
-- If `dotnet build` fails, **do not commit**. Fix all build errors first.
-- If `dotnet test` fails, **do not commit**. Fix all failing tests first.
-- If build or test errors cannot be resolved, stop and ask the user for guidance.
+- Prefer `LoggerMessage` source generators over runtime string-based logging — faster, allocation-free, and compile-time structured.
+- Logging methods must be in a dedicated internal static class:
+  - Placed in a `LoggingExtensions` sub-namespace relative to the class it serves.
+  - Named after the class it serves with a `LoggingExtensions` suffix — e.g. `FooLoggingExtensions` for class `Foo`.
+  - Must be `internal` and `static`.
 
 ## Asynchronous Code
 
@@ -178,8 +177,4 @@ Do **not** suppress NuGet vulnerability warnings globally in shared `.props` fil
 
 ### Rationale
 
-Global suppression hides newly introduced advisories as packages are updated. Per-advisory project-level suppression ensures that:
-
-- Only explicitly reviewed and accepted vulnerabilities are suppressed.
-- New advisories on updated packages are not silently ignored.
-- Each suppression is traceable to a specific advisory URL and kept in the project file where the affected package is referenced.
+Global suppression hides advisories as packages are updated. Per-advisory project-level suppression keeps each suppression traceable to a reviewed advisory URL and prevents new advisories from being silently ignored.

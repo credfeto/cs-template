@@ -19,7 +19,6 @@ Read all of these before starting any task, regardless of language or context.
 | [task-workflow.instructions.md](task-workflow.instructions.md) | Agent routing table, model selection, failure handling, issue/PR assignment, commit cadence, resuming work |
 | [code-quality.instructions.md](code-quality.instructions.md) | Code coverage, tests, async, immutability, parameterised tests, refactoring |
 | [documentation.instructions.md](documentation.instructions.md) | README, CHANGELOG conventions |
-| [language.instructions.md](language.instructions.md) | UK English for docs/comments; platform convention for identifiers |
 | [security.instructions.md](security.instructions.md) | No secrets in code, input validation, output sanitisation |
 | [error-handling.instructions.md](error-handling.instructions.md) | Explicit error handling, propagation, safe surfacing |
 | [logging.instructions.md](logging.instructions.md) | Structured logging, log levels, no PII/secrets |
@@ -42,6 +41,7 @@ Load these only when the work involves the relevant technology or context.
 | [changelog.instructions.md](changelog.instructions.md) | You need to add or update a changelog entry, or you are the Changelog agent | Format, tooling (`dotnet changelog`), when to add entries, add/remove commands |
 | [git-commits.instructions.md](git-commits.instructions.md) | You are about to commit, or you are the Committer agent | Commit size rules, empty commit check, push cadence, Conventional Commits format |
 | [gitignore.instructions.md](gitignore.instructions.md) | Any `.gitignore` file is being created or modified | IDE file exclusions, root `.gitignore` ownership, consistency checks |
+| [language.instructions.md](language.instructions.md) | Writing code, documentation, comments, or commit messages | UK English for docs/comments; platform convention for identifiers |
 
 ## Reference Files (Load on Demand)
 

@@ -2,14 +2,6 @@
 
 [Back to Global Instructions Index](index.md)
 
-## Source-Generated Logging
-
-- Where the language or framework provides source-generated or compile-time logging (e.g. `LoggerMessage` source generators in .NET), use it in preference to runtime string-based logging — it is faster, allocation-free, and enforces structure at compile time.
-- Logging methods must not be placed directly on the class being logged — they must be separated into a dedicated internal static logging extension class:
-  - The logging class must be placed in a `LoggingExtensions` sub-namespace relative to the class it serves.
-  - The logging class must be named after the class it serves, suffixed with `LoggingExtensions` — e.g. for a class `Foo`, the logging class is `FooLoggingExtensions`.
-  - The logging class must be `internal` and `static`.
-
 ## Structured Logging
 
 - All logging must use structured logging — log data as key-value pairs or structured objects, not concatenated strings.
@@ -33,5 +25,5 @@ Use log levels consistently:
 ## What Not to Log
 
 - Never log personally identifiable information (PII) — e.g. names, email addresses, phone numbers, IP addresses, or any data that could identify an individual.
-- Never log secrets, credentials, tokens, or passwords under any circumstances.
+- Never log secrets, credentials, tokens, or passwords — see [security.instructions.md](security.instructions.md#secrets-and-credentials).
 - Avoid logging large payloads in full — summarise or truncate where appropriate.
