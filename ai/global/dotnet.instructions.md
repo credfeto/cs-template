@@ -1,5 +1,7 @@
 # .NET Instructions
 
+> Load when: any `.csproj`, `.sln`, or `.slnx` file is present.
+
 [Back to Global Instructions Index](index.md)
 
 ## Build and Test Before Commit (MANDATORY)
@@ -71,15 +73,14 @@ Use `AddMockedService<T>()` in tests deriving from `DependencyInjectionTestsBase
 ## Value Types (struct / record struct)
 
 - Prefer `struct` or `record struct` over `class` for small, short-lived, immutable data — avoids heap allocations.
-- Use `struct` when: the type is logically a value (not an identity), is small (≤16 bytes is a useful guide), and is frequently created/discarded.
+- Use `struct` when: the type is logically a value (not an identity), is generally small, and is frequently created/discarded.
 - Prefer `readonly struct` or `readonly record struct` to enforce immutability and enable compiler optimisations.
 - Avoid mutable structs — unexpected copy semantics cause subtle bugs.
 - Do not use `struct` for types that need inheritance or will be boxed frequently.
 
 ## Debugger Diagnostics
 
-- All `struct` types must have `[DebuggerDisplay("...")]` showing key fields.
-- All value types (records with positional parameters or `record struct`) must have `[DebuggerDisplay("...")]`.
+- All value types (`struct`, `record struct`, records with positional parameters) must have `[DebuggerDisplay("...")]` showing key fields.
 - All configuration/options classes must have `[DebuggerDisplay("...")]` showing key properties.
 
 ## Time Abstraction
@@ -89,31 +90,19 @@ Use `AddMockedService<T>()` in tests deriving from `DependencyInjectionTestsBase
 - In tests, use `FakeTimeProvider` from `Microsoft.Extensions.TimeProvider.Testing` — never roll a custom mock.
 - Migrate any code touching `ICurrentTimeSource` or `IDateTimeSource` to `TimeProvider`/`FakeTimeProvider` as part of that work.
 
-## Warning Suppression
-
-- Never use `#pragma warning disable <ID>`.
-- For genuinely unfixable warnings, use `[SuppressMessage("category", "ID", Justification = "reason")]` at the narrowest scope.
-- `Justification` is **mandatory** — suppression without one is a build error.
-
-## Warnings as Errors
+## Warning Suppression and Errors
 
 - Every project must build with `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`.
-- Never use `<NoWarn>` or `<WarningsNotAsErrors>` — fix the code or use `[SuppressMessage]`. Exception: per-advisory NuGet audit suppressions (see below).
+- Never use `#pragma warning disable <ID>`, `<NoWarn>`, or `<WarningsNotAsErrors>` — fix the code or use `[SuppressMessage]`. Exception: per-advisory NuGet audit suppressions (see below).
+- For genuinely unfixable warnings, use `[SuppressMessage("category", "ID", Justification = "reason")]` at the narrowest scope — `Justification` is **mandatory**.
 
 ## NuGet Vulnerability Suppression
 
-Suppress per-project using the advisory URL — never globally in shared `.props` files. Track each suppression in a GitHub issue.
+Suppress per-project using the advisory URL — never globally in shared `.props` files. Track each suppression in a GitHub issue. See [dotnet.examples.md](dotnet.examples.md) for the prohibited global suppression patterns.
 
 ```xml
 <ItemGroup>
   <!-- Reason: <why accepted> -->
   <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-xxxx-xxxx-xxxx" />
 </ItemGroup>
-```
-
-Prohibited (global suppression — silently hides new advisories):
-
-```xml
-<WarningsNotAsErrors>NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
-<NoWarn>NU1901;NU1902;NU1903;NU1904</NoWarn>
 ```
