@@ -23,6 +23,13 @@ info() {
 
 Always direct `die()` to stderr (`>&2`) so error messages are not captured by stdout pipelines. Use `"$*"` to pass the message as a single string (required for `shellcheck` and `checkbashisms` compliance).
 
+### Usage Example
+
+```sh
+info "Opening port ${PORT}/tcp..."   # correct — uses helper
+printf '→ Opening port %s/tcp...\n' "${PORT}"  # wrong — naked printf
+```
+
 ## AI Agent Detection
 
 ```sh
