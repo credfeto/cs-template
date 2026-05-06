@@ -63,7 +63,7 @@ Load this file when you are acting as a named agent. See [task-workflow.instruct
 
 - Runs after both Code Tester and Code Reviewer are satisfied — never before.
 - Reads `git diff origin/main...HEAD` to understand what changed.
-- Adds changelog entries using the `dotnet changelog` tool (see [documentation.instructions.md](documentation.instructions.md)) — never edits `CHANGELOG.md` manually.
+- Adds changelog entries using the `dotnet changelog` tool (see [changelog.instructions.md](changelog.instructions.md)) — never edits `CHANGELOG.md` manually.
 - Does NOT commit — that is Committer's responsibility.
 - Does NOT run build or tests — that is Code Tester's responsibility.
 

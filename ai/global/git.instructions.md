@@ -76,19 +76,7 @@ When the `GH_HOST` environment variable is set to a value other than `github.com
 
 ## Commits
 
-- **Never create an empty commit.** Before running `git commit`, verify that `git diff --cached --name-only` lists at least one file. If the staging area is empty, stop and investigate why — do not proceed with the commit.
-- Changes should be worked on in small increments and committed one by one.
-- Commits should be as small as possible — one logical change per commit:
-  - When achieving 100% coverage, commit and push each file as soon as it reaches 100% coverage individually; do not batch multiple files into one commit.
-  - Dead/unreachable code removal must be a separate commit from test changes, made only after running tests on the entire handler or app to confirm no code path accesses it; removing several methods or functions should be done one per commit.
-  - For shared code removal, first verify the entire codebase does not access it — this can only be done once all apps and handlers have 100% code coverage; each shared removal is its own commit.
-  - Never amend an existing commit; always create a new one.
-- After every commit, push the changes to `origin` immediately.
-
-## Commit Message Format
-
-- Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format for all commit messages.
-- Always include the user's original prompt verbatim in the commit description (body), prefixed with `Prompt:` followed by a space. Do not include it in the commit title.
+For full commit rules and message format, see [git-commits.instructions.md](git-commits.instructions.md) — load that file when you are about to commit.
 
 ## Dependabot Vulnerability Warnings
 
