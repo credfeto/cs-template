@@ -29,12 +29,3 @@ Use `.AddMockedService<IOptions<TOptions>>(static o => o.Value.Returns(new TOpti
 // ❌ Wrong
 .AddSingleton<IOptions<MyOptions>>(Options.Create(new MyOptions()))
 ```
-
-## NuGet Vulnerability Suppression — Prohibited Patterns
-
-Never use global suppression — it silently hides new advisories:
-
-```xml
-<WarningsNotAsErrors>NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
-<NoWarn>NU1901;NU1902;NU1903;NU1904</NoWarn>
-```

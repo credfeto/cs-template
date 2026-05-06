@@ -98,7 +98,7 @@ Use `AddMockedService<T>()` in tests deriving from `DependencyInjectionTestsBase
 
 ## NuGet Vulnerability Suppression
 
-Suppress per-project using the advisory URL — never globally in shared `.props` files. Track each suppression in a GitHub issue. See [dotnet.examples.md](dotnet.examples.md) for the prohibited global suppression patterns.
+Suppress per-project using the advisory URL — never globally in shared `.props` files. Track each suppression in a GitHub issue.
 
 ```xml
 <ItemGroup>

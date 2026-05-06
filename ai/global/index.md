@@ -53,5 +53,5 @@ These contain code examples only. Load them when actively writing or modifying t
 | [shell.firewall.examples.md](shell.firewall.examples.md) | Writing firewall scripts — provides `allow_ipv4`, `allow_ipv6`, `open_port_for_private_networks` implementations |
 | [github-workflows.examples.md](github-workflows.examples.md) | Creating or scaffolding a local composite action — provides action template, explicit inputs, env-var validation step |
 | [sql.examples.md](sql.examples.md) | Writing SQL or database connection scripts — provides `.database` file format, `sqlcmd` invocation, and `SET STATISTICS` baseline template |
-| [dotnet.examples.md](dotnet.examples.md) | Writing .NET DI setup tests or NuGet suppression — provides `AddMockedService`, `IOptions` patterns, and prohibited NuGet suppression examples |
+| [dotnet.examples.md](dotnet.examples.md) | Writing .NET DI setup tests — provides `AddMockedService` and `IOptions` patterns |
 | [git.examples.md](git.examples.md) | Implementing or debugging git identity checks — provides GPG validation script and template escalation command |
