@@ -152,31 +152,18 @@ Use `.AddMockedService<IOptions<TOptions>>(static o => o.Value.Returns(new TOpti
 
 ## NuGet Vulnerability Suppression
 
-Accepted NuGet security advisories must be suppressed **at the project level** using the specific advisory URL, not suppressed globally in shared props.
-
-Any suppressed vulnerability should be tracked in a github issue with the advisory URL, so it can be reviewed and re-evaluated when packages are updated.
-
-### Required: project-level suppression
-
-Suppress each accepted advisory in the affected `.csproj` file using `<NuGetAuditSuppress>`:
+Suppress accepted advisories **per-project** using the advisory URL — never globally in shared `.props` files. Track each suppression in a GitHub issue for re-evaluation when packages update.
 
 ```xml
 <ItemGroup>
-  <!-- Reason: <brief explanation of why this advisory is accepted> -->
+  <!-- Reason: <why accepted> -->
   <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-xxxx-xxxx-xxxx" />
 </ItemGroup>
 ```
 
-### Prohibited: global suppression
-
-Do **not** suppress NuGet vulnerability warnings globally in shared `.props` files or `Directory.Build.props`. The following patterns are **explicitly prohibited**:
+Prohibited (global suppression — silently hides new advisories):
 
 ```xml
-<!-- PROHIBITED: broad suppression in shared props -->
 <WarningsNotAsErrors>NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
 <NoWarn>NU1901;NU1902;NU1903;NU1904</NoWarn>
 ```
-
-### Rationale
-
-Global suppression hides advisories as packages are updated. Per-advisory project-level suppression keeps each suppression traceable to a reviewed advisory URL and prevents new advisories from being silently ignored.
