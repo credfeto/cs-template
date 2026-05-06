@@ -22,10 +22,12 @@ Use consistent coloured prefixes for outcome messages so that success and failur
 
 ```sh
 die() {
-    printf '\n\033[31m✗\033[0m %s\n' "$*"
+    printf '\n\033[31m✗\033[0m %s\n' "$*" >&2
     exit 1
 }
 ```
+
+Always direct `die()` output to stderr (`>&2`) so error messages are not captured by stdout pipelines and remain visible even when stdout is redirected.
 
 - **Success** — prefix with a green `✓`:
 
