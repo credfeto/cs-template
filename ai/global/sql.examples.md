@@ -20,7 +20,7 @@ PASSWORD=<password>
 DB=Treasury
 ```
 
-Ad-hoc `sqlcmd` invocation (only needed outside `./testdb`):
+Ad-hoc `sqlcmd` invocation (only needed outside `<repo>/testdb`):
 
 ```sh
 . "$HOME/.database" && . .database && sqlcmd -S "$SERVER" -U "$USER" -P "$PASSWORD" -d "$DB" ...
