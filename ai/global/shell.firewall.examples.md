@@ -1,12 +1,12 @@
-# Shell Script Instructions
+# Firewall Script Examples
 
 [Back to Global Instructions Index](index.md)
 
-## Firewall Rules (`firewall-cmd`)
+Reference implementations for the firewall helpers described in [shell.firewall.instructions.md](shell.firewall.instructions.md). Load this file when actively writing or modifying firewall scripts.
 
-### Private Network Constants
+## Private Network Constants
 
-Define these constants at the top of any script that manages firewall rules:
+Define these at the top of any script that manages firewall rules:
 
 ```bash
 IPV4_PRIVATE_RANGES=(
@@ -21,9 +21,7 @@ IPV6_PRIVATE_RANGES=(
 )
 ```
 
-### Helper Functions
-
-Include these helpers in any script that opens ports:
+## Helper Functions
 
 ```bash
 allow_ipv4() {
@@ -58,7 +56,7 @@ open_port_for_private_networks() {
 }
 ```
 
-### Usage
+## Usage
 
 To allow a port from all private networks (both IPv4 and IPv6):
 
@@ -74,10 +72,3 @@ allow_ipv4 "192.168.0.0/16" 1234 tcp
 allow_ipv6 "fc00::/7" 1234 tcp
 firewall-cmd --reload
 ```
-
-### Rules
-
-- Always use `--permanent` so rules survive reboots.
-- Always call `firewall-cmd --reload` after adding rules — call it once after all rules for a given operation are added, not once per rule.
-- Never open ports to `0.0.0.0/0` or `::/0` without an explicit security review.
-- Use `open_port_for_private_networks` as the default when a service should be reachable from LAN/VPN; only open to the internet if the service is intentionally public-facing.
