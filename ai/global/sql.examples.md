@@ -8,7 +8,7 @@ Reference examples for [sql.instructions.md](sql.instructions.md). Load when wri
 
 `$HOME/.database` (machine-specific, never committed):
 
-```sh
+```dotenv
 SERVER=localhost
 USER=sa
 PASSWORD=<password>
@@ -16,7 +16,7 @@ PASSWORD=<password>
 
 `<repo>/.database` (committed, repo-specific):
 
-```sh
+```dotenv
 DB=Treasury
 ```
 

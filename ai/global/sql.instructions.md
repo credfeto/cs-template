@@ -15,7 +15,7 @@ Two `.database` files provide the local connection — see [sql.examples.md](sql
 - **`$HOME/.database`** — machine-specific credentials, never committed.
 - **`<repo>/.database`** — committed, repo-specific (database name).
 
-The `<repo>/testdb` script sources both automatically — do NOT pre-source them before calling `./testdb`.
+The `<repo>/testdb` script sources both automatically — do NOT pre-source them before calling `<repo>/testdb`.
 
 ## Performance Optimisation
 
