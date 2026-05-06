@@ -9,14 +9,14 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 -->
 
 ## [Unreleased]
+### Security
 ### Added
 ### Fixed
 ### Changed
+- die() must output to stderr so error messages are not swallowed by stdout pipelines
 ### Deprecated
 ### Removed
-### Security
 ### Deployment Changes
-
 <!--
 Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
 -->
