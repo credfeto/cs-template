@@ -7,7 +7,7 @@ Load this file when about to commit or acting as the Committer agent. See [git.i
 ## Commit Rules
 
 - **Never create an empty commit.** Verify `git diff --cached --name-only` lists at least one file before running `git commit`.
-- One logical change per commit — never amend an existing commit, always create a new one.
+- Never amend an existing commit — always create a new one.
 - Push to `origin` after every commit.
 
 ## Commit Message Format

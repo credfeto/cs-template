@@ -63,6 +63,8 @@ The top-level issue tracks only handler/app-level status (which sub-issues are o
 
 ## Commit, Push, and Issue Update Cadence
 
+- One logical change per commit; do not batch unrelated changes.
+
 Per-file cadence for coverage tasks:
 
 1. Write tests until the file reaches target coverage.
