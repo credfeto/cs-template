@@ -2,56 +2,37 @@
 
 [Back to Global Instructions Index](index.md)
 
-These rules apply to all .NET solutions derived from this template.
-
 ## Build and Test Before Commit (MANDATORY)
 
-Run `dotnet build` and `dotnet test` before every commit. See [git.instructions.md](git.instructions.md#build-and-test-verification-mandatory-before-any-commit-or-push) for the general rule — the same stop/ask-the-user behaviour applies.
+Run `dotnet build` and `dotnet test` before every commit — see [git.instructions.md](git.instructions.md#build-and-test-verification-mandatory-before-any-commit-or-push).
 
 ## Source-Generated Logging
 
 - Prefer `LoggerMessage` source generators over runtime string-based logging — faster, allocation-free, and compile-time structured.
-- Logging methods must be in a dedicated internal static class:
+- Logging methods must be in a dedicated `internal static` class:
   - Placed in a `LoggingExtensions` sub-namespace relative to the class it serves.
-  - Named after the class it serves with a `LoggingExtensions` suffix — e.g. `FooLoggingExtensions` for class `Foo`.
-  - Must be `internal` and `static`.
+  - Named `<ClassName>LoggingExtensions` (e.g. `FooLoggingExtensions` for `Foo`).
 
 ## Asynchronous Code
 
-See [code-quality.instructions.md](code-quality.instructions.md) for the general async rules (prefer async over sync, never block, propagate async through the call stack). .NET-specific additions:
+See [code-quality.instructions.md](code-quality.instructions.md) for general async rules. .NET-specific:
 
-- Prefer `ValueTask` and `ValueTask<T>` over `Task` and `Task<T>` wherever possible — they avoid heap allocations in the common synchronous-completion path.
-- Only use `Task`/`Task<T>` where `ValueTask` is not supported or where the method is known to always complete asynchronously.
+- Prefer `ValueTask`/`ValueTask<T>` over `Task`/`Task<T>` — avoids heap allocations on synchronous-completion paths.
+- Only use `Task`/`Task<T>` where `ValueTask` is unsupported or the method always completes asynchronously.
 
 ## Cancellation
 
-- All async methods must accept and pass down a `CancellationToken` from the caller wherever the API supports it.
-- Never create a new `CancellationToken` internally when one has been provided by the caller, unless there is an explicit and documented reason (e.g. combining the caller's token with a timeout using `CancellationTokenSource.CreateLinkedTokenSource`).
-- Prefer overloads that accept a `CancellationToken` over those that do not.
-- Do not pass `CancellationToken.None` unless there is an explicit and documented reason why cancellation must be suppressed.
+- All async methods must accept and pass down a `CancellationToken`.
+- Never create a new `CancellationToken` when one has been provided, unless combining with a timeout via `CancellationTokenSource.CreateLinkedTokenSource`.
+- Prefer overloads that accept a `CancellationToken`.
+- Do not pass `CancellationToken.None` without explicit documented reason.
 
 ## Project and Solution Structure
 
 - All projects must be added to the solution file (`.slnx` or `.sln`).
-- All projects must pass the latest release of the `FunFair.BuildCheck` dotnet tool before committing.
-
-### Running FunFair.BuildCheck
-
-Run from the solution root:
-
-```bash
-dotnet buildcheck
-```
-
-For available options:
-
-```bash
-dotnet buildcheck --help
-```
+- All projects must pass `FunFair.BuildCheck` before committing: `dotnet buildcheck` (run from solution root; `dotnet buildcheck --help` for options).
 
 ## Test Assembly Naming
-
-Test projects must follow a consistent naming convention relative to the assembly under test:
 
 | Test type | Assembly name pattern |
 | --------- | --------------------- |
@@ -59,100 +40,61 @@ Test projects must follow a consistent naming convention relative to the assembl
 | Integration tests | `<AssemblyName>.Integration.Tests` |
 | Benchmarks | `<AssemblyName>.Benchmark.Tests` |
 
-For example, for an assembly `This.Test.Example`:
-
-- Unit tests → `This.Test.Example.Tests`
-- Integration tests → `This.Test.Example.Integration.Tests`
-- Benchmarks → `This.Test.Example.Benchmark.Tests`
-
 ## Test Dependencies
 
-- All test projects must reference the latest release version of `FunFair.Test.Common`.
-- All test projects must import the latest release version of the `FunFair.Test.Source.Generator` source generator package.
+- All test projects must reference the latest release of `FunFair.Test.Common`.
+- All test projects must import the latest release of `FunFair.Test.Source.Generator`.
 - Test fixture classes must derive from `FunFair.Test.Common.TestBase`.
 
 ## NSubstitute and FunFair.Test.Common Patterns
-
-When writing tests with `FunFair.Test.Common.TestBase`, use the helper methods provided by the base class instead of calling NSubstitute directly:
 
 | Instead of | Use |
 | ---------- | --- |
 | `Substitute.For<IMyInterface>()` | `GetSubstitute<IMyInterface>()` (static — no `this.`) |
 | `Substitute.For<ILogger<MyClass>>()` | `this.GetTypedLogger<MyClass>()` (instance — requires `this.`) |
 
-### Rules
-
-- Never call `Substitute.For<T>()` directly in test classes that derive from `TestBase` or `DependencyInjectionTestsBase`.
-- Use `GetSubstitute<T>()` (no `this.` prefix — it is a static method) for all interface/class mocks.
-- Use `this.GetTypedLogger<T>()` (with `this.` prefix — it is an instance method) for `ILogger<T>` mocks.
-- Remove unused `using NSubstitute;` statements from files where all `Substitute.For<>()` calls have been replaced.
+- Never call `Substitute.For<T>()` in classes deriving from `TestBase` or `DependencyInjectionTestsBase`.
+- Remove unused `using NSubstitute;` after replacing all `Substitute.For<>()` calls.
 
 ## DI Setup Test Patterns
 
-When writing DI setup tests that derive from `DependencyInjectionTestsBase`, use `AddMockedService<T>()` from `FunFair.Test.Common` to register mocks.
+Use `AddMockedService<T>()` in tests deriving from `DependencyInjectionTestsBase` — see [dotnet.examples.md](dotnet.examples.md) for `AddMockedService` and `IOptions` patterns.
 
-### Registering mocked services
-
-Use `.AddMockedService<T>()` instead of creating concrete inner classes or calling `Substitute.For<T>()` manually:
-
-```csharp
-// ✅ Correct
-private static IServiceCollection Configure(IServiceCollection services)
-{
-    return services.AddMyModule()
-                   .AddMockedService<IFoo>()
-                   .AddMockedService<IBar>();
-}
-```
-
-### Registering mocked IOptions\<T\>
-
-Use `.AddMockedService<IOptions<TOptions>>(static o => o.Value.Returns(new TOptions()))` instead of `Options.Create(...)`:
-
-```csharp
-// ✅ Correct
-.AddMockedService<IOptions<MyOptions>>(static o => o.Value.Returns(new MyOptions()))
-
-// ❌ Wrong
-.AddSingleton<IOptions<MyOptions>>(Options.Create(new MyOptions()))
-```
-
-- Never create concrete no-op inner classes to satisfy DI mocking in setup tests.
-- `GetSubstitute<T>()` is safe to call from `static` Configure methods (it is a static method).
+- Never create concrete no-op inner classes to satisfy DI mocking.
+- `GetSubstitute<T>()` is safe in `static` Configure methods.
 
 ## Source File Organisation
 
-- **One type per file**: every C# source file must contain exactly one type (class, record, struct, interface, or enum). Do not define multiple types in a single file.
-- The file name must match the type name exactly (e.g. `FooBar.cs` for `class FooBar`).
+- One type per file — class, record, struct, interface, or enum.
+- File name must match the type name exactly (e.g. `FooBar.cs` for `class FooBar`).
 
 ## Debugger Diagnostics
 
-- All `struct` types must have a `[DebuggerDisplay("...")]` attribute that shows their key fields.
-- All value types (records declared with positional parameters or `record struct`) must have a `[DebuggerDisplay("...")]` attribute.
-- All configuration/options classes (typically bound from `appsettings.json`) must have a `[DebuggerDisplay("...")]` attribute showing their key properties.
-- The `DebuggerDisplay` format string should show the most useful identifying information — typically a name, identifier, or URL.
+- All `struct` types must have `[DebuggerDisplay("...")]` showing key fields.
+- All value types (records with positional parameters or `record struct`) must have `[DebuggerDisplay("...")]`.
+- All configuration/options classes must have `[DebuggerDisplay("...")]` showing key properties.
 
 ## Time Abstraction
 
-- Use `System.TimeProvider` (built into .NET 8+) in production code for all time-related abstractions.
-- **Never use** `Credfeto.Date.ICurrentTimeSource` or `FunFair.Common.Services.IDateTimeSource` — these are obsolete custom abstractions being removed.
-- In tests, use `FakeTimeProvider` from the `Microsoft.Extensions.TimeProvider.Testing` NuGet package — never roll a custom time mock or fake.
-- Whenever work touches code that uses `ICurrentTimeSource` or `IDateTimeSource`, migrate it to `TimeProvider`/`FakeTimeProvider` as part of that work.
+- Use `System.TimeProvider` (.NET 8+) for all time abstractions.
+- Never use `Credfeto.Date.ICurrentTimeSource` or `FunFair.Common.Services.IDateTimeSource` — these are obsolete.
+- In tests, use `FakeTimeProvider` from `Microsoft.Extensions.TimeProvider.Testing` — never roll a custom mock.
+- Migrate any code touching `ICurrentTimeSource` or `IDateTimeSource` to `TimeProvider`/`FakeTimeProvider` as part of that work.
 
 ## Warning Suppression
 
-- **Never use `#pragma warning disable <ID>`** — inline suppression hides problems without explanation and is invisible in code review.
-- If a warning genuinely cannot be fixed and must be suppressed, use `[SuppressMessage("category", "ID", Justification = "reason")]` at the narrowest possible scope (method or property, never assembly-level unless unavoidable).
-- The `Justification` parameter is **mandatory** — suppression without a justification must be treated as a build error.
+- Never use `#pragma warning disable <ID>`.
+- For genuinely unfixable warnings, use `[SuppressMessage("category", "ID", Justification = "reason")]` at the narrowest scope.
+- `Justification` is **mandatory** — suppression without one is a build error.
 
 ## Warnings as Errors
 
-- Every project must build with `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` in its project file or a shared `Directory.Build.props`.
-- `<NoWarn>` and `<WarningsNotAsErrors>` must not be used to silence warnings — fix the code or use `[SuppressMessage]` with a justification instead. See [NuGet Vulnerability Suppression](#nuget-vulnerability-suppression) for the one narrow exception (per-advisory NuGet audit suppressions).
+- Every project must build with `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`.
+- Never use `<NoWarn>` or `<WarningsNotAsErrors>` — fix the code or use `[SuppressMessage]`. Exception: per-advisory NuGet audit suppressions (see below).
 
 ## NuGet Vulnerability Suppression
 
-Suppress accepted advisories **per-project** using the advisory URL — never globally in shared `.props` files. Track each suppression in a GitHub issue for re-evaluation when packages update.
+Suppress per-project using the advisory URL — never globally in shared `.props` files. Track each suppression in a GitHub issue.
 
 ```xml
 <ItemGroup>

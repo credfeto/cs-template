@@ -74,3 +74,41 @@ When env vars cannot be avoided, add this as the **first step** in the action:
             core.info('✅ All required environment variables are set');
           }
 ```
+
+## Step Output Formatting — github-script
+
+```javascript
+core.info(`✅ Branch ${branchName} already exists`);
+core.info(`✅ Updated global.json to version ${version}`);
+core.info(`❌ Branch ${branchName} not found — creating`);
+core.setFailed(`❌ Found ${mergeCommits.length} merge commit(s). Please rebase.`);
+core.warning(`⚠️ No releases found — nothing to do`);
+```
+
+## Step Output Formatting — bash
+
+```bash
+echo "✅ No merge conflict markers found."
+echo "❌ Merge conflict markers found — resolve before merging."
+echo "✅ src/global.json found — detected SDK version: $version"
+echo "⚠️ src/global.json not found — using fallback version: 10.0.*"
+```
+
+## Surfacing Key Values (core.info + core.notice)
+
+```javascript
+// \u001b[38;5;6m = ANSI 256-colour cyan; colours the value in the step log
+// core.notice surfaces it as a job annotation visible in the run summary
+core.info(`Version: \u001b[38;5;6m${version}`);
+core.notice(`Version: ${version}`);
+```
+
+## Unifying Invocations — Caller Pattern
+
+```yaml
+# pull_request trigger — PR is the current event
+pr-number: ${{github.event.pull_request.number}}
+
+# push trigger — PR was just created by a previous step
+pr-number: ${{steps.open-pr.outputs.pr_number}}
+```

@@ -5,7 +5,6 @@
 ## Structured Logging
 
 - All logging must use structured logging — log data as key-value pairs or structured objects, not concatenated strings.
-- This ensures logs are machine-readable and queryable in log aggregation tools.
 
 ## Log Levels
 

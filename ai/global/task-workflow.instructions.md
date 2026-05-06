@@ -4,96 +4,80 @@
 
 ## Issue Assignment
 
-- **When picking up an issue to work on**, assign it to yourself (`gh issue edit <number> --add-assignee @me`) before starting any work.
-- **Do not pick up issues already assigned to someone else.** If an issue is assigned, skip it and move to the next available one.
-- Only work on issues that are unassigned, or already assigned to you.
+- Assign the issue to yourself before starting (`gh issue edit <number> --add-assignee @me`).
+- Only work on unassigned issues or issues already assigned to you.
 
 ## PR Assignment
 
-- **When creating or updating a PR**, always add yourself as an assignee (`gh pr edit <number> --add-assignee @me`).
-- Do this at the time of PR creation, or immediately after if the PR already exists.
+Add yourself as assignee when creating or updating a PR: `gh pr edit <number> --add-assignee @me`.
 
 ## PR and Branch Concurrency
 
 - Only one active branch or open PR per repository at a time.
-- Do not start new work (create a new branch or open a new PR) until the current branch has been merged and the PR closed.
-- If asked to start new work while a PR is still open, stop and inform the user — do not proceed until either the open PR is merged or the user explicitly instructs you to work in parallel.
+- Do not create a new branch or PR until the current one is merged and closed.
 
 ## PR Draft State
 
-- **When additional work needs to be added to an open PR** (e.g. addressing review comments, adding missing coverage, fixing CI failures), convert it to a draft immediately before starting: `gh pr ready <number> --undo`.
-- Keep the PR in draft for the entire duration of that work — do not flip it back early.
-- **Only convert back to ready for review once all work is complete** and Code Tester and Code Reviewer are both satisfied — this is done by PR Submitter at the end of the pipeline, not manually.
+- When adding work to an open PR (review comments, missing coverage, CI fixes), convert to draft first: `gh pr ready <number> --undo`.
+- Keep it in draft for the entire duration — only PR Submitter converts it back once Code Tester and Code Reviewer are both satisfied.
 
 ## Rules Compliance for In-Flight Work
 
-Whenever any instruction file is added or updated — in this repo or in the global cs-template — all currently open branches and PRs must be re-evaluated against the new rules before being merged.
+Whenever an instruction file is added or updated, re-evaluate all open branches and PRs:
 
-- After any rule change, review every open branch (`git diff origin/main...HEAD`) and every open PR to check whether the new or updated rules apply to the code already written.
-- If any code or documentation on an in-flight branch does not comply, fix it on that branch before continuing other work on it.
-- Treat rule compliance the same as a CI failure: work cannot be considered done until the code satisfies all current rules, not the rules that existed when the work started.
+- Check every open branch (`git diff origin/main...HEAD`) and PR against the new rules.
+- Fix any non-compliance on the branch before continuing.
+- Treat rule compliance the same as a CI failure — work is not done until it satisfies all current rules.
 
-This applies to all rule types: coding conventions, test conventions, documentation structure, workflow rules, and AI instruction files themselves.
+Applies to all rule types: coding conventions, test conventions, documentation, workflow rules, and AI instruction files.
 
 ## Instruction File Source Routing
 
-When an instruction file needs to be changed or a new rule needs to be added:
-
-- If the file originates from `funfair/funfair-server-template` and the required change is not already present in that repository, raise an issue on `funfair/funfair-server-template` to get it added there — do not make the change only in the current repository.
-- If the file originates from `credfeto/cs-template` and the required change is not already present in that repository, raise an issue on `credfeto/cs-template` to get it added there — do not make the change only in the current repository.
-- If neither of the above applies, make the change directly in the current repository.
+- If the file originates from `funfair/funfair-server-template`, raise an issue there first.
+- If the file originates from `credfeto/cs-template`, raise an issue there first.
+- Otherwise, make the change directly in the current repository.
 
 ## Large Multi-Handler / Multi-App Tasks
 
-When given a task that spans multiple handlers, apps, or components (e.g. "ensure 100% coverage for all handlers", "migrate all projects to a new package"):
-
-1. **Create a top-level GitHub issue** if none is specified. Assign it to whoever asked. Include the full original prompt as the issue body.
-2. **Comment findings** on the issue before starting any work (e.g. list handlers found, current state of each).
-3. **For each handler/app/component**, create a sub-issue referencing the top-level issue. Use the sub-issue number in the branch name and commit messages.
-4. **Work on one handler/component at a time** — do not start the next until the current one is committed and pushed.
-5. **Push each branch** when the handler's work is complete.
-6. **Close the sub-issue** as soon as the relevant commits have been pushed to the working branch — do not leave sub-issues open after the work is done.
+1. Create a top-level GitHub issue (if none specified); assign it; include the full original prompt as the body.
+2. Comment findings on the issue before starting (e.g. list handlers found, current state).
+3. For each handler/app/component, create a sub-issue referencing the top-level issue; use the sub-issue number in branch names and commit messages.
+4. Work on one handler/component at a time — commit and push before starting the next.
+5. Close the sub-issue as soon as the relevant commits are pushed — do not leave them open after the work is done.
 
 ## Sub-issue File Status Tracking
 
-Each sub-issue (not the top-level issue) should contain the list of files being worked on and their status. Keep this updated as work progresses:
+Each sub-issue must list files being worked on with status — use a table or checklist:
 
-- Use a table or checklist with one row per file.
-- Mark each file as: `❌ Not started`, `🔄 In progress`, or `✅ Done`.
-- Update the sub-issue **immediately after each commit+push** that completes a file.
-- For complex files where multiple rounds of changes are needed, update the sub-issue after each commit+push.
+- `❌ Not started` / `🔄 In progress` / `✅ Done`
+- Update immediately after each commit+push.
 
-The top-level issue should only track handler/app-level status (which sub-issues are open/closed, which branches are merged).
+The top-level issue tracks only handler/app-level status (which sub-issues are open/closed, which branches merged).
 
 ## GitHub Issue Updates
 
-- **Only update issues if the GitHub CLI (`gh`) is installed and properly authenticated.** To check: run `gh auth status`. If it fails or shows unauthenticated, determine current state by reading the code and git log instead — do not attempt issue updates.
-- **Update the sub-issue** after each significant piece of work (each commit+push to the branch).
-- **Update the top-level issue** when the overall status changes (e.g. a sub-issue is closed, a PR is raised).
-- When resuming work, update the issue with current state before continuing.
+- Only update issues if `gh` is installed and authenticated (`gh auth status`); otherwise read code and git log for state.
+- Update the sub-issue after each significant commit+push.
+- Update the top-level issue when overall status changes (sub-issue closed, PR raised).
+- When resuming, update the issue with current state before continuing.
 
 ## Commit, Push, and Issue Update Cadence
 
-For coverage tasks, the cadence per file is:
+Per-file cadence for coverage tasks:
 
 1. Write tests until the file reaches target coverage.
-2. `git commit` the test file (one file per commit).
-3. `git push` the branch immediately — do not batch pushes.
-4. Update the sub-issue to mark that file as done.
+2. `git commit` the test file.
+3. `git push` immediately — do not batch.
+4. Update the sub-issue to mark the file done.
 5. Move to the next file.
 
-For complex files where it takes multiple rounds of changes:
+For complex files, commit+push+update after each round — do not wait until fully complete.
 
-1. After each round: commit, push, update the sub-issue.
-2. Do not wait until the file is fully complete before the first push.
-
-> **Note:** Commits may take longer than expected due to pre-commit hooks running linters. Do not assume failure if the commit is slow — wait for the hooks to complete before retrying.
+> Pre-commit hooks may make commits slow — wait for them to complete before assuming failure.
 
 ## Multi-Agent Implementation and Review Pattern
 
 ### Model Selection
-
-Agents that perform mechanical, well-defined tasks (running builds, committing, submitting PRs, monitoring CI, rebasing) must use a smaller/cheaper model. Agents that require judgement, creativity, or diagnosis use the full model.
 
 | Use full model | Use lesser model |
 | --- | --- |
@@ -101,13 +85,11 @@ Agents that perform mechanical, well-defined tasks (running builds, committing, 
 
 ### Failure Handling — No Self-Repair
 
-Mechanical agents must not attempt to interpret or fix failures themselves. When a hardcoded check fails, the agent must:
+Mechanical agents must not interpret or fix failures. When a check fails:
 
-1. Capture the full output of the failing step.
-2. Stop immediately — do not proceed with subsequent steps.
-3. Return the failure details verbatim to the calling agent so it can decide how to respond.
-
-The calling agent is responsible for diagnosis and repair.
+1. Capture the full output.
+2. Stop immediately.
+3. Return failure details verbatim to the calling agent.
 
 ### Routing Rules
 
@@ -125,11 +107,7 @@ For detailed agent role definitions, see [agent-roles.instructions.md](agent-rol
 
 ## Resuming Interrupted Work
 
-When asked to resume a large task:
-
-- Check the status of existing issues and branches (open, closed, merged).
-- If a branch has been merged into main, skip that — the work is done.
-- If a branch exists but is unmerged, decide whether to continue it or delete and recreate based on its state.
-- Determine current position from issue/branch status and continue from there.
-- Update the top-level issue with the current status and next steps before resuming work.
-- Update the sub-issue as work progresses.
+- Check the status of existing issues and branches.
+- Skip merged branches — the work is done.
+- For unmerged branches, decide whether to continue or delete and recreate.
+- Update the top-level issue with current status and next steps before resuming.

@@ -4,7 +4,7 @@
 
 ## Secrets and Credentials
 
-- Secrets, credentials, API keys, tokens, and passwords must never be committed to source control under any circumstances.
+- Never commit secrets, credentials, API keys, tokens, or passwords.
 - If a secret is accidentally committed, treat it as compromised immediately — rotate it and purge it from history.
 - Use environment variables, secrets managers, or platform-provided vaults for all runtime secrets.
 - Refer to local AI instructions for the specific secrets management approach used in the project.
@@ -22,9 +22,7 @@
 
 ## Threat Modelling
 
-- When designing any new feature that handles data, exposes an endpoint, or introduces a new trust boundary, consider potential threats before writing code.
-- Ask: who can call this, what can they send, what can go wrong, and what is the worst case if it does?
-- Document any significant threats identified and the mitigations applied.
+- For any new feature handling data, exposing an endpoint, or introducing a trust boundary — model threats before writing code: who can call it, what can they send, what can go wrong, what is the worst case. Document significant threats and mitigations.
 
 ## Dependency Vulnerability Scanning
 

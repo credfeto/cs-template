@@ -2,12 +2,12 @@
 
 [Back to Global Instructions Index](index.md)
 
-Load this file when you are adding or updating changelog entries, or when acting as the Changelog agent.
+Load this file when adding changelog entries or acting as the Changelog agent.
 
 ## Format and Tooling
 
 - Maintain `CHANGELOG.md` in [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
-- The `Credfeto.Changelog.Cmd` dotnet tool is the **only** permitted way to modify `CHANGELOG.md`, regardless of the project's primary language — never edit the file manually.
+- The `Credfeto.Changelog.Cmd` dotnet tool is the **only** permitted way to modify `CHANGELOG.md` — never edit manually.
 - `CHANGELOG.md` must be excluded from markdownlint by ensuring it is listed in `.markdownlintignore` at the repo root. If `.markdownlintignore` does not exist, create it and add `CHANGELOG.md` as the first entry.
 - Changelog entries must be understandable by someone who has not read the code — describe what changed and why it matters, not how it was implemented.
 
@@ -15,7 +15,7 @@ Load this file when you are adding or updating changelog entries, or when acting
 
 Add a changelog entry for every task, **unless**:
 
-- This is the `git@github.com:credfeto/cs-template.git` repository — the `CHANGELOG.md` there is kept blank for new repositories using the template.
+- This is the `credfeto/cs-template` repository — the `CHANGELOG.md` there is kept blank for new repositories using the template.
 - It is purely a documentation change with no effect on production code.
 - It is an AI instructions change.
 
