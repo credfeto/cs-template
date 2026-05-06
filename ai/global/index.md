@@ -52,3 +52,4 @@ These contain code examples only. Load them when actively writing or modifying t
 | [shell-scripts.examples.md](shell-scripts.examples.md) | Writing or modifying shell scripts — provides `die`, `success`, `info`, `is_ai_agent` implementations |
 | [shell.firewall.examples.md](shell.firewall.examples.md) | Writing firewall scripts — provides `allow_ipv4`, `allow_ipv6`, `open_port_for_private_networks` implementations |
 | [github-workflows.examples.md](github-workflows.examples.md) | Creating or scaffolding a local composite action — provides action template, explicit inputs, env-var validation step |
+| [sql.examples.md](sql.examples.md) | Writing SQL or database connection scripts — provides `.database` file format, `sqlcmd` invocation, and `SET STATISTICS` baseline template |
