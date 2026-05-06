@@ -28,6 +28,7 @@ Use `actions/github-script` to replace third-party actions that perform any of t
 When converting, always wrap the `actions/github-script` step in a **local composite action** placed at `.github/actions/<name>/action.yml`. Do not inline the script directly in workflow files — use the local action instead. This keeps the conversion reusable and the workflow files clean.
 
 The local action must:
+
 - Mirror the inputs and outputs of the replaced action so callers need only change the `uses:` line
 - Use `runs.using: composite`
 - Pin `actions/github-script` to a specific version (e.g. `@v9.0.0`)
@@ -35,33 +36,7 @@ The local action must:
 
 ### Minimal local action template
 
-```yaml
-name: "Action Name"
-description: "What it does"
-
-inputs:
-  my-input:
-    description: "..."
-    required: true
-
-outputs:
-  my-output:
-    description: "..."
-    value: ${{steps.the-step.outputs.my-output}}
-
-runs:
-  using: composite
-  steps:
-    - name: "Do Thing"
-      id: the-step
-      uses: actions/github-script@v9.0.0
-      env:
-        MY_INPUT: ${{inputs.my-input}}
-      with:
-        script: |
-          // use process.env.MY_INPUT, not ${{inputs.my-input}}, in the script body
-          core.setOutput('my-output', result);
-```
+See [github-workflows.examples.md](github-workflows.examples.md) for the full composite action scaffold, explicit inputs declaration, and env-var validation step template.
 
 ## Simple Bash Replacements
 
@@ -118,6 +93,7 @@ Use `actions/github-script` for:
 - Any step that reads structured data (JSON, YAML) — use `JSON.parse` rather than `jq` pipelines
 
 Bash is acceptable only for steps that meet **all** of the following:
+
 - Single command or a small sequence with no branching logic
 - No GitHub API calls
 - No structured data parsing
@@ -174,7 +150,7 @@ All steps must use a consistent field order. `name:` is always first; optional f
 Make step output easy to scan at a glance. Use tick and cross characters to signal pass/fail state, and prefix status lines consistently:
 
 | State | Character | Usage |
-|-------|-----------|-------|
+| --- | --- | --- |
 | Pass / found / enabled | `✅` | Something is present, correct, or succeeded |
 | Fail / missing / disabled | `❌` | Something is absent, wrong, or failed |
 | Warning / skipped | `⚠️` | Something was skipped or needs attention |
@@ -262,11 +238,13 @@ Jobs that check static file content, scan for markers, or invoke build/lint tool
 Before extracting a group of steps into a composite action, consider whether the group can be collapsed into a **single `actions/github-script` step** with a few inline `if` statements. If the combined logic fits in 20–30 lines and has no reuse value elsewhere, collapsing is preferable to creating a new composite action file.
 
 A group is a good candidate for collapsing when:
+
 - Each step is a conditional variant of the same operation (e.g. "do X if flag is set, else do Y")
 - The steps share no external tool requirements — only API calls or env-var writes
 - The resulting script body would be straightforward to read without comments
 
 A group should become a composite action instead when:
+
 - The same sequence appears in two or more workflows or actions
 - The group involves non-trivial inputs/outputs that callers need to vary
 - The steps mix `actions/github-script` with other `uses:` steps that cannot be inlined
@@ -308,44 +286,11 @@ Composite actions must never silently depend on environment variables set by the
 
 ### Prefer explicit inputs
 
-Declare every required value as a named input with `required: true`. The caller passes it explicitly via `with:`, making the dependency visible at the call site:
-
-```yaml
-# action.yml
-inputs:
-  github-token:
-    description: "GitHub token with write access"
-    required: true
-  pr-number:
-    description: "Pull request number"
-    required: true
-```
-
-```yaml
-# caller
-uses: ./.github/actions/my-action
-with:
-  github-token: ${{secrets.SOURCE_PUSH_TOKEN}}
-  pr-number: ${{github.event.pull_request.number}}
-```
+Declare every required value as a named input with `required: true`. The caller passes it explicitly via `with:`, making the dependency visible at the call site. See [github-workflows.examples.md](github-workflows.examples.md) for a full action.yml + caller example.
 
 ### When env vars cannot be avoided
 
-Some steps invoke external tools that read env vars by convention (e.g. `DOTNET_VERSION`, `NUGET_FEED`). If the action cannot express these as inputs, add a validation step as the **first step** in the action that checks each required env var and fails immediately with a clear ❌ message naming the missing variable:
-
-```yaml
-    - name: "Validate Environment"
-      uses: actions/github-script@v9.0.0
-      with:
-        script: |
-          const required = ['DOTNET_VERSION', 'NUGET_FEED'];
-          const missing = required.filter(k => !process.env[k]);
-          if (missing.length) {
-            core.setFailed(`❌ Required environment variables are not set: ${missing.join(', ')}`);
-          } else {
-            core.info('✅ All required environment variables are set');
-          }
-```
+Some steps invoke external tools that read env vars by convention (e.g. `DOTNET_VERSION`, `NUGET_FEED`). If the action cannot express these as inputs, add a validation step as the **first step** in the action that checks each required env var and fails immediately with a clear ❌ message naming the missing variable. See [github-workflows.examples.md](github-workflows.examples.md) for the validation step template.
 
 **Rules:**
 
