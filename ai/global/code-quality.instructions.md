@@ -47,3 +47,9 @@ Prefer parameterised tests over duplicated test methods — each behavioural var
 ## Compile-Time Configuration
 
 Cover compile-time configuration (environment constants, build-time feature flags) with unit tests — not runtime assertions, which pollute production code.
+
+## Code Complexity
+
+- Prefer clean code — readable, well-named, single-responsibility.
+- Cyclomatic complexity must stay below 20 per method; refactor if it exceeds this.
+- Keep cognitive complexity low — if a method is hard to read at a glance, simplify it.
