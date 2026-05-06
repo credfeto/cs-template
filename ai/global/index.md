@@ -33,7 +33,7 @@ Load these only when the work involves the relevant technology or context.
 | [dotnet.instructions.md](dotnet.instructions.md) | Any `.csproj`, `.sln`, or `.slnx` file is present | Build/test, solution structure, test patterns, ValueTask, CancellationToken, NuGet audit |
 | [sql.instructions.md](sql.instructions.md) | Any `.sql` file or SQL project is present | SQL linting, local DB connection, performance optimisation |
 | [shell-scripts.instructions.md](shell-scripts.instructions.md) | Any `.sh` file is present or shell script work is needed | Shebang, linting, output helper conventions (`die`/`success`/`info`) |
-| [shell.instructions.md](shell.instructions.md) | Firewall rule management is needed | `firewall-cmd` rules, private network constants |
+| [shell.firewall.instructions.md](shell.firewall.instructions.md) | Firewall rule management is needed | `firewall-cmd` rules, private network constants |
 | [github-workflows.instructions.md](github-workflows.instructions.md) | Any `.github/workflows/*.yml` file is present or being created | Action policy, composite actions, step ordering, permissions, version pinning |
 | [api.instructions.md](api.instructions.md) | An HTTP API is being created or modified | `.http` test file requirements |
 | [performance.instructions.md](performance.instructions.md) | Performance-critical code is being written or optimised | Design principles, benchmarks, optimisation workflow |

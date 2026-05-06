@@ -2,7 +2,7 @@
 
 [Back to Global Instructions Index](index.md)
 
-Reference implementations for the firewall helpers described in [shell.instructions.md](shell.instructions.md). Load this file when actively writing or modifying firewall scripts.
+Reference implementations for the firewall helpers described in [shell.firewall.instructions.md](shell.firewall.instructions.md). Load this file when actively writing or modifying firewall scripts.
 
 ## Private Network Constants
 
