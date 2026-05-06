@@ -143,7 +143,7 @@ Use `.AddMockedService<IOptions<TOptions>>(static o => o.Value.Returns(new TOpti
 
 - **Never use `#pragma warning disable <ID>`** — inline suppression hides problems without explanation and is invisible in code review.
 - If a warning genuinely cannot be fixed and must be suppressed, use `[SuppressMessage("category", "ID", Justification = "reason")]` at the narrowest possible scope (method or property, never assembly-level unless unavoidable).
-- The `Justification` parameter is **mandatory** — a suppression without a justification must be treated as a build error.
+- The `Justification` parameter is **mandatory** — suppression without a justification must be treated as a build error.
 
 ## Warnings as Errors
 
@@ -153,6 +153,8 @@ Use `.AddMockedService<IOptions<TOptions>>(static o => o.Value.Returns(new TOpti
 ## NuGet Vulnerability Suppression
 
 Accepted NuGet security advisories must be suppressed **at the project level** using the specific advisory URL, not suppressed globally in shared props.
+
+Any suppressed vulnerability should be tracked in a github issue with the advisory URL, so it can be reviewed and re-evaluated when packages are updated.
 
 ### Required: project-level suppression
 
