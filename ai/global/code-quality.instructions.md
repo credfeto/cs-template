@@ -14,7 +14,9 @@
 
 ## Dead Code
 
-Remove unreachable code rather than writing tests around it.
+- Remove unreachable code rather than writing tests around it.
+- Dead/unreachable code removal: separate commit from test changes, after running tests on the entire handler or app; one method or function per commit.
+- Shared code removal: only after the entire codebase has 100% coverage; each removal is its own commit.
 
 ## Asynchronous Code
 
