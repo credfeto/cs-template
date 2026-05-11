@@ -15,12 +15,13 @@
 - Only one active branch or open PR per repository at a time; do not create another until the current one is merged and closed.
 - When adding work to an open PR (review comments, missing coverage, CI fixes), convert to draft first: `gh pr ready <number> --undo`. Keep it in draft until Code Tester and Code Reviewer are both satisfied — only PR Submitter converts it back.
 
-## Label Propagation from Issue to PR (MANDATORY)
+## PR Title, Body, and Label Sync (MANDATORY)
 
-When creating or updating a PR linked to one or more issues, copy all issue labels to the PR:
+When creating or updating a PR linked to one or more issues:
 
-1. `gh issue view <n> --json labels --jq '.labels[].name'`
-2. `gh pr edit <n> --add-label "<label>"`
+1. Ensure the **title** accurately reflects all changes in the PR — update it if the scope has changed.
+2. Ensure the **body** summarises all changes and includes `Closes #<n>` for each linked issue.
+3. Copy all issue labels: `gh issue view <n> --json labels --jq '.labels[].name'` → `gh pr edit <n> --add-label "<label>"`
 
 Repeat after every push or PR update.
 
