@@ -8,7 +8,7 @@ Verify all required languages and runtimes are installed. If any are missing, st
 
 ## Environment Health (MANDATORY)
 
-If the working environment is sufficiently broken that you would have to fix infrastructure, tooling, or configuration issues just to perform the requested work, **stop immediately** and demand the environment be fixed before proceeding. Do not patch around broken tooling — surface the problem.
+If the environment is too broken to work in without first fixing infrastructure or tooling, **stop** and demand it be fixed. Do not work around broken tooling.
 
 ## Build and Test Verification (MANDATORY before any commit or push)
 
@@ -74,9 +74,7 @@ After any push, if the remote reports vulnerabilities:
 
 ## Pre-Commit Hook Known Incompatibilities
 
-When configuring pre-commit hooks, use the following known-correct entries:
-
-- **dotenv-linter** — v3.x changed the CLI: filenames must follow a subcommand. Use `entry: dotenv-linter check`, not `entry: dotenv-linter`. Without `check`, v3.x treats the filename as a subcommand and fails.
+- **dotenv-linter**: use `entry: dotenv-linter check` — v3.x requires the `check` subcommand before the filename.
 
 ## Template Rule Escalation (Non-Template Repos Only)
 

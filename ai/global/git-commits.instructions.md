@@ -12,16 +12,14 @@ Load this file when about to commit or acting as the Committer agent. See [git.i
 
 ## Unexpected Reformatting During Commit (MANDATORY)
 
-Before finalising a commit, check whether pre-commit hooks or formatters have modified any files that were **not part of your intended change set** (e.g. CSharpier, end-of-file fixer, trailing-whitespace normaliser).
+If hooks or formatters modify files **not in your intended change set**:
 
-If they have:
-
-1. Do **not** stage or commit the unrequested reformatting.
+1. Do not stage the unrequested changes.
 2. Abort the commit.
-3. Report to the user: list the unexpectedly modified files, which hook/formatter changed them, and that the repository has pre-existing formatting violations.
-4. Wait for explicit instructions before continuing.
+3. Report the affected files and which hook/formatter changed them.
+4. Wait for explicit instructions.
 
-Do not use `--no-verify` to bypass hooks as a workaround.
+Do not use `--no-verify`.
 
 ## Commit Message Format
 

@@ -17,14 +17,12 @@
 
 ## Label Propagation from Issue to PR (MANDATORY)
 
-When creating a PR, or updating a PR you have worked on, check whether it is linked to one or more GitHub issues.
+When creating or updating a PR linked to one or more issues, copy all issue labels to the PR:
 
-If it is:
+1. `gh issue view <n> --json labels --jq '.labels[].name'`
+2. `gh pr edit <n> --add-label "<label>"`
 
-1. Fetch the labels from each linked issue: `gh issue view <n> --json labels --jq '.labels[].name'`
-2. Apply all of those labels to the PR: `gh pr edit <n> --add-label "<label>"`
-
-Do this at PR creation time and again whenever you push new commits or update the PR in response to review. Do not skip this step even when labels appear to match.
+Repeat after every push or PR update.
 
 ## Rules Compliance for In-Flight Work
 
