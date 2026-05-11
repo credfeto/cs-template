@@ -15,6 +15,17 @@
 - Only one active branch or open PR per repository at a time; do not create another until the current one is merged and closed.
 - When adding work to an open PR (review comments, missing coverage, CI fixes), convert to draft first: `gh pr ready <number> --undo`. Keep it in draft until Code Tester and Code Reviewer are both satisfied — only PR Submitter converts it back.
 
+## Label Propagation from Issue to PR (MANDATORY)
+
+When creating a PR, or updating a PR you have worked on, check whether it is linked to one or more GitHub issues.
+
+If it is:
+
+1. Fetch the labels from each linked issue: `gh issue view <n> --json labels --jq '.labels[].name'`
+2. Apply all of those labels to the PR: `gh pr edit <n> --add-label "<label>"`
+
+Do this at PR creation time and again whenever you push new commits or update the PR in response to review. Do not skip this step even when labels appear to match.
+
 ## Rules Compliance for In-Flight Work
 
 Whenever an instruction file is added or updated, re-evaluate all open branches and PRs against the new rules. Fix any non-compliance before continuing — treat it the same as a CI failure.
