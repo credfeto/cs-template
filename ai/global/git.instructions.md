@@ -6,6 +6,10 @@
 
 Verify all required languages and runtimes are installed. If any are missing, stop — do not scaffold code or make partial changes; ask the user to install them first.
 
+## Environment Health (MANDATORY)
+
+If the working environment is sufficiently broken that you would have to fix infrastructure, tooling, or configuration issues just to perform the requested work, **stop immediately** and demand the environment be fixed before proceeding. Do not patch around broken tooling — surface the problem.
+
 ## Build and Test Verification (MANDATORY before any commit or push)
 
 Build must pass and all tests must pass before committing or pushing. If they fail and cannot be resolved, stop and ask.
