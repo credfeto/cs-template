@@ -72,6 +72,12 @@ After any push, if the remote reports vulnerabilities:
 - Check for open Dependabot PRs covering them (`gh pr list --label dependencies`).
 - If none exist, visit the repo's Dependabot page and for any manually fixable advisory create a GitHub issue labelled `Security` and `AI-Work`, naming the package, severity, and fix steps.
 
+## Pre-Commit Hook Known Incompatibilities
+
+When configuring pre-commit hooks, use the following known-correct entries:
+
+- **dotenv-linter** — v3.x changed the CLI: filenames must follow a subcommand. Use `entry: dotenv-linter check`, not `entry: dotenv-linter`. Without `check`, v3.x treats the filename as a subcommand and fails.
+
 ## Template Rule Escalation (Non-Template Repos Only)
 
 When working outside `credfeto/cs-template` and a gap in the global template rules is found:
