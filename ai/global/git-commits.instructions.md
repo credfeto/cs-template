@@ -10,6 +10,19 @@ Load this file when about to commit or acting as the Committer agent. See [git.i
 - Never amend an existing commit — always create a new one.
 - Push to `origin` after every commit.
 
+## Unexpected Reformatting During Commit (MANDATORY)
+
+Before finalising a commit, check whether pre-commit hooks or formatters have modified any files that were **not part of your intended change set** (e.g. CSharpier, end-of-file fixer, trailing-whitespace normaliser).
+
+If they have:
+
+1. Do **not** stage or commit the unrequested reformatting.
+2. Abort the commit.
+3. Report to the user: list the unexpectedly modified files, which hook/formatter changed them, and that the repository has pre-existing formatting violations.
+4. Wait for explicit instructions before continuing.
+
+Do not use `--no-verify` to bypass hooks as a workaround.
+
 ## Commit Message Format
 
 - Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format.
