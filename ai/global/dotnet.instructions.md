@@ -48,11 +48,9 @@ See [code-quality.instructions.md](code-quality.instructions.md) for general asy
 - All test projects must import the latest release of `FunFair.Test.Source.Generator`.
 - Test fixture classes must derive from `FunFair.Test.Common.TestBase`.
 
-## Benchmark Test Pattern
+## Benchmark Guidance
 
-- .NET benchmarks must be written as executable xUnit tests in the `<AssemblyName>.Benchmark.Tests` project rather than as standalone benchmark apps.
-- Benchmark tests must use `FunFair.Test.Common` and invoke the BenchmarkDotNet entry points they cover.
-- Benchmark tests must assert memory/allocation limits and any other benchmark thresholds using the standard `FunFair.Test.Common` helpers.
+- For .NET benchmark implementation and threshold assertions, follow [performance.instructions.md](performance.instructions.md#benchmarks-and-optimisation).
 
 ## NSubstitute and FunFair.Test.Common Patterns
 
