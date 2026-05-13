@@ -22,9 +22,10 @@ Some CI systems (e.g. funfair-tech repos) automatically create PRs from pushed b
 **Before starting any work in a repository:**
 
 1. Run `gh pr list --state open --repo <owner/repo> --json number,title,author,headRefName,url` — no `--author @me` filter.
-2. For any PR authored by `app/github-actions`, check if the commits are from your account: `gh pr view <n> --repo <owner/repo> --json commits --jq '.commits[].authors[].login'`.
-3. If commits are yours, **take ownership**: update the PR title and body to match the proper format (summary, `Closes #<n>`, test plan), add yourself as assignee, and treat it as your active PR for that repo.
-4. Do **not** create a new branch or PR for the same issue — that would be duplicate work.
+2. For any PR authored by `app/github-actions`, check the commit authors: `gh pr view <n> --repo <owner/repo> --json commits --jq '.commits[].authors[].login'`.
+3. If **all commits** are from your account (you are the sole committer), **take ownership**: update the PR title and body to match the proper format (summary, `Closes #<n>`, test plan), add yourself as assignee, and treat it as your active PR for that repo.
+4. If commits are from multiple authors (e.g. you plus a human or Copilot), do **not** take over — leave the PR as-is and do not claim it as yours.
+5. Do **not** create a new branch or PR for the same issue — that would be duplicate work.
 
 **When you find a duplicate pair** (a bot-created PR and one you authored yourself, for the same issue or branch):
 
