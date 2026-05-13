@@ -17,7 +17,7 @@
 
 ## Bot-Created PRs (MANDATORY — treat as your own)
 
-Some CI systems (e.g. funfair-tech repos) automatically create PRs from pushed branches. These PRs appear authored by `app/github-actions` but the commits are authored by you. **They are your work — treat them identically to PRs you created yourself.**
+github is configured to automatically create PRs from pushed branches. These PRs appear authored by `app/github-actions` but the commits are authored by you. **They are your work — treat them identically to PRs you created yourself.**
 
 **Before starting any work in a repository:**
 
