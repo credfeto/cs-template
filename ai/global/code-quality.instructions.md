@@ -48,6 +48,20 @@ Prefer parameterised tests over duplicated test methods — each behavioural var
 
 Cover compile-time configuration (environment constants, build-time feature flags) with unit tests — not runtime assertions, which pollute production code.
 
+## Deprecation Warnings During Tests
+
+When deprecation warnings appear in test output (e.g. framework or runtime warnings about deprecated APIs):
+
+- **If the warning is new and caused by your change** — fix the deprecation before committing; do not leave it for later.
+- **If the warning is pre-existing and not caused by your change** — raise a GitHub issue in the current repository with:
+  - A clear title describing the deprecated API.
+  - The full warning text.
+  - The component or dependency responsible.
+  - What needs to be done to resolve it.
+  - Label the issue `AI-Work`.
+
+Do not suppress or ignore deprecation warnings.
+
 ## Code Complexity
 
 - Prefer clean code — readable, well-named, single-responsibility.
