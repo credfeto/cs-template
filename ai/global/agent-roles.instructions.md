@@ -12,14 +12,15 @@ Load when acting as a named agent. Routing table and model selection: [task-work
 
 ## Coding Researcher
 
-Invoked by: Orchestrator, Code Writer, Code Fixer.
+Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 
-- Research how to best implement a specific task when the calling role lacks sufficient knowledge — e.g. unfamiliar APIs, library behaviour, patterns found in public repositories, or framework-specific idioms.
+- Research how to best implement or fix a specific task when the calling role lacks sufficient knowledge — e.g. unfamiliar APIs, library behaviour, patterns found in public repositories, or framework-specific idioms.
 - Use available tools (web search, API docs, public repos) to find authoritative, up-to-date guidance.
 - Treat the repo's instruction files and its pinned/locked dependency versions as authoritative. When web guidance targets a newer library version than the repo pins, research against the pinned version and call out any version-specific discrepancy in the report.
 - Return one of two outcomes to the caller:
   - **Actionable guidance**: concrete steps, code patterns, relevant API signatures, and any important caveats the caller must know before implementing.
   - **Not possible**: a clear statement that the task cannot be achieved as requested, with a brief explanation of why and (if applicable) the closest viable alternative.
+- Persist the result: post the question researched and the outcome as a comment on the work item's issue/PR under a `### Coding Researcher` heading, so the same question is not researched again. The calling role provides the issue/PR reference when invoking; if `gh` is unavailable, return findings to the caller only.
 - Do not write production code or tests — research and report only.
 - Do not call other agents; return findings directly to the calling role.
 
@@ -43,6 +44,7 @@ Invoked by: Orchestrator, Code Writer, Code Fixer.
 - Launch all the sub-agents **in parallel**: Reuse, Quality, Efficiency, Correctness, Security, Compliance.
 - Each sub-agent reports `{"clean": true}` or `{"clean": false, "findings": [{"file": "...", "line": ..., "issue": "...", "suggestion": "..."}]}`.
 - Fix each real finding in its own commit; skip false positives. Re-run Code Tester after fixes.
+- If fixing a finding requires knowledge outside the instruction files, invoke Coding Researcher first — do not guess or fabricate. If Coding Researcher returns **Not possible**, leave the finding unresolved and escalate to Orchestrator with the explanation.
 - Report `{"clean": true}` or `{"clean": false, "fixes": [...]}`. Cap at 5 iterations.
 - After 5 iterations, report any unresolved findings to the Orchestrator; Orchestrator adds each as a PR comment for human consideration.
 
@@ -186,6 +188,7 @@ Invoked by: Orchestrator, Code Writer, Code Fixer.
 
 - Read full logs (`gh run view --log-failed`), identify root cause.
 - Fix if code-related; escalate to Orchestrator with a clear description if environmental or infrastructure.
+- If a code-related fix requires knowledge outside the instruction files, invoke Coding Researcher first — do not guess or fabricate. If Coding Researcher returns **Not possible**, escalate to Orchestrator with the explanation.
 
 ## Changelog
 
