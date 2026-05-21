@@ -100,7 +100,7 @@ Mechanical agents must not interpret or fix failures. When a check fails: captur
 
 ### Routing Rules
 
-Standard loop pattern: Code Writer/Fixer loops ≤5 with Code Tester; Code Reviewer loops ≤5 re-running both each round. Orchestrator, Code Writer, and Code Fixer may invoke Coding Researcher on demand at any point when implementation knowledge is lacking — this does not count toward loop limits.
+Standard loop pattern: Code Writer/Fixer loops ≤5 with Code Tester; Code Reviewer loops ≤5 re-running both each round. Orchestrator, Code Writer, and Code Fixer may invoke Coding Researcher on demand at any point when implementation knowledge is lacking — this does not count toward loop limits. If Coding Researcher returns **Not possible**, the calling role stops and escalates to Orchestrator rather than continuing the loop or guessing.
 
 | Work type | Agent sequence |
 | --- | --- |

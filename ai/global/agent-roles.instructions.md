@@ -8,6 +8,7 @@ Load when acting as a named agent. Routing table and model selection: [task-work
 
 - Prioritise `CHANGES_REQUESTED` PRs over new issues.
 - Determine work type and route via the routing table. Never implement directly.
+- If a delegated role escalates a task as infeasible (Coding Researcher **Not possible** result), do not re-route it unchanged. Record the finding on the issue/PR and surface it to the user for a decision — re-scope, accept the suggested alternative, or drop.
 
 ## Coding Researcher
 
@@ -15,6 +16,7 @@ Invoked by: Orchestrator, Code Writer, Code Fixer.
 
 - Research how to best implement a specific task when the calling role lacks sufficient knowledge — e.g. unfamiliar APIs, library behaviour, patterns found in public repositories, or framework-specific idioms.
 - Use available tools (web search, API docs, public repos) to find authoritative, up-to-date guidance.
+- Treat the repo's instruction files and its pinned/locked dependency versions as authoritative. When web guidance targets a newer library version than the repo pins, research against the pinned version and call out any version-specific discrepancy in the report.
 - Return one of two outcomes to the caller:
   - **Actionable guidance**: concrete steps, code patterns, relevant API signatures, and any important caveats the caller must know before implementing.
   - **Not possible**: a clear statement that the task cannot be achieved as requested, with a brief explanation of why and (if applicable) the closest viable alternative.
@@ -24,7 +26,7 @@ Invoked by: Orchestrator, Code Writer, Code Fixer.
 ## Code Writer
 
 - Implement the GitHub issue: read all relevant instruction files, write production code and tests.
-- If implementation requires knowledge outside the instruction files (unfamiliar API, complex library usage, etc.), invoke Coding Researcher first — do not guess or fabricate.
+- If implementation requires knowledge outside the instruction files (unfamiliar API, complex library usage, etc.), invoke Coding Researcher first — do not guess or fabricate. If Coding Researcher returns **Not possible**, stop — do not partially implement — and escalate to Orchestrator with the explanation and any suggested alternative.
 - Do not commit, push, or update the changelog — hand off to Code Tester when done.
 
 ## Code Tester
@@ -166,7 +168,7 @@ Invoked by: Orchestrator, Code Writer, Code Fixer.
 ## Code Fixer
 
 - Address requested changes on an existing PR — this includes both GitHub `CHANGES_REQUESTED` review status and verbal/chat requests for changes on an open PR.
-- If a fix requires knowledge outside the instruction files, invoke Coding Researcher first — do not guess or fabricate.
+- If a fix requires knowledge outside the instruction files, invoke Coding Researcher first — do not guess or fabricate. If Coding Researcher returns **Not possible**, stop and escalate to Orchestrator with the explanation; do not partially apply the fix.
 - Convert to draft before starting (`gh pr ready <number> --undo`).
 - One commit per review comment. Hand off to Code Tester after each fix.
 - Respond to **every** review comment without exception:
