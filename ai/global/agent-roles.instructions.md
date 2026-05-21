@@ -20,7 +20,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - Return one of two outcomes to the caller:
   - **Actionable guidance**: concrete steps, code patterns, relevant API signatures, and any important caveats the caller must know before implementing.
   - **Not possible**: a clear statement that the task cannot be achieved as requested, with a brief explanation of why and (if applicable) the closest viable alternative.
-- Persist the result: post the question researched and the outcome as a comment on the work item's issue/PR under a `### Coding Researcher` heading, so the same question is not researched again. The calling role provides the issue/PR reference when invoking; if `gh` is unavailable, return findings to the caller only.
+- Report findings in a self-contained, persistable form (the question researched plus the outcome) so the calling role can record them on the work item's issue/PR. You have no repo or issue/PR access — do not attempt to post comments or persist findings yourself.
 - Do not write production code or tests — research and report only.
 - Do not call other agents; return findings directly to the calling role.
 
