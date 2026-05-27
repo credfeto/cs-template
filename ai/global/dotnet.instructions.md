@@ -55,6 +55,32 @@ Critical rules:
 
 Do not install `coverlet.collector`, `coverlet.msbuild`, or any VSTest data collector — they do not work with Microsoft.Testing.Platform. Do not switch to `dotnet-coverage` or any wrapper tool. If coverage is still not collected, verify that `UnitTests.props` is imported by the test project and that `Microsoft.Testing.Extensions.CodeCoverage` is present.
 
+## Coverage Reporting with reportgenerator
+
+After collecting `.cobertura.xml` files, generate reports using `dotnet reportgenerator`.
+
+**Always generate one report per assembly** — pass only that assembly's `.cobertura.xml` as input:
+
+```bash
+dotnet reportgenerator \
+  -reports:{repo-root}/coverage/{AssemblyName}.coverage.cobertura.xml \
+  -targetdir:{repo-root}/coverage/{AssemblyName} \
+  -reporttypes:Html
+```
+
+**Do not pass multiple assemblies' `.cobertura.xml` files into a single `reportgenerator` run.** If assembly A references types from assembly B, running them together causes B's components to appear in A's coverage report, which falsely lowers A's measured coverage.
+
+When a combined view is needed (e.g. for a summary dashboard), run each assembly individually first, then produce one additional combined report as a separate step:
+
+```bash
+dotnet reportgenerator \
+  -reports:"{repo-root}/coverage/*.coverage.cobertura.xml" \
+  -targetdir:{repo-root}/coverage/combined \
+  -reporttypes:Html
+```
+
+The per-assembly reports remain the authoritative measure of test quality for each project.
+
 ## Source-Generated Logging
 
 - Prefer `LoggerMessage` source generators over runtime string-based logging — faster, allocation-free, and compile-time structured.
