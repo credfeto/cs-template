@@ -34,17 +34,6 @@ dotnet test {AssemblyName}.Tests/{AssemblyName}.Tests.csproj \
      --coverage-output {repo-root}/coverage/{AssemblyName}.coverage.cobertura.xml
 ```
 
-Solution form — use the solution file with a filter:
-
-```bash
-cd {solution-src-dir}
-dotnet test {Solution}.slnx \
-  -c Release \
-  --filter "FullyQualifiedName~{AssemblyName}" \
-  -- --coverage --coverage-output-format cobertura \
-     --coverage-output {repo-root}/coverage/{AssemblyName}.coverage.cobertura.xml
-```
-
 Critical rules:
 
 - **`cd` to the solution `src/` directory first** and use a **relative** project path — absolute paths trigger the legacy VSTest bridge, which MTP 2.0+ rejects on .NET 10 SDK.
