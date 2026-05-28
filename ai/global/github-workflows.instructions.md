@@ -85,10 +85,10 @@ Take the following steps:
 
 1. **Identify the action** named in the warning (e.g. `azure/sql-action@v2.3`).
 2. **Locate the workflow file** that references it — it could live in the current repo, `credfeto/cs-template`, or `credfeto/funfair-server-template`. Search `.github/workflows/` in each.
-3. **Find the minimum compliant version**: run `gh api repos/<owner>/<action>/releases --jq '[.[] | select(.tag_name)] | .[0].tag_name'` (or browse the action's releases) and identify the earliest release that ships a Node.js 24 runtime. Use the release notes / changelog to confirm.
+3. **Find the minimum compliant version**: enumerate candidate releases with `gh api --paginate repos/<owner>/<action>/releases --jq '.[].tag_name'` (or browse the action's releases), then inspect tagged `action.yml`/`action.yaml` `runs.using` values to confirm the earliest release that ships a Node.js 24 runtime.
 4. **Raise an issue in the repo that owns the workflow file**, with:
    - **Title**: `chore: update <action> to a Node.js 24 compatible version`
-   - **Labels**: `Ai-Work`, `Dependencies`, `github-actions`, `High`
+   - **Labels**: `AI-Work`, `dependencies`, `github-actions`, `High`
    - **Body**: include the current version, the minimum compliant version (if one exists), a link to the upstream release, and the deprecation deadline.
 5. Do **not** silently ignore the warning or defer it — raise the issue even if no compliant version is available yet (note that in the issue body).
 
