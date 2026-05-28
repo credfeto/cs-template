@@ -84,7 +84,7 @@ When reviewing a PR run and you see a message similar to:
 Take the following steps:
 
 1. **Identify the action** named in the warning (e.g. `azure/sql-action@v2.3`).
-2. **Locate the workflow file** that references it — it could live in the current repo, `credfeto/cs-template`, or `credfeto/funfair-server-template`. Search `.github/workflows/` in each.
+2. **Locate the workflow file** that references it — it could live in `funfair-tech/funfair-server-template`, `credfeto/cs-template`, or the current repo. Search `.github/workflows/` in each.
 3. **Find the minimum compliant version**: enumerate candidate releases with `gh api --paginate repos/<owner>/<action>/releases --jq '.[].tag_name'` (or browse the action's releases), then inspect tagged `action.yml`/`action.yaml` `runs.using` values to confirm the earliest release that ships a Node.js 24 runtime.
 4. **Raise an issue in the repo that owns the workflow file**, with:
    - **Title**: `chore: update <action> to a Node.js 24 compatible version`
