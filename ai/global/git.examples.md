@@ -13,7 +13,7 @@ Run before any commit to verify identity and GPG signing:
 # shell-scripts.examples.md — keep them in sync if either changes.
 
 die() {
-    printf '\n\033[31m✗\033[0m %s\n' "$*"
+    printf '\n\033[31m✗\033[0m %s\n' "$*" >&2
     exit 1
 }
 
