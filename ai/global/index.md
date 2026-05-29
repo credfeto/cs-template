@@ -4,7 +4,7 @@ This is an index of global instructions that apply to all projects.
 
 - Ensure consistency across all projects.
 - This folder should be maintained ONLY in the `git@github.com:credfeto/cs-template.git` repository.
-- Updates to this folder will be distributed using an external mechanism. A secondary authoritative template (`credfeto/funfair-server-template`) also distributes from this folder — raise instruction changes in either template repo as appropriate.
+- Updates to this folder will be distributed using an external mechanism. A secondary authoritative template (`funfair-tech/funfair-server-template`) also distributes from this folder — raise instruction changes in either template repo as appropriate.
 - Rule files are named `<category>.instructions.md`; code reference files are named `<category>.examples.md`.
 - All files must maintain a backlink to this index.
 - When adding a rule, check all other files for conflicts or duplication.

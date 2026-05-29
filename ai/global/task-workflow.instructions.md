@@ -52,7 +52,7 @@ Whenever an instruction file is added or updated, re-evaluate all open branches 
 
 ## Instruction File Source Routing
 
-- If the file originates from `credfeto/funfair-server-template` or `credfeto/cs-template`, raise an issue there first. Both are authoritative template repositories — `credfeto/cs-template` for C# projects, `credfeto/funfair-server-template` for FunFair server projects.
+- If the file originates from `funfair-tech/funfair-server-template` or `credfeto/cs-template`, raise an issue there first. Both are authoritative template repositories — `credfeto/cs-template` for C# projects, `credfeto/funfair-server-template` for FunFair server projects.
 - Otherwise, make the change directly in the current repository.
 
 ## Large Multi-Handler / Multi-App Tasks
