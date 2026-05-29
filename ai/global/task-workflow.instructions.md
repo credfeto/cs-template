@@ -46,6 +46,14 @@ When creating or updating a PR linked to one or more issues:
 
 Repeat after every push or PR update.
 
+## Missing CLI Tools (MANDATORY)
+
+If a required CLI tool is not found, **stop immediately and ask the user to install it**. Never:
+
+- Search for the binary in alternative locations
+- Manipulate PATH to try to find it
+- Attempt to install it without being asked
+
 ## Rules Compliance for In-Flight Work
 
 Whenever an instruction file is added or updated, re-evaluate all open branches and PRs against the new rules. Fix any non-compliance before continuing — treat it the same as a CI failure.
