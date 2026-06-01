@@ -10,6 +10,23 @@ Load when acting as a named agent. Routing table and model selection: [task-work
 - Determine work type and route via the routing table. Never implement directly.
 - If a delegated role escalates a task as infeasible (Coding Researcher **Not possible** result), do not re-route it unchanged. Record the finding on the issue/PR and surface it to the user for a decision — re-scope, accept the suggested alternative, or drop.
 
+### Blocked Label
+
+When asking a question in a PR or issue comment and waiting for an answer before continuing:
+
+1. Add the `Blocked` label to the PR or issue immediately after posting the question:
+   - Issue: `gh issue edit <number> --repo <owner/repo> --add-label "Blocked"`
+   - PR: `gh pr edit <number> --repo <owner/repo> --add-label "Blocked"`
+2. Do **not** continue working on the item until the label is removed.
+
+### Comment Replies (MANDATORY)
+
+Reply to every PR or issue comment that prompted an action:
+
+- Code change made: reply with `Fixed in <commit-sha> — <one sentence describing what changed and why>`.
+- Question answered inline (no code change): reply with the full answer.
+- No reply means no acknowledgement — always close the loop.
+
 ## Coding Researcher
 
 Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
