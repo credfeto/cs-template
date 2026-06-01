@@ -192,7 +192,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - Convert to draft before starting (`gh pr ready <number> --undo`).
 - One commit per review comment. Hand off to Code Tester after each fix.
 - Respond to **every** review comment without exception:
-  - If the comment required a code change: reply with `Fixed in <commit-sha>`.
+  - If the comment required a code change: reply with `Fixed in <commit-sha> — <one sentence describing what changed and why>`.
   - If the comment is a question or discussion point (no code change needed): reply with a full answer inline on the PR.
 
 ## Rebase Agent
