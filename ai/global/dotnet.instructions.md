@@ -31,8 +31,8 @@ A project is a test project **only** if its assembly name ends with one of these
 
 - **Never** use "contains 'Test'" in a project name as a heuristic — a project named `*.TestHarness`, `*.Tests.Mocks`, or `*.Tests.Common` is NOT a test project.
 - **Never** target a project with `dotnet test` if its csproj contains `<IsTestProject>false</IsTestProject>`.
-- **Never** run `dotnet test` against an application (`OutputType=Exe`) or a web project (`Microsoft.NET.Sdk.Web`) — these are runnable processes that will hang, not test suites.
-- **Always** verify by reading the csproj before deciding whether a project is a test project — do not rely solely on the project name.
+- **Do not** rely on `OutputType` or the project SDK as a discriminator — with Microsoft.Testing.Platform, legitimate test projects also use `OutputType=Exe`, and some test projects use `Microsoft.NET.Sdk.Web`.
+- **Always** verify by reading the csproj before deciding whether a project is a test project — the naming convention and `IsTestProject` are the only reliable signals.
 
 Test support libraries (e.g. `*.Tests.Mocks`, `*.Tests.Common`) exist to be referenced by test projects. They are **not** test projects themselves and must never be targeted for test runs.
 
