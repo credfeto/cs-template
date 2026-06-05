@@ -46,7 +46,7 @@ Then act immediately — do **not** loop, sleep, or use `--watch`:
 - All required checks passed → proceed with the next step.
 - Any check pending or in_progress → post a brief status comment on the PR and stop. The orchestrator re-invokes the session automatically when the PR state changes (checks complete, review arrives, etc.).
 - Any check failed → investigate, fix, push, post a status comment, and stop. Do not wait for the new run to complete.
-- CI consistently failing and cannot be fixed → mark the PR blocked: `gh pr edit <number> --repo <owner/repo> --add-label Blocked`
+- CI consistently failing and cannot be fixed → mark the PR blocked: `gh pr edit <number> --repo <owner/repo> --add-label "Blocked"`
 
 ## Coding Researcher
 
