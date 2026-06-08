@@ -178,6 +178,19 @@ See [code-quality.instructions.md](code-quality.instructions.md) for general asy
 - Never call `Substitute.For<T>()` in classes deriving from `TestBase` or `DependencyInjectionTestsBase`.
 - Remove unused `using NSubstitute;` after replacing all `Substitute.For<>()` calls.
 
+## xunit Assertion Patterns
+
+- `Assert.Single(collection)` returns the single element — capture it directly instead of asserting then indexing:
+
+  ```csharp
+  // WRONG
+  Assert.Single(collection);
+  var item = collection[0];
+
+  // CORRECT
+  var item = Assert.Single(collection);
+  ```
+
 ## DI Setup Test Patterns
 
 Use `AddMockedService<T>()` in tests deriving from `DependencyInjectionTestsBase` — see [dotnet.examples.md](dotnet.examples.md) for `AddMockedService` and `IOptions` patterns.
