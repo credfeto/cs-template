@@ -225,6 +225,35 @@ Use `AddMockedService<T>()` in tests deriving from `DependencyInjectionTestsBase
 - One type per file — class, record, struct, interface, or enum.
 - File name must match the type name exactly (e.g. `FooBar.cs` for `class FooBar`).
 
+## Data Types: Prefer Records over Classes
+
+Use a positional `record` (or `readonly record struct`) instead of a hand-written data class wherever the type is a pure carrier of data with no behaviour.
+
+```csharp
+// WRONG — hand-written data class
+public sealed class GlobalJsonInfo
+{
+    public GlobalJsonInfo(string? sdkVersion, string? rollForward, bool? allowPrerelease)
+    {
+        this.SdkVersion = sdkVersion;
+        this.RollForward = rollForward;
+        this.AllowPrerelease = allowPrerelease;
+    }
+
+    public string? SdkVersion { get; }
+    public string? RollForward { get; }
+    public bool? AllowPrerelease { get; }
+}
+
+// CORRECT — positional record
+[DebuggerDisplay("SdkVersion={SdkVersion}, RollForward={RollForward}, AllowPrerelease={AllowPrerelease}")]
+public sealed record GlobalJsonInfo(string? SdkVersion, string? RollForward, bool? AllowPrerelease);
+```
+
+- Always add `[DebuggerDisplay("...")]` showing all key properties (see [Debugger Diagnostics](#debugger-diagnostics)).
+- If the type is a pure value (no identity semantics, small, immutable) prefer `readonly record struct` over `record class`.
+- If the target framework does **not** support records (e.g. `netstandard2.0`), continue using a `class` or `struct`, but manually implement everything a record would provide: a constructor that sets all properties, read-only auto-properties, `Equals`, `GetHashCode`, `ToString`, and `IEquatable<T>`.
+
 ## Value Types (struct / record struct)
 
 - Prefer `struct` or `record struct` over `class` for small, short-lived, immutable data — avoids heap allocations.
