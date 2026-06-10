@@ -131,6 +131,15 @@ See [code-quality.instructions.md](code-quality.instructions.md) for general asy
 
 - All projects must be added to the solution file (`.slnx` or `.sln`).
 - All projects must pass `FunFair.BuildCheck` before committing: `dotnet buildcheck` (run from solution root; `dotnet buildcheck --help` for options).
+- Every solution's `src/` directory must contain a `Directory.Build.props` that defines a `$(SolutionDir)` fallback so that projects resolve correctly in solution-less build contexts (e.g. BenchmarkDotNet host processes, `dotnet watch`, direct project builds):
+
+  ```xml
+  <Project>
+      <PropertyGroup>
+          <SolutionDir Condition="'$(SolutionDir)' == ''">$(MSBuildThisFileDirectory)</SolutionDir>
+      </PropertyGroup>
+  </Project>
+  ```
 
 ## Test Assembly Naming
 
