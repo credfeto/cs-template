@@ -131,7 +131,7 @@ See [code-quality.instructions.md](code-quality.instructions.md) for general asy
 
 - All projects must be added to the solution file (`.slnx` or `.sln`).
 - All projects must pass `FunFair.BuildCheck` before committing: `dotnet buildcheck` (run from solution root; `dotnet buildcheck --help` for options).
-- Every solution's `src/` directory must contain a `Directory.Build.props` that defines a `$(SolutionDir)` fallback so that projects resolve correctly in solution-less build contexts (e.g. BenchmarkDotNet host processes, `dotnet watch`, direct project builds):
+- If a build fails because `$(SolutionDir)` is undefined (e.g. imports guarded by `Exists('$(SolutionDir)...')` are silently skipped, leading to errors such as `NU5017`), fix it by ensuring the solution's `src/` directory has a `Directory.Build.props` that sets a fallback:
 
   ```xml
   <Project>
@@ -140,6 +140,8 @@ See [code-quality.instructions.md](code-quality.instructions.md) for general asy
       </PropertyGroup>
   </Project>
   ```
+
+  This makes `$(SolutionDir)` resolve correctly in solution-less build contexts (e.g. BenchmarkDotNet host processes, `dotnet watch`, direct project builds) without changing any project files.
 
 ## Test Assembly Naming
 
