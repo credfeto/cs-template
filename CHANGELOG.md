@@ -12,6 +12,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Security
 ### Added
 ### Fixed
+- on_new_pr.yml: inline composite action logic to fix local action path resolution failure under pull_request_target
 ### Changed
 ### Deprecated
 ### Removed
