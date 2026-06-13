@@ -341,7 +341,7 @@ server-dist/
 .nuget/
 
 # Dotnet tool config
-.config/
+# .config/ is NOT excluded wholesale — .config/dotnet-tools.json must remain trackable
 dotnet-tools.json
 
 # Test output
