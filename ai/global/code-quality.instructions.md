@@ -11,8 +11,6 @@
 
 Some methods open real network connections, file handles, or database sessions, and their success-path (the line that returns a live resource) is only reachable when actual infrastructure is available. In a unit-test environment that path is unreachable.
 
-**Accepted approach (option d):**
-
 - Do **not** add `[ExcludeFromCodeCoverage]`, `[SuppressMessage]`, or any `coverage.settings.xml` `<Functions>` exclusion for these gaps.
 - Accept the coverage gap and note it; do not block work on it.
 - Prefer mocking the success path instead — if the underlying type or interface can be substituted, write a test that exercises it.
