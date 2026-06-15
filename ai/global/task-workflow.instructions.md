@@ -140,6 +140,21 @@ When using the Monitor tool to watch a background Bash task, the poll condition 
 
 4. **Prefer foreground over background for bounded work.** Use `run_in_background: true` only when a command genuinely takes many minutes (e.g. a full integration-test run) and you have independent work to do while waiting. A `dotnet build` or `git commit` should always run in the foreground.
 
+5. **Time-box every poll loop — die after 30 minutes.** Always include a deadline so the session cannot hang forever:
+
+   ```bash
+   deadline=$(( $(date +%s) + 1800 ))
+   until grep -q "Build succeeded." "${output_file}" 2>/dev/null; do
+       sleep 15
+       if [ "$(date +%s)" -ge "${deadline}" ]; then
+           echo "ERROR: timed out after 30 minutes waiting for build" >&2
+           exit 1
+       fi
+   done
+   ```
+
+   If the deadline fires, report the failure — do not silently continue.
+
 ### Reliable poll strings by command
 
 | Command / scenario | String to poll for |
