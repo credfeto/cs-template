@@ -153,7 +153,15 @@ When using the Monitor tool to watch a background Bash task, the poll condition 
    done
    ```
 
-   If the deadline fires, report the failure — do not silently continue.
+   If the deadline fires, mark the work item Blocked and stop:
+
+   ```bash
+   gh issue edit <number> --repo <owner/repo> --add-label "Blocked"
+   gh issue comment <number> --repo <owner/repo> \
+       --body "Blocked: timed out after 30 minutes waiting for <what>. Last output: $(tail -5 "${output_file}" 2>/dev/null)"
+   ```
+
+   Use `gh pr edit` / `gh pr comment` instead if the work item is a PR. Then exit — do not continue work.
 
 ### Reliable poll strings by command
 
