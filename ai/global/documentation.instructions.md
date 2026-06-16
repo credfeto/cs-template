@@ -21,7 +21,7 @@
 9. **Contributing** — link to `CONTRIBUTING.md`.
 10. **Security** — link to `SECURITY.md`.
 11. **Licence** — link to `LICENSE`.
-12. **Contributors** — all-contributors section (keep the auto-generated markers in place).
+12. **Contributors** — all-contributors section; see the [Contributors section](#contributors) below for when to include it.
 
 Omit any section that does not apply (e.g. no Installation section for a library with no NuGet package), but never invent placeholder sections.
 
@@ -72,3 +72,23 @@ Only include badges that are actively maintained and reflect real state. Remove 
 - All non-template repos must have a `docs/` folder; template repos must not.
 - Place all docs and architecture diagrams (except `README.md`/`CHANGELOG.md`) in `docs/`; keep them current.
 - Architecture diagrams: show folder structure only — omit individual files and package versions; prefer SVG over raster formats.
+
+## Contributors
+
+- Include a `## Contributors` section in `README.md` using the [all-contributors](https://allcontributors.org) spec **only when the repository has more than one known human contributor**. Omit the section entirely when there is only one.
+- When the condition is met, preserve the auto-generated comment markers exactly — do not reformat, reorder, or remove them:
+
+```markdown
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+```
+
+- Never manually edit the content between the `START` and `END` markers — the all-contributors bot manages that block.
