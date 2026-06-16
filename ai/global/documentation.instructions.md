@@ -22,6 +22,7 @@
 10. **Security** — link to `SECURITY.md`.
 11. **Licence** — link to `LICENSE`.
 12. **Contributors** — all-contributors section; see the [Contributors section](#contributors) below for when to include it.
+13. **Reference links** — all image and URL references used by badges and links, collected at the very bottom of the file.
 
 Omit any section that does not apply (e.g. no Installation section for a library with no NuGet package), but never invent placeholder sections.
 
@@ -29,40 +30,75 @@ Omit any section that does not apply (e.g. no Installation section for a library
 
 Place all badges near the top of the file, after the title but before the overview prose.
 
+#### Link Format (MANDATORY)
+
+All badges and hyperlinks must use **reference-style** markdown — never inline URLs. Use descriptive named labels; never use bare numbers (`[1]`, `[2]`). Collect all reference definitions at the very bottom of the file.
+
+```markdown
+[![Alt text][image-ref]][link-ref]
+
+<!-- bottom of file -->
+[image-ref]: https://example.com/badge.svg
+[link-ref]: https://example.com/
+```
+
 #### CI / Build Status
 
 Use a table to separate `main`/pre-release from `release` builds:
 
 ```markdown
-| Branch  | Status |
-|---------|--------|
-| main    | [![Build: Pre-Release](https://github.com/OWNER/REPO/actions/workflows/build-and-publish-pre-release.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/build-and-publish-pre-release.yml) |
-| release | [![Build: Release](https://github.com/OWNER/REPO/actions/workflows/build-and-publish-release.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/build-and-publish-release.yml) |
+| Branch  | Status                                            |
+|---------|---------------------------------------------------|
+| main    | [![Build: Pre-Release][pre-release-img]][pre-release] |
+| release | [![Build: Release][release-img]][release]         |
+
+<!-- bottom of file -->
+[pre-release-img]: https://github.com/OWNER/REPO/actions/workflows/build-and-publish-pre-release.yml/badge.svg
+[pre-release]: https://github.com/OWNER/REPO/actions/workflows/build-and-publish-pre-release.yml
+[release-img]: https://github.com/OWNER/REPO/actions/workflows/build-and-publish-release.yml/badge.svg
+[release]: https://github.com/OWNER/REPO/actions/workflows/build-and-publish-release.yml
 ```
 
 #### NuGet (when the project publishes a package)
 
 ```markdown
-[![NuGet](https://img.shields.io/nuget/v/PACKAGE_NAME.svg)](https://www.nuget.org/packages/PACKAGE_NAME)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/PACKAGE_NAME.svg)](https://www.nuget.org/packages/PACKAGE_NAME)
+[![NuGet][nuget-img]][nuget]
+[![NuGet Downloads][nuget-downloads-img]][nuget]
+
+<!-- bottom of file -->
+[nuget-img]: https://img.shields.io/nuget/v/PACKAGE_NAME.svg
+[nuget-downloads-img]: https://img.shields.io/nuget/dt/PACKAGE_NAME.svg
+[nuget]: https://www.nuget.org/packages/PACKAGE_NAME
 ```
 
 #### Code Coverage
 
 ```markdown
-[![codecov](https://codecov.io/gh/OWNER/REPO/branch/main/graph/badge.svg)](https://codecov.io/gh/OWNER/REPO)
+[![codecov][codecov-img]][codecov]
+
+<!-- bottom of file -->
+[codecov-img]: https://codecov.io/gh/OWNER/REPO/branch/main/graph/badge.svg
+[codecov]: https://codecov.io/gh/OWNER/REPO
 ```
 
 #### Licence
 
 ```markdown
-[![Licence](https://img.shields.io/github/license/OWNER/REPO)](LICENSE)
+[![Licence][licence-img]][licence]
+
+<!-- bottom of file -->
+[licence-img]: https://img.shields.io/github/license/OWNER/REPO
+[licence]: LICENSE
 ```
 
 #### Open Issues / Bugs
 
 ```markdown
-[![Bugs](https://img.shields.io/github/issues/OWNER/REPO/bug)](https://github.com/OWNER/REPO/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+[![Bugs][bugs-img]][bugs]
+
+<!-- bottom of file -->
+[bugs-img]: https://img.shields.io/github/issues/OWNER/REPO/bug
+[bugs]: https://github.com/OWNER/REPO/issues?q=is%3Aopen+is%3Aissue+label%3Abug
 ```
 
 Only include badges that are actively maintained and reflect real state. Remove any badge whose target service is unavailable or whose data is stale.
