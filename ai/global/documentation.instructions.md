@@ -22,7 +22,7 @@
 10. **Security** — link to `SECURITY.md`.
 11. **Licence** — link to `LICENSE`.
 12. **Contributors** — all-contributors section; see the [Contributors section](#contributors) below for when to include it.
-13. **Reference links** — all image and URL references used by badges and links, collected at the very bottom of the file.
+13. **Reference links** — all image and URL references used by badges and links, collected at the very bottom of the file, sorted alphabetically by label.
 
 Omit any section that does not apply (e.g. no Installation section for a library with no NuGet package), but never invent placeholder sections.
 
@@ -32,7 +32,7 @@ Place all badges near the top of the file, after the title but before the overvi
 
 #### Link Format (MANDATORY)
 
-All badges and hyperlinks must use **reference-style** markdown — never inline URLs. Use descriptive named labels; never use bare numbers (`[1]`, `[2]`). Collect all reference definitions at the very bottom of the file.
+All badges and hyperlinks must use **reference-style** markdown — never inline URLs. Use descriptive named labels; never use bare numbers (`[1]`, `[2]`). Collect all reference definitions at the very bottom of the file, sorted alphabetically by label.
 
 ```markdown
 [![Alt text][image-ref]][link-ref]
