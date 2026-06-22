@@ -62,9 +62,15 @@ When a project is a test support library (provides mocks, helpers, or base types
 <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
 ```
 
+It must also import `UnitTests.props` (required by `FunFair.BuildCheck` until [funfair-tech/funfair-build-check#417](https://github.com/funfair-tech/funfair-build-check/issues/417) is resolved):
+
+```xml
+<Import Project="$(SolutionDir)UnitTests.props" Condition="Exists('$(SolutionDir)UnitTests.props')" />
+```
+
 - `IsTestProject=false` — tells `FunFair.BuildCheck` this is not a test project; without it, buildcheck errors because a project referencing test packages that lacks this flag is expected to be a test runner.
 - `IsTestingPlatformApplication=false` — overrides the implicit `true` set by `FunFair.Test.Common`, xunit, and similar packages; without it, `dotnet test` on .NET 10 attempts to run the project as an executable and fails because `OutputType=Library`.
-- `UseMicrosoftTestingPlatformRunner=true` — still required by `FunFair.BuildCheck` for any project that references test packages, even when `IsTestProject=false`.
+- `UseMicrosoftTestingPlatformRunner=true` — required by `FunFair.BuildCheck` for any project that references test packages, even when `IsTestProject=false`.
 
 These projects keep `OutputType=Library`.
 
