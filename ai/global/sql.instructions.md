@@ -28,15 +28,29 @@ When a .NET SQL Server project uses **both** a DACPAC (via `MSBuild.Sdk.SqlProj`
 
 ### DACPAC directory structure (pure DDL — no `IF EXISTS`, no `GO`)
 
+Organise by schema first, then object type. The `dbo` schema uses `dbo` as the directory name:
+
 ```text
 db/
-  Schemas/          <Schema>.sql                      -- CREATE SCHEMA [Schema]
-  Tables/           <Schema>.<Table>.sql              -- CREATE TABLE
-  UserDefinedTableTypes/  <Schema>.<TypeName>.sql     -- CREATE TYPE AS TABLE
-  StoredProcedures/ <Schema>.<Name>.sql               -- CREATE OR ALTER PROCEDURE
-  Views/            <Schema>.<Name>.sql               -- CREATE OR ALTER VIEW
-  Functions/        <Schema>.<Name>.sql               -- CREATE OR ALTER FUNCTION
+  <SchemaName>/
+    Schema/                     <SchemaName>.sql              -- CREATE SCHEMA [SchemaName]
+    Table/                      <TableName>.sql               -- CREATE TABLE (singular name)
+    View/                       <ViewName>.sql                -- CREATE OR ALTER VIEW
+    StoredProcedure/            <TableName>_<Action>.sql      -- CREATE OR ALTER PROCEDURE
+    UserDefinedTableType/       <TypeName>.sql                -- CREATE TYPE AS TABLE
+    Function/                   <FunctionName>.sql            -- CREATE OR ALTER FUNCTION
+  dbo/                          (standard schema, no explicit Schema/ file needed)
+    Table/                      <TableName>.sql
+    StoredProcedure/            <TableName>_<Action>.sql
+    ...
 ```
+
+Examples:
+
+- `db/DefiLlama/Schema/DefiLlama.sql` — `CREATE SCHEMA [DefiLlama]`
+- `db/DefiLlama/Table/Pool.sql` — `CREATE TABLE [DefiLlama].[Pool]`
+- `db/DefiLlama/StoredProcedure/Pool_GetAll.sql` — `CREATE OR ALTER PROCEDURE [DefiLlama].[Pool_GetAll]`
+- `db/dbo/Table/ApiCache.sql` — `CREATE TABLE [dbo].[ApiCache]`
 
 Rules for DACPAC files:
 
@@ -44,7 +58,8 @@ Rules for DACPAC files:
 - **No `IF [NOT] EXISTS` guards** — DACPAC compares state and applies the delta; guards break the diff.
 - **No `CREATE OR ALTER`** on tables, schemas, or types — only on SPs, views, and functions.
 - **No `SQLCMD` directives** — they are not valid in MSBuild.Sdk.SqlProj source files.
-- File naming: `<Schema>.<ObjectName>.sql` — the dot is a name separator, not a path separator.
+- **Table and view names must be singular** — use `Pool`, not `Pools`; use `Author`, not `Authors`.
+- **Stored procedure file naming**: `<TableName>_<Action>.sql` — e.g. `Pool_GetAll.sql`, `Pool_Sync.sql`.
 
 ### Migration script rules (DbUp-style with guards and `GO`)
 
@@ -59,14 +74,14 @@ When adding or modifying a schema object, update **both**:
 
 | Change | DACPAC file to create/update | Migration script action |
 | ------ | ----------------------------- | ----------------------- |
-| New schema | `db/Schemas/<Schema>.sql` | `IF NOT EXISTS ... CREATE SCHEMA` in new migration |
-| New table | `db/Tables/<Schema>.<Table>.sql` | `IF NOT EXISTS ... CREATE TABLE` in new migration |
-| New TVP | `db/UserDefinedTableTypes/<Schema>.<Type>.sql` | `IF NOT EXISTS ... CREATE TYPE AS TABLE` in new migration |
-| New/changed SP | `db/StoredProcedures/<Schema>.<SP>.sql` | `CREATE OR ALTER PROCEDURE` in new migration |
-| New/changed view | `db/Views/<Schema>.<View>.sql` | `CREATE OR ALTER VIEW` in new migration |
-| Column added | Update `db/Tables/<Schema>.<Table>.sql` | `IF NOT EXISTS ... ALTER TABLE ADD COLUMN` in new migration |
+| New schema | `db/<Schema>/Schema/<Schema>.sql` | `IF NOT EXISTS ... CREATE SCHEMA` in new migration |
+| New table | `db/<Schema>/Table/<Table>.sql` | `IF NOT EXISTS ... CREATE TABLE` in new migration |
+| New TVP | `db/<Schema>/UserDefinedTableType/<Type>.sql` | `IF NOT EXISTS ... CREATE TYPE AS TABLE` in new migration |
+| New/changed SP | `db/<Schema>/StoredProcedure/<Table>_<Action>.sql` | `CREATE OR ALTER PROCEDURE` in new migration |
+| New/changed view | `db/<Schema>/View/<View>.sql` | `CREATE OR ALTER VIEW` in new migration |
+| Column added | Update `db/<Schema>/Table/<Table>.sql` | `IF NOT EXISTS ... ALTER TABLE ADD COLUMN` in new migration |
 | Column type change | Update DACPAC table file | `ALTER TABLE ALTER COLUMN` in new migration |
-| Index added | `db/Indexes/<Schema>.<Table>.<IndexName>.sql` (if applicable) | `IF NOT EXISTS ... CREATE INDEX` in new migration |
+| Index added | `db/<Schema>/Index/<Table>_<IndexName>.sql` (if applicable) | `IF NOT EXISTS ... CREATE INDEX` in new migration |
 
 ### Validation
 
