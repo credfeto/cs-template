@@ -11,6 +11,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ## [Unreleased]
 ### Security
 ### Added
+- git.instructions: mandatory rule requiring verbatim command output in PR/issue comments before any diagnosis when a git command fails
 ### Fixed
 - on_new_pr.yml: inline composite action logic to fix local action path resolution failure under pull_request_target
 - Corrected plan-approval description: board Approved status or comment-based fallback (no board) are the explicit approval signals; orchestrator never auto-removes Blocked
