@@ -24,7 +24,9 @@ When picking up an **Issue** that has no existing PR:
    ```
 
    - `false` → Plan mode (steps 2–3 below).
-   - `true` → Plan was already approved (you would not be running otherwise). Skip to implementation.
+   - `true` → Plan exists. How approval is signalled depends on whether a Workflow board is configured (the orchestrator passes this context in your CLAUDE.md):
+     - **Board configured**: check whether a human has set the board status to **Approved**. If yes → skip to implementation. If not yet → revise or re-post the plan, mark Blocked, STOP (step 2).
+     - **No board**: check for a human approval comment posted **after** the plan comment (keywords: `approved` / `go ahead` / `looks good` / `lgtm` — case-insensitive, whole word). If found → skip to implementation. If not → revise or re-post, mark Blocked, STOP (step 2).
 
 2. **Plan mode**: produce a concrete implementation plan using `/plan`, then post it as an issue comment in **exactly** this format:
 
@@ -47,13 +49,15 @@ When picking up an **Issue** that has no existing PR:
    <list or "None — ready to proceed pending approval">
    ```
 
-3. Mark the issue as Blocked and update the Workflow board to **Planning** (see [Workflow Board](#workflow-board) below), then **STOP**:
+3. Mark the issue as Blocked and update the Workflow board to **Planning** (if board data is present), then **STOP**:
 
    ```bash
    gh issue edit <number> --repo <owner/repo> --add-label Blocked
    ```
 
-A human must review the plan and remove the `Blocked` label to approve it. The orchestrator does not auto-detect approval comments — removing `Blocked` is always a deliberate human action.
+   **Approval requires an explicit human action — the orchestrator never removes `Blocked` automatically:**
+   - **Board configured**: human sets board status to **Approved** and removes `Blocked`.
+   - **No board**: human posts an approval comment (`approved` / `go ahead` / `looks good` / `lgtm`) and removes `Blocked`.
 
 ### PR Workflow — AI Review Loop
 
