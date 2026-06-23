@@ -53,11 +53,11 @@ When picking up an **Issue** that has no existing PR:
    gh issue edit <number> --repo <owner/repo> --add-label Blocked
    ```
 
-The orchestrator (oneshot) automatically detects an approval comment on re-run and removes the `Blocked` label before invoking the agent. An approval comment contains one of: `approved`, `go ahead`, `looks good`, `lgtm`, `proceed` (case-insensitive).
+A human must review the plan and remove the `Blocked` label to approve it. The orchestrator does not auto-detect approval comments — removing `Blocked` is always a deliberate human action.
 
 ### PR Workflow — AI Review Loop
 
-After all code changes are pushed and CI is not failing, **before** enabling auto-merge:
+After all code changes are pushed and all required CI checks pass, **before** enabling auto-merge:
 
 #### Phase A — Code review (up to `MAX_REVIEW_ITERATIONS` rounds)
 
