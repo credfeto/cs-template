@@ -71,7 +71,8 @@ On every agent run, for every PR being interacted with:
    gh pr view <pr> --repo <owner/repo> --json closingIssuesReferences \
      --jq '.closingIssuesReferences[].number' \
    | while IFS= read -r n; do
-       gh issue view "$n" --repo <owner/repo> --json labels --jq '.labels[].name'
+       gh issue view "$n" --repo <owner/repo> --json labels --jq '.labels[].name' \
+         || echo "Warning: could not fetch labels for issue $n" >&2
      done \
    | sort -u \
    | grep -vE '^(Blocked|On-Hold)$' \
