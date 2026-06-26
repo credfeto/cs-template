@@ -74,7 +74,7 @@ On every agent run, for every PR being interacted with:
        gh issue view "$n" --repo <owner/repo> --json labels --jq '.labels[].name'
      done \
    | sort -u \
-   | grep -v '^Blocked$' \
+   | grep -vE '^(Blocked|On-Hold)$' \
    | while IFS= read -r label; do
        gh pr edit <pr> --repo <owner/repo> --add-label "$label"
      done
