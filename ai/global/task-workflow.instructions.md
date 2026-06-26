@@ -80,7 +80,7 @@ On every agent run, for every PR being interacted with:
    | xargs -I{} gh pr edit <pr> --repo <owner/repo> --add-label "{}"
    ```
 
-   The `Blocked` label is explicitly excluded — it must never be synced from an issue to its PR.
+   The `Blocked` and `On-Hold` labels are explicitly excluded — workflow-control labels must never be synced from an issue to its PR.
 
 4. Never remove any label from a PR or issue — GitHub workflows add labels automatically and they must not be removed.
 
