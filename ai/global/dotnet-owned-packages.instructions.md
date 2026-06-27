@@ -19,6 +19,7 @@
 | `FunFair.Test.Common` | [funfair-test-common](https://github.com/funfair-tech/funfair-test-common) | Shared test base classes and helpers |
 | `FunFair.Test.Source.Generator` | [funfair-test-source-generator](https://github.com/funfair-tech/funfair-test-source-generator) | Source generator for test projects |
 | `FunFair.BuildCheck` | [funfair-build-check](https://github.com/funfair-tech/funfair-build-check) | `dotnet buildcheck` CLI tool |
+| `FunFair.CodeAnalysis` | [funfair-server-code-analysis](https://github.com/funfair-tech/funfair-server-code-analysis) | Roslyn code analysis rules for FunFair projects |
 
 ## General Guidance
 
