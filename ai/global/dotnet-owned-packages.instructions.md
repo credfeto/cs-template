@@ -16,10 +16,10 @@
 | `Credfeto.Enum.Source.Generator` | [credfeto-enum-source-generation](https://github.com/credfeto/credfeto-enum-source-generation) | Source generator for enum helpers |
 | `Credfeto.Exceptions.SourceGenerator` | [credfeto-exception-source-generator](https://github.com/credfeto/credfeto-exception-source-generator) | Source generator for exception constructors |
 | `Credfeto.Changelog.Cmd` | [credfeto-changelog-cmd](https://github.com/credfeto/credfeto-changelog-cmd) | `dotnet changelog` CLI tool |
+| `FunFair.BuildCheck` | [funfair-build-check](https://github.com/funfair-tech/funfair-build-check) | `dotnet buildcheck` CLI tool |
+| `FunFair.CodeAnalysis` | [funfair-server-code-analysis](https://github.com/funfair-tech/funfair-server-code-analysis) | Roslyn code analysis rules for FunFair projects; repo is named `funfair-server-code-analysis` (not `funfair-code-analysis`) |
 | `FunFair.Test.Common` | [funfair-test-common](https://github.com/funfair-tech/funfair-test-common) | Shared test base classes and helpers |
 | `FunFair.Test.Source.Generator` | [funfair-test-source-generator](https://github.com/funfair-tech/funfair-test-source-generator) | Source generator for test projects |
-| `FunFair.BuildCheck` | [funfair-build-check](https://github.com/funfair-tech/funfair-build-check) | `dotnet buildcheck` CLI tool |
-| `FunFair.CodeAnalysis` | [funfair-server-code-analysis](https://github.com/funfair-tech/funfair-server-code-analysis) | Roslyn code analysis rules for FunFair projects |
 
 ## General Guidance
 
