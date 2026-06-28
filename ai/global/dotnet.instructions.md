@@ -315,6 +315,8 @@ Use `AddMockedService<T>()` in tests deriving from `DependencyInjectionTestsBase
 
 ## String Comparison
 
+FFS rules in this section are enforced by the `FunFair.CodeAnalysis` package — see [dotnet-owned-packages.instructions.md](dotnet-owned-packages.instructions.md) for the source repository.
+
 - Prefer `StringComparer.<type>.Equals(x, y)` over `string.Equals(x, y, StringComparison.<type>)` — enforced by FFS0050.
 - This applies to all `StringComparison` variants (`Ordinal`, `OrdinalIgnoreCase`, etc.).
 - Do not use `StringComparison.InvariantCulture`, `StringComparison.InvariantCultureIgnoreCase`, `StringComparison.CurrentCulture`, or `StringComparison.CurrentCultureIgnoreCase` — enforced by FFS0045–FFS0048.
