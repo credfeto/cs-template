@@ -250,7 +250,7 @@ The `FunFair.Test.*` packages in this file are owned by the organisation — see
 
 ## FunFair.Test.* — Prefer Library Code Over Custom Implementations (MANDATORY)
 
-The `FunFair.Test.*` packages in this section are org-owned — see [dotnet-owned-packages.instructions.md](dotnet-owned-packages.instructions.md) for their GitHub source repositories.
+The `FunFair.Test.*` packages in this section are owned by the organisation — see [dotnet-owned-packages.instructions.md](dotnet-owned-packages.instructions.md) for the GitHub source repository.
 
 **Do not write code that FunFair.Test.* already provides.** Before implementing a custom test helper, check what `FunFair.Test.Common` and `FunFair.Test.Infrastructure` offer.
 
