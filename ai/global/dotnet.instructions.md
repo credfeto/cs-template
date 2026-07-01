@@ -369,6 +369,8 @@ public sealed record GlobalJsonInfo(string? SdkVersion, string? RollForward, boo
 
 ## Exception Classes
 
+`Credfeto.Exceptions.SourceGenerator` is an org-owned package — see [dotnet-owned-packages.instructions.md](dotnet-owned-packages.instructions.md) for the GitHub source repository.
+
 Use `Credfeto.Exceptions.SourceGenerator` to define exception types — it generates all required constructors automatically.
 
 1. Add the package to the project (analyzer only — not a runtime dependency):
