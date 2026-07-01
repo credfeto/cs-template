@@ -209,7 +209,7 @@ This prevents the generator's Roslyn NuGet dependencies (e.g. `System.Collection
 
 ## Test Dependencies
 
-The `FunFair.Test.*` packages in this section are owned by the organisation — see [dotnet-owned-packages.instructions.md](dotnet-owned-packages.instructions.md) for the GitHub source repository.
+The `FunFair.Test.*` packages in this file are owned by the organisation — see [dotnet-owned-packages.instructions.md](dotnet-owned-packages.instructions.md) for the GitHub source repository.
 
 - All test projects must reference the latest release of `FunFair.Test.Common`.
 - All test projects must import the latest release of `FunFair.Test.Source.Generator`.
