@@ -166,6 +166,8 @@ See [code-quality.instructions.md](code-quality.instructions.md) for general asy
 
 ## Project and Solution Structure
 
+`FunFair.BuildCheck` is an org-owned package — see [dotnet-owned-packages.instructions.md](dotnet-owned-packages.instructions.md) for the GitHub source repository.
+
 - All projects must be added to the solution file (`.slnx` or `.sln`).
 - All projects must pass `FunFair.BuildCheck` before committing: `dotnet buildcheck` (run from solution root; `dotnet buildcheck --help` for options).
 - If a build fails because `$(SolutionDir)` is undefined (e.g. imports guarded by `Exists('$(SolutionDir)...')` are silently skipped, leading to errors such as `NU5017`), fix it by ensuring the solution's `src/` directory has a `Directory.Build.props` that sets a fallback:
