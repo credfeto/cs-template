@@ -39,7 +39,7 @@ When asked to create or update a GitHub issue (i.e. the issue itself is the requ
 1. Enter Plan Mode.
 2. Work out at a high level what code change the issue would represent — scope, affected files, approach.
 3. Exit Plan Mode and return to auto.
-4. Create the issue, using the plan output to write a meaningful description.
+4. Create the issue, or update the existing issue, using the plan output to write a meaningful description.
 
 This is distinct from [Ad-Hoc Prompt Intake](#ad-hoc-prompt-intake-mandatory) below — that section covers being asked to _do_ something, where the issue is a tracking side-effect rather than the deliverable itself.
 
