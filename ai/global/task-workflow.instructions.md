@@ -50,7 +50,7 @@ Applies whenever a human asks you to _do_ something in the context of a repo (a 
 1. Before taking any other action (including answering a read-only question), create a GitHub issue in the current repo:
    - Title: a concise summary of the prompt.
    - Body: the prompt, verbatim, as the starting point.
-   - Labels: `AI-Work` and `Blocked` — always, regardless of who initiated the underlying task.
+   - Labels: `AI-Work` and `Blocked` (minimum) — always, regardless of who initiated the underlying task; add other relevant labels (e.g. priority) as appropriate.
 2. Use Plan Mode to work out scope, affected files, and approach, and post it as an `## Implementation Plan` issue comment per the format in [agent-roles.instructions.md](agent-roles.instructions.md#issue-workflow--plan-first-new-issues-only).
 3. As open questions are identified, add each as an issue comment as soon as it's identified — do not batch them all until the end.
 4. Do not remove `Blocked` until an explicit human approval comment exists (`approved` / `go ahead` / `looks good` / `lgtm`) — if approval came via live chat, mirror it as a GitHub comment first (see [Blocked Label](agent-roles.instructions.md#blocked-label)) — then wait for the human to remove `Blocked`.
