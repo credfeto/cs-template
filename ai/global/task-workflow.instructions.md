@@ -34,7 +34,7 @@ When selecting the next issue to work on, prefer issues with higher-priority lab
 
 ## GitHub Issue Creation (MANDATORY)
 
-When asked to create or add a GitHub issue (i.e. the issue itself is the requested deliverable):
+When asked to create or update a GitHub issue (i.e. the issue itself is the requested deliverable):
 
 1. Enter Plan Mode.
 2. Work out at a high level what code change the issue would represent — scope, affected files, approach.
