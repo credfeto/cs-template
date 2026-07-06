@@ -434,6 +434,8 @@ When all target frameworks listed in a project file are .NET 9 or later, framewo
 - If a warning fires, fix the root cause. If the fix is non-obvious, raise a GitHub issue rather than suppressing the warning.
 - Test projects are **not** exempt from this rule — suppressing warnings in test code is equally prohibited without explicit permission.
 
+**Exception — project-specific local instruction files:** A project's `ai/local/` instruction file may explicitly document approved suppressions for that repository. When a local instruction file grants permission for a specific warning ID and class of code, that permission satisfies the "explicit written permission from the repo owner" requirement. Local instructions take precedence over this global rule per the `.ai-instructions` precedence hierarchy. When a suppression is approved during a PR review, the local instruction file must be updated in that same PR to document: the specific warning ID, the affected class of code, and the reasoning for the exception.
+
 ## NuGet Vulnerability Suppression
 
 Suppress per-project using the advisory URL — never globally in shared `.props` files. Track each suppression in a GitHub issue.
