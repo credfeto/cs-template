@@ -208,23 +208,6 @@ For each such request that has not already been actioned (i.e. no reply from you
 
 The same rule applies when picking up an **issue**: if any comment on that issue requests a sub-issue to be raised, create it and reply (using `gh issue comment`) before proceeding with implementation work.
 
-### Environment/Infrastructure Block Marker (MANDATORY, PRs only)
-
-When a Blocked-ing failure is diagnosed as an environment/infrastructure problem — a bug in the container image, a missing tool, a transient infra issue — rather than a bug in the PR's own code, add a machine-readable marker alongside the diagnosis so `oneshot` can auto-clear `Blocked` once the fix has actually shipped, instead of the PR sitting blocked until a human happens to notice (credfeto/credfeto-orchestrator#1118):
-
-1. Post the full human-readable diagnosis as normal — root cause, evidence, and (if known) the fix needed.
-2. Append a single trailer line to that same comment:
-
-   ```text
-   <!-- orchestrator:env-block image-sha=${IMAGE_SHA_DEVELOPMENT_AGENT} -->
-   ```
-
-   Read `IMAGE_SHA_DEVELOPMENT_AGENT` from your own container environment (the same value printed at session start as part of "Image layer provenance") — this records which image build was current when you made the diagnosis.
-3. Apply `Blocked` exactly as in the section above.
-4. Use this marker **only** for a genuine environment/infrastructure diagnosis. `oneshot` auto-clears `Blocked` the moment it observes a differently-built agent image, with no further human involvement — marking a real code question or design decision this way would resume work before a human actually answered it.
-
-This convention only applies to PRs (there is no container session, and therefore no image to diagnose against, before a PR/branch exists). Everything else about the Blocked-label convention above is unchanged.
-
 ### Comment Replies (MANDATORY)
 
 Reply to every PR or issue comment that prompted an action:
