@@ -11,13 +11,8 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ## [Unreleased]
 ### Security
 ### Added
-- dotnet.instructions: document MockBase<T> move to FunFair.Test.Infrastructure.Mocks namespace (from FunFair.Test.Common.Mocks) as of FunFair.Test.Common 6.3.1.2342
-- git.instructions: mandatory rule requiring verbatim command output in PR/issue comments before any diagnosis when a git command fails
 ### Fixed
-- on_new_pr.yml: inline composite action logic to fix local action path resolution failure under pull_request_target
-- Corrected plan-approval description: board Approved status or comment-based fallback (no board) are the explicit approval signals; orchestrator never auto-removes Blocked
 ### Changed
-- SDK - Updated DotNet SDK to 10.0.301
 ### Deprecated
 ### Removed
 ### Deployment Changes
