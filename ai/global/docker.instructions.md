@@ -27,7 +27,7 @@
 - Use external named volumes for persistent state; bind-mount only for local development conveniences (source code, config overrides).
 - Keep environment-specific overrides in a separate override file (e.g. `compose.override.yml`) rather than branching logic inside the base file.
 - Add `install` and `update` scripts to the repo: `install` performs first-time setup — creating any external volumes/networks, pulling or building images, and starting the containers; `update` pulls or rebuilds the latest images and restarts the containers without touching persistent volumes.
-- A `reset` script should also be provided that tears down an existing container and then calls `install`.
+- A `reset` script should also be provided that tears down the existing containers and then calls `install`.
 
 ## Security Basics
 
@@ -35,7 +35,5 @@
 - Scan images for known vulnerabilities before publishing (e.g. `docker scout`, `trivy`, or the CI-configured scanner) — see [security.instructions.md](security.instructions.md#dependency-vulnerability-scanning) for the general dependency-scanning policy.
 - Never bake secrets, credentials, or tokens into an image layer — see the Dockerfile Authoring section above.
 - Set explicit resource limits (memory/CPU) in compose/runtime configuration for anything other than local development — confirm the runner actually enforces them (e.g. `deploy.resources.limits` is a Swarm construct that some Compose V2 versions ignore outside Swarm mode) rather than assuming the field alone provides protection.
-- If there's a sudo or doas in the base image, ensure that it's not available in the container and that the container runs as a non-root user.
-- Ensure that the container doesn't have any unnecessary capabilities (e.g. `CAP_NET_ADMIN`) and that the container's user has the minimum required permissions.
+- Run containers under least privilege: remove `sudo`/`doas` and other setuid privilege-escalation binaries from the final image, run as a non-root user, drop all capabilities by default and add back only the specific ones a service genuinely needs (e.g. `cap_drop: [ALL]` plus an explicit `cap_add` allowlist), and set `security_opt: [no-new-privileges:true]` (or the Podman equivalent) so the container can never acquire additional privileges at runtime.
 - Ensure that containers are defined with read-only filesystems (`read_only: true`) to prevent accidental or malicious modifications.
-- Ensure that containers have no way of getting additional capabilities or permissions.
