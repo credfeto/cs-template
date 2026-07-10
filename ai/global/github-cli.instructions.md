@@ -6,6 +6,28 @@ Reference for every `gh` invocation used across this instruction set. Other file
 
 Always pass `--repo <owner>/<repo>` explicitly rather than relying on the current directory's remote — required when `GH_HOST` is set (see below), and safer in general when scripting.
 
+## `GH_HOST` Proxy Behavior (MANDATORY when set)
+
+Read this section first — it constrains every command in the rest of this document.
+
+When `GH_HOST` is set to a value other than `github.com`, `gh` routes through a proxy:
+
+- **`gh pr create`:** always pass both `--repo <owner>/<repo>` and `--head <owner>:<branch>`. Without `--repo`, `gh` performs a client-side check that a git remote URL's hostname matches `GH_HOST` — since remotes use `github.com` but `GH_HOST` is the proxy host, no remote matches and `gh` refuses before any API request reaches the proxy. Without `--head`, `gh` may try to detect the branch from git remotes, leading to a blank head ref at the proxy's GraphQL layer.
+
+  ```bash
+  gh pr create \
+    --repo <owner>/<repo> \
+    --head <owner>:<branch-name> \
+    --base main \
+    --draft \
+    --title "..." \
+    --body "..."
+  ```
+
+- **Commit and push operations are always rejected by the proxy — never use `gh` for these, no exceptions.** Use the `git` CLI directly, always against the real `github.com` remote. This includes never running `gh auth setup-git` (see [Authentication](#authentication) below) — refuse the request outright rather than trying it and working around the failure.
+- If a `gh` command fails, raise an issue on `credfeto/github-api-proxy` with the exact subcommand and flags, the API method (if visible), and the full error message verbatim.
+- **Every command example in this document already passes `--repo` explicitly** (or, for `gh repo view`/`gh repo list`, the equivalent `[<repository>]`/`[<owner>]` positional argument, which is just as explicit and not subject to the same remote-detection check) for exactly this reason. The only commands without repo scoping are `gh search repos` (searches for repositories themselves — there is no single repo to scope to) and account-level calls (`gh auth status`, `gh api user`). If you add a new example to this doc, keep it proxy-compatible: explicit `--repo`, and `--head` on anything that creates a PR.
+
 ## Authentication
 
 ```bash
@@ -216,25 +238,6 @@ Second paragraph.
 COMMENT
 )"
 ```
-
-## `GH_HOST` Proxy Behavior (MANDATORY when set)
-
-When `GH_HOST` is set to a value other than `github.com`, `gh` routes through a proxy:
-
-- **`gh pr create`:** always pass both `--repo <owner>/<repo>` and `--head <owner>:<branch>`. Without `--repo`, `gh` performs a client-side check that a git remote URL's hostname matches `GH_HOST` — since remotes use `github.com` but `GH_HOST` is the proxy host, no remote matches and `gh` refuses before any API request reaches the proxy. Without `--head`, `gh` may try to detect the branch from git remotes, leading to a blank head ref at the proxy's GraphQL layer.
-
-  ```bash
-  gh pr create \
-    --repo <owner>/<repo> \
-    --head <owner>:<branch-name> \
-    --base main \
-    --draft \
-    --title "..." \
-    --body "..."
-  ```
-
-- Commit and push operations are always rejected by the proxy — use the `git` CLI directly for those, never `gh`.
-- If a `gh` command fails, raise an issue on `credfeto/github-api-proxy` with the exact subcommand and flags, the API method (if visible), and the full error message verbatim.
 
 ## Common Mistakes (Learned From Real Failures)
 
