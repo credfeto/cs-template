@@ -34,7 +34,7 @@ Never block work based on inspecting config files and deducing that a tool might
    1. `git config --system --get core.hooksPath`
    2. `git config --global --get core.hooksPath`
    3. `git config --local --get core.hooksPath` (run inside the repo)
-   If none of the three scopes returns a value, the hook is **not installed** — see [Git Identity Check](#git-identity-check-mandatory-before-any-commit) for what that means for identity verification.
+   If none of the three scopes returns a value, the hook is **not installed**.
 2. Stage your changes.
 3. Run the pre-commit hook directly: `<hooks-path>/pre-commit`, using the path found in step 1.
 4. Only block if the hook **actually fails** with a real error.
