@@ -217,13 +217,13 @@ gh api repos/<owner>/<repo>/pulls/<number>/comments \
 
 `commit_id` must be the PR's **current head SHA** (`gh pr view <number> --json headRefOid --jq '.headRefOid'`), and `path`/`line` must fall inside that commit's actual diff — otherwise the request fails (see Common Mistakes below).
 
-To reply to an existing review comment thread:
+To reply to an existing review comment thread — note `-F` (typed), not `-f`, for `in_reply_to`: the API requires it as a number, and `-f` sends it as a string, failing with `"in_reply_to" is not a permitted key"` / `is not a number`:
 
 ```bash
 gh api repos/<owner>/<repo>/pulls/<number>/comments \
   -X POST \
   -f body="<reply text>" \
-  -f in_reply_to=<comment-id>
+  -F in_reply_to=<comment-id>
 ```
 
 ## Comment and Body Text (MANDATORY — HEREDOC, never `\n`)
@@ -252,5 +252,7 @@ These are documented because each one has actually broken a live session — che
 4. **Inline PR review comments via `gh api .../pulls/<n>/comments`** fail with `422 Validation Failed: pull_request_review_thread.path could not be resolved` if `commit_id` is stale or `path`/`line` don't fall inside that commit's diff. Fetch the current head SHA and the actual changed files first (`gh pr view <n> --json headRefOid`, `gh api repos/<owner>/<repo>/pulls/<n>/files --jq '.[].filename'`) rather than guessing.
 
 5. **GraphQL ProjectV2 collaborator mutations**: the input type is `ProjectV2Collaborator`, not the plausible-looking `ProjectV2CollaboratorInput` (the latter errors with `isn't a defined input type`). Any connection field selected in a mutation's return payload (e.g. `collaborators { nodes { ... } }`) needs an explicit `first`/`last` pagination argument, or the whole mutation is rejected with `MISSING_PAGINATION_BOUNDARIES` — even though the mutation itself already took effect.
+
+6. **`gh api -f`/`-F` are not interchangeable.** `-f`/`--raw-field` always sends a string; `-F`/`--field` sends a typed value (numbers, booleans, `@file`). Fields the API schema declares as a number — e.g. `in_reply_to` when replying to a PR review comment — must use `-F`. Using `-f in_reply_to=<id>` fails with `"in_reply_to" is not a permitted key" / "is not a number"`, because the string form doesn't match any of the schema's `oneOf` variants.
 
 When a `gh` command's exact flags/fields are uncertain, run `gh <command> --help` (or `gh <command> <subcommand> --help`) rather than guessing from memory or from a similar-looking command.
