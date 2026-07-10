@@ -45,14 +45,6 @@ Inspecting `.pre-commit-config.yaml` and concluding a `language: system` tool is
 
 Build must pass and all tests must pass before committing or pushing. If they fail and cannot be resolved, stop and ask.
 
-## Git Identity Check (MANDATORY before any commit)
-
-Identity and GPG signing (`user.email`, `commit.gpgsign`, `user.signingkey`) are verified automatically on every commit by the global pre-commit hook (`credfeto-global-pre-commit`'s `src/scripts/check-identity`) — see [git.examples.md](git.examples.md) for the check it runs.
-
-**If the hook fails with an identity or signing error: stop all work, do not commit, and report the misconfiguration.**
-
-If [Pre-Commit Hook Verification](#pre-commit-hook-verification-mandatory-before-blocking) finds the hook is **not installed** in any git config scope, automatic enforcement does not apply — run the identity check manually using the script in [git.examples.md](git.examples.md) before committing.
-
 ## Pre-Commit Branch Check
 
 - Run `git branch --show-current` and confirm it is the expected working branch before staging or committing.
