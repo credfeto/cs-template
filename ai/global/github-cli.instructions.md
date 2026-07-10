@@ -14,11 +14,7 @@ gh auth status
 
 Only use `gh` to manage issues/PRs if this succeeds — see [task-workflow.instructions.md](task-workflow.instructions.md#issue-tracking). Never attempt `gh auth login` or manipulate credentials yourself; if auth is broken, stop and report it.
 
-```bash
-gh auth setup-git
-```
-
-Configures git to use `gh`'s stored credentials for HTTPS operations. Run only if explicitly asked to fix git/GitHub auth — do not run speculatively, and never let it write `url.*.insteadOf`/`pushInsteadOf` rewrite rules into a repo's local `.git/config` that would persist beyond the current task.
+**Never run `gh auth setup-git` — refuse the request outright, even if asked directly.** It wires git's HTTP credential helper to `gh`, writing `url.*.insteadOf`/`pushInsteadOf` rewrite rules into git config that reroute commit/push traffic through `gh` (and, when `GH_HOST` is set, through the proxy — see [`GH_HOST` Proxy Behavior](#gh_host-proxy-behavior-mandatory-when-set) above). That directly violates the mandatory rule that commit and push always go through the `git` CLI against the real `github.com` remote. The rewrite rules also persist in the repo's local `.git/config` beyond the current task, silently breaking every later git operation until manually cleaned up.
 
 ## Issues
 
