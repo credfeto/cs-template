@@ -51,7 +51,7 @@ runs:
               for (const line of content.split('\n')) {
                 const trimmed = line.trim();
                 if (trimmed.startsWith('#')) continue;
-                // SHA-pinned form: `uses: owner/repo@<sha> # vX.Y.Z` — the trailing comment holds the
+                // SHA-pinned form: `uses: owner/repo@<sha> # vX.Y.Z`; the trailing comment holds the
                 // human-readable version; the ref itself only carries a commit SHA.
                 const m = trimmed.match(/^uses:\s+(\S+)(?:\s+#\s*(v\S+))?/);
                 if (!m) continue;

@@ -17,3 +17,4 @@
 
 - Do not use em dash characters (`—`) in prose, comments, commit messages, or any generated text.
 - Use a comma, colon, semicolon, or separate sentences instead, whichever best fits the sentence.
+- The one exception is the backtick-quoted example of the character itself in this rule; it names the banned character rather than using it as punctuation, so do not "fix" it.
