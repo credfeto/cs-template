@@ -25,16 +25,17 @@ This applies to every version-bearing file, including:
 Rules:
 
 1. Take the **latest** of the candidate versions.
-2. **Security exception**: if the latest candidate is known to be less secure than another candidate (e.g. it has a published security advisory that the other does not), take the most recent candidate that is not affected.
-3. Never resolve by downgrading below every candidate, and never invent a version that appears on neither side.
-4. Lock files (`package-lock.json` and similar): do not hand-merge; resolve the manifest first, then regenerate the lock file with the package manager.
-5. After the merge or rebase completes, run the build and tests. If the chosen version broke the build (API changes, removed features), fix the breakage on the same branch as part of the merge work; do not downgrade to avoid the fix.
+2. **Stable-over-pre-release exception**: if one candidate is a stable (release) version and the other is a pre-release (alpha/beta/rc/preview/dev build, etc.), take the stable candidate even if the pre-release has a nominally higher version number. Only take a pre-release if every candidate is a pre-release, in which case take the latest of them.
+3. **Security exception**: if the latest candidate is known to be less secure than another candidate (e.g. it has a published security advisory that the other does not), take the most recent candidate that is not affected.
+4. Never resolve by downgrading below every candidate, and never invent a version that appears on neither side.
+5. Lock files (`package-lock.json` and similar): do not hand-merge; resolve the manifest first, then regenerate the lock file with the package manager.
+6. After the merge or rebase completes, run the build and tests. If the chosen version broke the build (API changes, removed features), fix the breakage on the same branch as part of the merge work; do not downgrade to avoid the fix.
 
 ### No Confirmation Needed When the Algorithm Resolves the Conflict
 
-Rules 1-4 above are a complete, deterministic algorithm: for every conflicting entry there is exactly one correct resolution (the latest candidate, or the security-exception candidate). Apply it and continue; do not stop a merge or rebase to ask for confirmation on a conflict this algorithm resolves unambiguously, and do not post a PR/issue comment asking someone to confirm the choice.
+Rules 1-5 above are a complete, deterministic algorithm: for every conflicting entry there is exactly one correct resolution (the latest candidate, the stable candidate, or the security-exception candidate). Apply it and continue; do not stop a merge or rebase to ask for confirmation on a conflict this algorithm resolves unambiguously, and do not post a PR/issue comment asking someone to confirm the choice.
 
 Only stop and ask when a conflict genuinely falls outside the algorithm, for example:
 
-- The same package is bumped to two different, unrelated versions on both sides and there is no clear "latest" (e.g. divergent major versions, or pre-release vs. stable with no obvious ordering).
+- The same package is bumped to two different, unrelated versions on both sides and there is no clear "latest" (e.g. divergent major versions).
 - A security trade-off with no candidate that is both latest and unaffected.
