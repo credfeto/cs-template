@@ -70,7 +70,7 @@ After all code changes are pushed and all required CI checks pass, **before** en
 1. Update Workflow board to **AI Review** (if board data is present in your CLAUDE.md).
 2. Run: `/simplify` against the diff. It applies reuse, simplification, efficiency, and altitude cleanups directly rather than just reporting them.
 3. If `/simplify` changed any files: commit and push them.
-4. Run: `/code-review --comment`
+4. Run: `/code-review --comment`. This intentionally re-covers the reuse/simplification/efficiency categories `/simplify` already applied: `/simplify` fixes silently in step 2-3, and this step verifies nothing was missed and separately checks correctness/security/compliance, which `/simplify` does not. Expect step 4 to usually find nothing in the categories step 2 already handled.
 5. If inline PR comment findings were posted: fix each in its own commit, push, return to step 4.
 6. After `MAX_REVIEW_ITERATIONS` rounds with unresolved findings: post a PR comment listing them, add `Blocked` label, and **STOP**:
 
