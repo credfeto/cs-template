@@ -29,3 +29,12 @@ Rules:
 3. Never resolve by downgrading below every candidate, and never invent a version that appears on neither side.
 4. Lock files (`package-lock.json` and similar): do not hand-merge; resolve the manifest first, then regenerate the lock file with the package manager.
 5. After the merge or rebase completes, run the build and tests. If the chosen version broke the build (API changes, removed features), fix the breakage on the same branch as part of the merge work; do not downgrade to avoid the fix.
+
+### No Confirmation Needed When the Algorithm Resolves the Conflict
+
+Rules 1-4 above are a complete, deterministic algorithm: for every conflicting entry there is exactly one correct resolution (the latest candidate, or the security-exception candidate). Apply it and continue; do not stop a merge or rebase to ask for confirmation on a conflict this algorithm resolves unambiguously, and do not post a PR/issue comment asking someone to confirm the choice.
+
+Only stop and ask when a conflict genuinely falls outside the algorithm, for example:
+
+- The same package is bumped to two different, unrelated versions on both sides and there is no clear "latest" (e.g. divergent major versions, or pre-release vs. stable with no obvious ordering).
+- A security trade-off with no candidate that is both latest and unaffected.
