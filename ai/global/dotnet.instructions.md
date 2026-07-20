@@ -140,6 +140,25 @@ dotnet reportgenerator \
 
 The per-assembly reports remain the authoritative measure of test quality for each project.
 
+### Deriving a Single Overall Coverage Percentage
+
+When a single whole-repo line-coverage percentage is needed (e.g. for the coverage ratchet, see [coverage-ratchet.instructions.md](coverage-ratchet.instructions.md#net)), generate a combined report using `-reporttypes:JsonSummary` instead of `Html`:
+
+```bash
+dotnet reportgenerator \
+  -reports:"{repo-root}/coverage/*.coverage.cobertura.xml" \
+  -targetdir:{repo-root}/coverage/combined-summary \
+  -reporttypes:JsonSummary
+```
+
+This writes `{repo-root}/coverage/combined-summary/Summary.json`; the overall percentage is its `summary.linecoverage` field:
+
+```bash
+jq '.summary.linecoverage' {repo-root}/coverage/combined-summary/Summary.json
+```
+
+This is in addition to, not a replacement for, the per-assembly `Html` reports above; the same assembly A/B cross-contamination caveat applies equally to the combined `JsonSummary` run, so it is only ever used for the single whole-repo figure, never as a per-assembly quality signal.
+
 ### Specific Coverage Rules (MANDATORY)
 
 - If a source generator is used then it is because we **WANT** the source generated version. Don't turn it off to get 100% code coverage. Source-generated code (classes decorated with `[GeneratedCode]`) should be excluded from coverage measurements; it is considered tested by the generator's author, not by us.
