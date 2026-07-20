@@ -8,7 +8,7 @@
 
 The AI Coverage phase is a whole-repo ratchet: each orchestrated language's overall line-coverage percentage on the PR branch must be **>=** that language's percentage on `main`, recomputed live every time (no stored/committed baseline file, no Codecov or similar external service). This is **not** a repeat of the diff-coverage check already performed by the Code Tester role ([agent-roles.instructions.md](agent-roles.instructions.md#code-tester)), which only verifies new/changed lines are covered; the ratchet also catches a deleted test or a refactor that drops coverage of code the diff never touched.
 
-Percentages are compared **per language**, never blended into one combined figure (a .NET percentage and a Python percentage are not commensurable). A language with no code or tests present in the repo is skipped. Shell is excluded from the ratchet entirely (see [Shell](#shell-excluded)).
+Percentages are compared **per language**, never blended into one combined figure (a .NET percentage and a Python percentage are not commensurable). A language with no code or tests present in the repo is skipped. Shell is out of scope (see [Shell](#shell-excluded)).
 
 There is no persisted state between phase invocations beyond what is written into a GitHub PR comment: every AI Coverage phase invocation is a fresh, memoryless session (see [task-workflow.instructions.md](task-workflow.instructions.md)). The only place the main-branch numbers survive between the baseline capture and the later comparison is the `## Coverage Baseline (main)` PR comment defined below.
 
@@ -23,7 +23,7 @@ Capture `main`'s coverage numbers **while still checked out on `main`**, as part
 3. Create the work branch as normal.
 4. Once the PR exists (PR Submitter step, [agent-roles.instructions.md](agent-roles.instructions.md#pr-submitter)), post the numbers captured in step 2 as a [Coverage Baseline PR comment](#coverage-baseline-pr-comment-format-mandatory).
 
-Steps 1-4 happen within one continuous session; the percentages are held in that session's own working context between step 2 (measurement) and step 4 (posting), never written to a file that gets committed.
+Steps 1-4 happen within one continuous session, per the memorylessness rule above.
 
 ### Re-Baseline After a Rebase (Checkout-Swap)
 
@@ -31,7 +31,7 @@ When [When to Rebase](git-rebasing.instructions.md#when-to-rebase) determines `o
 
 1. Confirm the working tree is clean (the rebase has already completed and been verified) so nothing is lost by switching branches.
 2. `git -C <repodir> checkout main`
-3. `git -C <repodir> pull --ff-only` (bring the local `main` ref fully up to date; it should already match `origin/main` post-fetch, this is a safety check).
+3. `git -C <repodir> merge --ff-only origin/main` (fast-forward the local `main` ref using the `origin/main` already fetched by the rebase that triggered this re-baseline, without a redundant network fetch).
 4. Run the [per-language extraction](#per-language-overall-coverage-extraction) procedure again.
 5. `git -C <repodir> checkout <branch>` to switch back to the work branch.
 6. Post a fresh [Coverage Baseline PR comment](#coverage-baseline-pr-comment-format-mandatory). Do not edit or delete the previous baseline comment; the AI Coverage phase always uses the **most recent** `## Coverage Baseline (main)` comment on the PR.
@@ -68,7 +68,7 @@ Skip .NET entirely if the repo has no `*.Tests` project ([Identifying Test Proje
 
 ### Node
 
-No Node test runner or coverage tool was previously pinned anywhere in these instructions. Per credfeto's direction on [credfeto/cs-template#992](https://github.com/credfeto/cs-template/issues/992) ("most languages already have coverage defined; if not, pick a tool and specify it in ai instructions"), this is now pinned as **Vitest** with the **`@vitest/coverage-v8`** provider. Adding these packages to a specific repo's `package.json` for the first time still goes through the normal [Third-Party Packages Require Human Approval](packages.instructions.md#third-party-packages-require-human-approval-mandatory) review; this section only fixes which tool to propose, not a blanket pre-approval to install it.
+Pinned as **Vitest** with the **`@vitest/coverage-v8`** provider (no Node test runner or coverage tool was previously pinned anywhere in these instructions; this follows credfeto's direction on [credfeto/cs-template#992](https://github.com/credfeto/cs-template/issues/992) to "pick a tool and specify it in ai instructions"). Adding these packages to a specific repo's `package.json` for the first time still goes through the normal [Third-Party Packages Require Human Approval](packages.instructions.md#third-party-packages-require-human-approval-mandatory) review; this section only fixes which tool to propose, not a blanket pre-approval to install it.
 
 Configure the `json-summary` reporter alongside whatever other reporters the repo already uses, so it is calculated in the ratchet's terms in every language:
 
@@ -123,7 +123,4 @@ Run this only when the Workflow board is at **AI Coverage** (see [agent-roles.in
    - All present languages branch **>=** baseline: the ratchet passes.
 4. **On failure**: post a status comment in the form `<lang> <branch-pct>% < main <baseline-pct>% - returning to Development` (one line per failing language), move the board back to **Development**, and stop.
 5. **On success**: move the board to **Human Review**, post a one-line status comment (`Coverage ratchet passed - advancing to Human Review`), and stop.
-
-## Round Cap and Escalation
-
-Count prior rounds from existing `... - returning to Development` coverage comments on the PR. After `MAX_REVIEW_ITERATIONS` such rounds without the branch catching up: post a PR comment listing the still-failing languages and their gap, add the `Blocked` label, and stop, per the [Blocked Label](agent-roles.instructions.md#blocked-label) convention.
+6. **Round cap**: see [Phase D step 5](agent-roles.instructions.md#phase-d-ai-coverage-up-to-max_review_iterations-rounds) for the round-counting and `Blocked` label escalation rule.

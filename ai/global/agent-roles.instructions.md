@@ -107,7 +107,7 @@ If a change proposed by `/simplify` (Phase A) or a finding raised by `/code-revi
 
 Only when all four phases pass (or no reviewable changes):
 
-1. Update Workflow board to **Human Review** (if board data present; Phase D already does this on success, this step is a no-op in that case).
+1. Update Workflow board to **Human Review** (if board data present), unless Phase D already moved it there on success.
 2. Enable auto-merge:
 
    ```bash
