@@ -10,7 +10,7 @@ The AI Coverage phase is a whole-repo ratchet: each orchestrated language's over
 
 Percentages are compared **per language**, never blended into one combined figure (a .NET percentage and a Python percentage are not commensurable). A language with no code or tests present in the repo is skipped. Shell is out of scope (see [Shell](#shell-excluded)).
 
-There is no persisted state between phase invocations beyond what is written into a GitHub PR comment: every AI Coverage phase invocation is a fresh, memoryless session (see [task-workflow.instructions.md](task-workflow.instructions.md)). The only place the main-branch numbers survive between the baseline capture and the later comparison is the `## Coverage Baseline (main)` PR comment defined below.
+There is no persisted state between phase invocations beyond what is written into a GitHub PR comment: every AI Coverage phase invocation is a fresh, memoryless session. The only place the main-branch numbers survive between the baseline capture and the later comparison is the `## Coverage Baseline (main)` PR comment defined below.
 
 ## Main Coverage Baseline Capture (MANDATORY)
 
@@ -62,7 +62,7 @@ Captured at commit `<main-sha>` on <ISO-8601 date>.
 
 ### .NET
 
-Collect each unit test project's `.cobertura.xml` as normal ([Code Coverage](dotnet.instructions.md#code-coverage-mandatory)), then generate the combined `JsonSummary` report and read its `summary.linecoverage` field as described in [Deriving a Single Overall Coverage Percentage](dotnet.instructions.md#deriving-a-single-overall-coverage-percentage).
+Collect each unit test project's `.cobertura.xml` as normal ([Code Coverage](dotnet.instructions.md#code-coverage-mandatory)), then generate the combined report and read its `summary.linecoverage` field as described in [Coverage Reporting with reportgenerator](dotnet.instructions.md#coverage-reporting-with-reportgenerator).
 
 Skip .NET entirely if the repo has no `*.Tests` project ([Identifying Test Projects](dotnet.instructions.md#identifying-test-projects-mandatory)).
 

@@ -129,35 +129,22 @@ dotnet reportgenerator \
 
 **Do not pass multiple assemblies' `.cobertura.xml` files into a single `reportgenerator` run.** If assembly A references types from assembly B, running them together causes B's components to appear in A's coverage report, which falsely lowers A's measured coverage.
 
-When a combined view is needed (e.g. for a summary dashboard), run each assembly individually first, then produce one additional combined report as a separate step:
+When a combined view is needed (e.g. for a summary dashboard, or the coverage ratchet's single whole-repo percentage, see [coverage-ratchet.instructions.md](coverage-ratchet.instructions.md#net)), run each assembly individually first, then produce one additional combined report as a separate step, requesting both report types together:
 
 ```bash
 dotnet reportgenerator \
   -reports:"{repo-root}/coverage/*.coverage.cobertura.xml" \
   -targetdir:{repo-root}/coverage/combined \
-  -reporttypes:Html
+  -reporttypes:"Html;JsonSummary"
 ```
 
-The per-assembly reports remain the authoritative measure of test quality for each project.
-
-### Deriving a Single Overall Coverage Percentage
-
-When a single whole-repo line-coverage percentage is needed (e.g. for the coverage ratchet, see [coverage-ratchet.instructions.md](coverage-ratchet.instructions.md#net)), generate a combined report using `-reporttypes:JsonSummary` instead of `Html`:
+This writes the `Html` dashboard alongside `{repo-root}/coverage/combined/Summary.json`; the overall whole-repo line-coverage percentage is its `summary.linecoverage` field:
 
 ```bash
-dotnet reportgenerator \
-  -reports:"{repo-root}/coverage/*.coverage.cobertura.xml" \
-  -targetdir:{repo-root}/coverage/combined-summary \
-  -reporttypes:JsonSummary
+jq '.summary.linecoverage' {repo-root}/coverage/combined/Summary.json
 ```
 
-This writes `{repo-root}/coverage/combined-summary/Summary.json`; the overall percentage is its `summary.linecoverage` field:
-
-```bash
-jq '.summary.linecoverage' {repo-root}/coverage/combined-summary/Summary.json
-```
-
-This is in addition to, not a replacement for, the per-assembly `Html` reports above; the same assembly A/B cross-contamination caveat applies equally to the combined `JsonSummary` run, so it is only ever used for the single whole-repo figure, never as a per-assembly quality signal.
+The per-assembly reports remain the authoritative measure of test quality for each project; the combined run is only ever used for the single whole-repo figure, never as a per-assembly quality signal. The same assembly A/B cross-contamination caveat applies equally here.
 
 ### Specific Coverage Rules (MANDATORY)
 
