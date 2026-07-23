@@ -28,7 +28,10 @@ Then, before starting any work on an issue or PR, run the hook against every tra
 
 This ensures CI results are unambiguous: pre-existing failures are resolved before any new changes are introduced.
 
-Coverage baselines need no separate capture step here: the AI Coverage phase reads `COVERAGE.md` live from `origin/main` each time it runs (see [coverage-ratchet.instructions.md](coverage-ratchet.instructions.md)), so there is nothing to record before branching and nothing to refresh after a rebase.
+When picking up a **new issue** (branching fresh from `main`, not resuming an existing branch): once the baseline hook passes cleanly, check whether `COVERAGE.md` exists at the repo root.
+
+- If it exists, nothing further is needed here: the AI Coverage phase reads it live from `origin/main` every time it runs (see [coverage-ratchet.instructions.md](coverage-ratchet.instructions.md)), so there is no per-branch capture step and nothing to refresh after a rebase.
+- If it does **not** exist, collect it now, while still on `main`: run the [per-language extraction](coverage-ratchet.instructions.md#per-language-overall-coverage-extraction) procedure for each orchestrated language present, then commit the resulting `COVERAGE.md` on a **new, dedicated branch and issue** — the same pattern as the auto-fix case above, kept separate from the branch/issue for the requested work — and mark the original work item `Blocked` until that branch is merged. This keeps a repo's first coverage baseline out of an unrelated feature/fix PR's diff. (The AI Coverage phase's own [bootstrap rule](coverage-ratchet.instructions.md#committed-coverage-file-mandatory) is a fallback for the rare case this step was skipped, not the primary mechanism.)
 
 ## Pre-Commit Hook Verification (MANDATORY before blocking)
 
