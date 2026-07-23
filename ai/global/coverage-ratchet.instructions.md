@@ -60,7 +60,14 @@ Captured at commit `<sha>` on <ISO-8601 date>.
 
 **Bootstrap**: `COVERAGE.md` reaches `main` for the first time via whichever branch's [Pre-Work Baseline Check](git.instructions.md#pre-work-baseline-check-mandatory-before-starting-any-work) first finds it missing: that branch commits an initial version as its own first commit, before the requested work starts. `origin/main` still won't have the file until that branch merges, so this phase's own comparison (step 2 below) finds nothing to compare against on that same branch too — not a regression, so it must not block. Overwrite `COVERAGE.md` again with the branch's live measurements (its second commit on that branch — expected, not a conflict), treat the gate as passed, and proceed as in [step 5](#ai-coverage-phase-decision-procedure-mandatory). For any later branch, once `main` has a real `COVERAGE.md`, this bootstrap path only recurs if the Pre-Work Baseline Check step was skipped or the branch predates it.
 
-**Conflict on rebase**: `COVERAGE.md` is generated content, not hand-authored — never text-merge conflicting percentages. If a rebase produces a conflict in `COVERAGE.md`, discard both sides and let the next AI Coverage phase run regenerate it fresh from the rebased branch's own measurement.
+**Conflict on rebase**: `COVERAGE.md` is generated content, not hand-authored — never text-merge conflicting percentages. If `git -C <repodir> rebase origin/main` produces a conflict in `COVERAGE.md`, take `main`'s copy:
+
+```bash
+git -C <repodir> checkout --ours -- COVERAGE.md
+git -C <repodir> add COVERAGE.md
+```
+
+(Git's rebase convention reverses the usual meaning: during a rebase, `--ours` is the branch being rebased *onto* — `origin/main` — and `--theirs` is your own commit being replayed, the opposite of a merge.) Continue the rebase as normal. Once it completes **and** the existing post-rebase build-and-test step ([When to Rebase](git-rebasing.instructions.md#when-to-rebase)) passes, re-run the [per-language extraction](#per-language-overall-coverage-extraction) against the rebased working tree and commit the fresh `COVERAGE.md` as part of that same rebase work — do not leave `main`'s stale copy in place, and do not measure before the build/tests are confirmed green.
 
 ## Per-Language Overall Coverage Extraction
 
