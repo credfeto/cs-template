@@ -28,7 +28,7 @@ Then, before starting any work on an issue or PR, run the hook against every tra
 
 This ensures CI results are unambiguous: pre-existing failures are resolved before any new changes are introduced.
 
-When picking up a **new issue** (branching fresh from `main`, not resuming an existing branch): once the baseline hook passes cleanly on `main`, also capture `main`'s whole-repo, per-language coverage numbers before creating the work branch, and post them once the PR exists; see [Initial Capture](coverage-ratchet.instructions.md#initial-capture-pre-work-baseline-check) in [coverage-ratchet.instructions.md](coverage-ratchet.instructions.md).
+Coverage baselines need no separate capture step here: the AI Coverage phase reads `COVERAGE.md` live from `origin/main` each time it runs (see [coverage-ratchet.instructions.md](coverage-ratchet.instructions.md)), so there is nothing to record before branching and nothing to refresh after a rebase.
 
 ## Pre-Commit Hook Verification (MANDATORY before blocking)
 
