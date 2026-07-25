@@ -65,13 +65,17 @@ When picking up an **Issue** that has no existing PR:
 
 After all code changes are pushed and all required CI checks pass, **before** enabling auto-merge:
 
-#### Phase A: Simplify (up to `MAX_REVIEW_ITERATIONS` rounds)
+#### Phase A: Simplify (up to `MAX_SIMPLIFY_ITERATIONS` rounds)
 
 1. Update Workflow board to **AI Simplify** (if board data is present in your CLAUDE.md).
 2. Run: `/simplify` against the diff. It applies reuse, simplification, efficiency, and altitude cleanups directly rather than just reporting them.
 3. If `/simplify` changed any files: run Changelog (correction) against the resulting diff; commit the code changes and, if the entry changed, `CHANGELOG.md` as a separate commit; push; then return to step 2 to re-run against the resulting diff.
 4. Once `/simplify` makes no further changes: proceed to Phase B.
-5. After `MAX_REVIEW_ITERATIONS` rounds where `/simplify` still keeps changing files (not converging): post a PR comment explaining that simplify is not converging, add `Blocked` label, and **STOP**.
+5. `/simplify` has its own iteration budget, separate from `MAX_REVIEW_ITERATIONS`, because it is expected to run more rounds and give up without blocking:
+   - Track each round's diff size (lines changed by that round's `/simplify` commit) against the previous round's.
+   - Once `SIMPLIFY_THRASH_LIMIT` rounds have run, if the current round is thrashing (its diff is flat or larger than the previous round's, i.e. not shrinking): give up immediately, even though `MAX_SIMPLIFY_ITERATIONS` has not been reached.
+   - Otherwise, keep re-running up to `MAX_SIMPLIFY_ITERATIONS` rounds total; once that hard cap is reached without converging to no changes, give up regardless of whether the diff was still shrinking.
+   - Either way, giving up means: post a PR comment noting that simplify did not converge, then proceed to Phase B with the diff as it currently stands. Do not add `Blocked` and do not `STOP` — unlike Phases B-D below, non-convergence in Phase A never blocks the PR, because `/code-review` in Phase B re-covers the same reuse/simplification/efficiency categories as a safety net (see Conflict Resolution below).
 
 #### Phase B: Code review (up to `MAX_REVIEW_ITERATIONS` rounds)
 
