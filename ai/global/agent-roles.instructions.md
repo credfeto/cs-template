@@ -478,3 +478,4 @@ Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](
 
 - Review Dependabot PRs: auto-merge safe patch/minor bumps with no advisories and passing CI.
 - Flag major version bumps and breaking changes to the user. Never merge on CI failure or major bump without confirmation.
+- If you take over or push any commit to a Dependabot (or other bot) PR and its changelog-check CI job then fails, see [Dependabot and Other Bot PRs](changelog.instructions.md#dependabot-and-other-bot-prs): add the missing changelog entry yourself rather than assuming the bot's `Changelog Not Required` label still applies.
