@@ -159,9 +159,22 @@ gh api graphql \
   -f query='mutation($p:ID!,$i:ID!,$f:ID!,$v:String!){updateProjectV2ItemFieldValue(input:{projectId:$p,itemId:$i,fieldId:$f,value:{singleSelectOptionId:$v}}){projectV2Item{id}}}' \
   -f p="${WF_PROJECT_ID}" -f i="${PROJECT_ITEM_ID}" \
   -f f="${WF_STATUS_FIELD_ID}" -f v="<STATUS_OPTION_ID>" > /dev/null
+
+# Step 4: verify the write actually persisted; retry up to 3 times with backoff if not
+for attempt in 1 2 3; do
+  ACTUAL=$(gh api graphql \
+    -f query='query($i:ID!){node(id:$i){... on ProjectV2Item{fieldValues(first:50){nodes{... on ProjectV2ItemFieldSingleSelectValue{optionId field{... on ProjectV2SingleSelectField{id}}}}}}}}' \
+    -f i="${PROJECT_ITEM_ID}" \
+    --jq ".data.node.fieldValues.nodes[] | select(.field.id==\"${WF_STATUS_FIELD_ID}\") | .optionId")
+  [ "$ACTUAL" = "<STATUS_OPTION_ID>" ] && break
+  sleep "$attempt"
+done
+[ "$ACTUAL" = "<STATUS_OPTION_ID>" ] || echo "::warning::Workflow board write did not persist after 3 attempts"
 ```
 
 `addProjectV2ItemById` is idempotent: calling it again for an item already in the project just returns the existing item ID.
+
+**Step 4 is MANDATORY, not optional.** `updateProjectV2ItemFieldValue` can return success (no GraphQL error) on an item that was just added by `addProjectV2ItemById` in Step 2, without the field write actually persisting: a known eventual-consistency race in the Projects v2 API on freshly-added items. Reporting success (a log line, a `core.notice`, a status comment) without this read-back verification is a real bug that shipped and went unnoticed because nothing threw (see `funfair-tech/funfair-server-template` issue #918, fixed in PR #920, for the incident this rule is drawn from). Never skip the verification step to save a round-trip.
 
 ### On-Hold Label
 
