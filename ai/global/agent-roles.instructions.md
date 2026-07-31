@@ -482,7 +482,7 @@ Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](
 - Update body if PR already exists. Add yourself as assignee.
 - Do **not** mark ready or enable auto-merge here; that is the Orchestrator's job after the AI review loop (see [PR Workflow: AI Review Loop](#pr-workflow-ai-review-loop)). Leave the PR as draft.
 
-## CI Monitor _(not currently enabled)_
+## CI Monitor *(not currently enabled)*
 
 - Watch checks after PR is ready: `gh pr checks <number> --watch`.
 - All pass → done. Any fail → hand off to CI Debugger. Repeat until all pass or CI Debugger escalates.
