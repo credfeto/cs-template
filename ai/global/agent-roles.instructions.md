@@ -61,6 +61,8 @@ When picking up an **Issue** that has no existing PR:
    - **Board configured**: human sets board status to **Approved** and removes `Blocked`.
    - **No board**: human posts an approval comment (`approved` / `go ahead` / `looks good` / `lgtm`) and removes `Blocked`.
 
+**Scope of the Approved gate — once a PR exists, this section no longer applies.** The gate above governs only picking up an Issue that has **no existing PR**. A Pull Request is never opened for an Issue until that gate has already been passed by a human — the PR's own existence *is* the authorisation. A PR-phase session must never re-derive or re-check approval from the PR's own Workflow board card: that card is purely a phase marker for the PR Workflow below, not a second approval gate. If a PR's own card still reads "Not Started", "Planning", or "Approved" (e.g. the session that opened the draft PR died before advancing its card, or a freshly-seeded board has not caught up yet), treat that as "Development" and continue with the PR Workflow below — never block pending approval, and never treat it as evidence the linked Issue was never approved (confirmed incident: `credfeto/recommendations-defi-dashboard#412`, where a PR-phase session misread its own lagging "Not Started" card this way and blocked instead of finishing the deferred implementation — [credfeto/credfeto-orchestrator#1276](https://github.com/credfeto/credfeto-orchestrator/issues/1276)). The two cards are kept in step automatically (issue → PR, forward-only) by the orchestrator itself; this is not something a session needs to reconcile by hand.
+
 ### PR Workflow: AI Review Loop
 
 After all code changes are pushed and all required CI checks pass, **before** enabling auto-merge:
