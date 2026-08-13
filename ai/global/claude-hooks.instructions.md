@@ -16,8 +16,8 @@ A `PreToolUse` hook denial (a tool result explaining the call was blocked) means
 
 - Fix the specific thing the denial names and retry **immediately, in the same turn**.
 - Never end a turn saying you are "waiting for it to finish" or "waiting for a completion
-  notification" for a denied command. This matters most acutely in a single-shot session — there
-  is no later turn for that notification to land in, so uncommitted work is silently abandoned —
+  notification" for a denied command. This matters most acutely in a single-shot session: there
+  is no later turn for that notification to land in, so uncommitted work is silently abandoned,
   but the same misread is just as wrong in an interactive session with turns to spare.
 
 ## Read the Denial's Stated Reason Literally (MANDATORY)
