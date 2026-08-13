@@ -11,9 +11,8 @@ and [Never Truncate Test/Commit Commands](task-workflow.instructions.md#never-tr
 
 ## A Denial Means the Command Never Ran (MANDATORY)
 
-A `PreToolUse` hook denial (a tool result explaining the call was blocked, e.g. `Blocked: git
-commands must use "git -C <dir>" format`) means the command **never started**. There is nothing in
-flight and nothing will ever notify you about it later.
+A `PreToolUse` hook denial (a tool result explaining the call was blocked) means the command
+**never started**. There is nothing in flight and nothing will ever notify you about it later.
 
 - Fix the specific thing the denial names and retry **immediately, in the same turn**.
 - Never end a turn saying you are "waiting for it to finish" or "waiting for a completion
@@ -38,12 +37,12 @@ Use the tool's own `run_in_background: true` parameter, never shell-level backgr
 denial-misread-as-in-flight failure described above in live incidents
 (`credfeto/credfeto-orchestrator#1281`).
 
-## Combined Example: Satisfying Two Hooks at Once
+## Satisfy Every Applicable Hook in the Same Retry
 
-The most common interaction is a command that must satisfy both a git-invocation-shape hook and a
-must-be-backgrounded hook in the same call. Satisfying each hook's rule individually by trial and
-error (fix one, get denied by the other, fix that, and so on) is what several live incidents show
-agents doing; instead, satisfy both rules in the one call that is retried:
+Satisfying each hook's rule individually by trial and error (fix one, get denied by the other, fix
+that, and so on) is what several live incidents show agents doing; instead, satisfy every
+applicable rule in the one call that is retried. The most common case is a command that must
+satisfy both a git-invocation-shape hook and a must-be-backgrounded hook at once:
 
 ```text
 git -C <dir> commit -m "..."
