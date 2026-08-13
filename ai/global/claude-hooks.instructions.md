@@ -17,7 +17,7 @@ flight and nothing will ever notify you about it later.
 
 - Fix the specific thing the denial names and retry **immediately, in the same turn**.
 - A denial is not "started, now wait for it"; it is "never started, try again correctly."
-- Never end a turn, or in a single-shot orchestrator-driven session, a session, saying you are
+- Never end a turn — including a single-shot orchestrator-driven session — saying you are
   "waiting for it to finish" or "waiting for a completion notification" for a command that was
   denied. A single-shot session gets no later turn for that notification to land in, so any
   uncommitted work is silently abandoned the moment you stop.
@@ -69,7 +69,7 @@ this file was written:
 | `env-var-blocklist` (data file, not a hook) | N/A | Environment variables (`PATH`, `IFS`, `LD_PRELOAD`, `GIT_*`, and similar) that `reject-obfuscated-commands` refuses to let a command assign, because they change how *other* commands are located, parsed, or attributed. |
 | `enforce-git-dash-c` | Any git subcommand not written as `git -C <dir> <command>` | Keeps every git call explicit about which repository it targets and avoids leaving the shell's working directory changed by a stray `cd`; see [Running Git Commands in a Specific Directory](git.instructions.md#running-git-commands-in-a-specific-directory). |
 | `enforce-git-identity` | Git subcommands that create or rewrite commits (or precede one, like `fetch`) unless git identity and GPG signing are correctly configured | Prevents an unsigned or misattributed commit from being created at all, rather than relying on review to catch it afterwards. |
-| `enforce-background-for-long-running-commands` | `git commit`, `pre-commit` (direct invocation), `dotnet build`, `dotnet test`, `npm test`, and `bun test` unless the call sets `run_in_background: true` | These five commands have no bounded, predictable duration; a foreground run that outlives the tool's own timeout gets killed mid-run, skipping the target process's own cleanup and leaving orphaned state behind. See [Never Truncate Test/Commit Commands](task-workflow.instructions.md#never-truncate-testcommit-commands-mandatory). |
+| `enforce-background-for-long-running-commands` | `git commit`, `pre-commit` (direct invocation), `dotnet build`, `dotnet test`, `npm test`, and `bun test` unless the call sets `run_in_background: true` | See [Never Truncate Test/Commit Commands](task-workflow.instructions.md#never-truncate-testcommit-commands-mandatory) for why these five have no safe foreground timeout. |
 | `block-git-worktree` | `git worktree add` | Worktrees split repo state across multiple linked checkouts sharing one object store; this template's tooling assumes a single checkout per repo directory, and an errant `worktree add` has previously left the primary checkout bare with no work tree of its own. See [Avoid `git worktree`](git.instructions.md#avoid-git-worktree). |
 | `block-dotnet-tool-install` | `dotnet tool install` (local or global) and `dotnet new tool-manifest` | This container's .NET global tools are pinned and baked into the image at build time; installing an unpinned tool at runtime would bypass the dependency-selection review the pinned set went through. |
 
