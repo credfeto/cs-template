@@ -16,18 +16,14 @@ commands must use "git -C <dir>" format`) means the command **never started**. T
 flight and nothing will ever notify you about it later.
 
 - Fix the specific thing the denial names and retry **immediately, in the same turn**.
-- Never end a turn — including a single-shot orchestrator-driven session — saying you are
-  "waiting for it to finish" or "waiting for a completion notification" for a command that was
-  denied. A single-shot session gets no later turn for that notification to land in, so any
-  uncommitted work is silently abandoned the moment you stop.
-- This matters most acutely in a single-shot session, but the underlying misread is exactly as
-  wrong in an interactive session that has turns to spare; do not let extra turns excuse
-  re-checking a denied call as if it might still complete on its own.
+- Never end a turn saying you are "waiting for it to finish" or "waiting for a completion
+  notification" for a denied command. This matters most acutely in a single-shot session — there
+  is no later turn for that notification to land in, so uncommitted work is silently abandoned —
+  but the same misread is just as wrong in an interactive session with turns to spare.
 
 ## Read the Denial's Stated Reason Literally (MANDATORY)
 
-Each hook names exactly what is wrong; fix that specific thing rather than guessing at a different
-cause:
+What "the specific thing" above means in practice:
 
 - `git commands must use "git -C <dir>" format` means add `-C <dir>` to that git invocation, not a
   general git problem.
@@ -53,7 +49,7 @@ agents doing; instead, satisfy both rules in the one call that is retried:
 git -C <dir> commit -m "..."
 ```
 
-invoked with `run_in_background: true` set on that same tool call, not as a second attempt.
+invoked with `run_in_background: true` set on that same tool call.
 
 ## Reference: Installed Hook Set
 
@@ -66,7 +62,7 @@ this file was written:
 | `command-allowlist` (data file, not a hook) | N/A | Known-good command names for `reject-obfuscated-commands`; a command not on this list (and not on `command-blocklist`, which wins) is rejected outright. |
 | `command-blocklist` (data file, not a hook) | N/A | Known-bad command names for `reject-obfuscated-commands` (e.g. `eval`, `source`, `bash`) that are rejected even though they are plain bare words, because each one hides or re-enters execution in a way this check cannot see through. |
 | `env-var-blocklist` (data file, not a hook) | N/A | Environment variables (`PATH`, `IFS`, `LD_PRELOAD`, `GIT_*`, and similar) that `reject-obfuscated-commands` refuses to let a command assign, because they change how *other* commands are located, parsed, or attributed. |
-| `enforce-git-dash-c` | Any git subcommand not written as `git -C <dir> <command>` | Keeps every git call explicit about which repository it targets and avoids leaving the shell's working directory changed by a stray `cd`; see [Running Git Commands in a Specific Directory](git.instructions.md#running-git-commands-in-a-specific-directory). |
+| `enforce-git-dash-c` | Any git subcommand not written as `git -C <dir> <command>` | See [Running Git Commands in a Specific Directory](git.instructions.md#running-git-commands-in-a-specific-directory). |
 | `enforce-git-identity` | Git subcommands that create or rewrite commits (or precede one, like `fetch`) unless git identity and GPG signing are correctly configured | Prevents an unsigned or misattributed commit from being created at all, rather than relying on review to catch it afterwards. |
 | `enforce-background-for-long-running-commands` | `git commit`, `pre-commit` (direct invocation), `dotnet build`, `dotnet test`, `npm test`, and `bun test` unless the call sets `run_in_background: true` | See [Never Truncate Test/Commit Commands](task-workflow.instructions.md#never-truncate-testcommit-commands-mandatory) for why these five have no safe foreground timeout. |
 | `block-git-worktree` | `git worktree add` | Worktrees split repo state across multiple linked checkouts sharing one object store; this template's tooling assumes a single checkout per repo directory, and an errant `worktree add` has previously left the primary checkout bare with no work tree of its own. See [Avoid `git worktree`](git.instructions.md#avoid-git-worktree). |
@@ -76,11 +72,3 @@ If a command is blocked by a hook not listed here, or this table no longer match
 `$HOME/.claude/hooks` on a given container, treat the table as stale rather than the denial as
 wrong: read the hook's own header comment (each one documents its rationale) before assuming it is
 a bug.
-
-## Background
-
-Drawn from live evidence gathered while fixing `credfeto/credfeto-orchestrator#1281` and `#1282`
-(the failure mode is described above). That fix added the same denial-handling guidance to
-`credfeto-orchestrator`'s own container-prompt generator, which only reaches orchestrator-driven,
-single-shot container sessions. This file makes the same knowledge available to every session type
-that loads this template's global instructions, interactive included.
