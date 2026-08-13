@@ -29,26 +29,18 @@ What "the specific thing" above means in practice:
 - `git commit must run with run_in_background: true` means add that tool parameter, not switch to
   a different commit approach.
 
+Fixing one hook's violation at a time and retrying can trigger a second hook's denial on the same
+call, so satisfy every applicable rule in the one call that is retried rather than discovering them
+one by one. The most common case is a command that must satisfy both a git-invocation-shape hook
+and a must-be-backgrounded hook at once: `git -C <dir> commit -m "..."` invoked with
+`run_in_background: true` set on that same tool call.
+
 ## Prefer the Tool's Own Backgrounding Parameter (MANDATORY)
 
 Use the tool's own `run_in_background: true` parameter, never shell-level backgrounding (`&`,
 `nohup ... &`, `disown`). Shell-level backgrounding is blocked outright by
-`enforce-background-for-long-running-commands` (see below) and has caused the exact
-denial-misread-as-in-flight failure described above in live incidents
-(`credfeto/credfeto-orchestrator#1281`).
-
-## Satisfy Every Applicable Hook in the Same Retry
-
-Satisfying each hook's rule individually by trial and error (fix one, get denied by the other, fix
-that, and so on) is what several live incidents show agents doing; instead, satisfy every
-applicable rule in the one call that is retried. The most common case is a command that must
-satisfy both a git-invocation-shape hook and a must-be-backgrounded hook at once:
-
-```text
-git -C <dir> commit -m "..."
-```
-
-invoked with `run_in_background: true` set on that same tool call.
+`enforce-background-for-long-running-commands` (see below) and produces the same
+denial-misread-as-in-flight failure described above.
 
 ## Reference: Installed Hook Set
 
@@ -57,7 +49,7 @@ this file was written:
 
 | Hook | Blocks | Why |
 | --- | --- | --- |
-| `reject-obfuscated-commands` | Any Bash command not built from plain, obviously-spelled command words (indirect execution, sub-shells, wrapper-flag smuggling) | Text/regex scanning for banned patterns is an arms race that never converges (eight bypass rounds found in the prior hand-rolled approach: `credfeto/cs-template#1159`/`#1105`); this hook parses with a real shell parser and applies policy to the resulting AST instead. Reads `command-allowlist`, `command-blocklist`, and `env-var-blocklist` as its data tables. |
+| `reject-obfuscated-commands` | Any Bash command not built from plain, obviously-spelled command words (indirect execution, sub-shells, wrapper-flag smuggling) | Text/regex scanning for banned patterns is an arms race that never converges against a determined bypass attempt; this hook parses with a real shell parser and applies policy to the resulting AST instead. Reads `command-allowlist`, `command-blocklist`, and `env-var-blocklist` as its data tables. |
 | `command-allowlist` (data file, not a hook) | N/A | Known-good command names for `reject-obfuscated-commands`; a command not on this list (and not on `command-blocklist`, which wins) is rejected outright. |
 | `command-blocklist` (data file, not a hook) | N/A | Known-bad command names for `reject-obfuscated-commands` (e.g. `eval`, `source`, `bash`) that are rejected even though they are plain bare words, because each one hides or re-enters execution in a way this check cannot see through. |
 | `env-var-blocklist` (data file, not a hook) | N/A | Environment variables (`PATH`, `IFS`, `LD_PRELOAD`, `GIT_*`, and similar) that `reject-obfuscated-commands` refuses to let a command assign, because they change how *other* commands are located, parsed, or attributed. |
