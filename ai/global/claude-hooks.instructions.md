@@ -16,7 +16,6 @@ commands must use "git -C <dir>" format`) means the command **never started**. T
 flight and nothing will ever notify you about it later.
 
 - Fix the specific thing the denial names and retry **immediately, in the same turn**.
-- A denial is not "started, now wait for it"; it is "never started, try again correctly."
 - Never end a turn — including a single-shot orchestrator-driven session — saying you are
   "waiting for it to finish" or "waiting for a completion notification" for a command that was
   denied. A single-shot session gets no later turn for that notification to land in, so any
@@ -80,9 +79,8 @@ a bug.
 
 ## Background
 
-Drawn from live evidence gathered while fixing `credfeto/credfeto-orchestrator#1281` ("Agent
-misreads a hook-blocked backgrounded `git commit` as in-flight, waits for an unreachable
-notification, and silently loses its work") and `#1282`. That fix added the same denial-handling
-guidance to `credfeto-orchestrator`'s own container-prompt generator, which only reaches
-orchestrator-driven, single-shot container sessions. This file makes the same knowledge available
-to every session type that loads this template's global instructions, interactive included.
+Drawn from live evidence gathered while fixing `credfeto/credfeto-orchestrator#1281` and `#1282`
+(the failure mode is described above). That fix added the same denial-handling guidance to
+`credfeto-orchestrator`'s own container-prompt generator, which only reaches orchestrator-driven,
+single-shot container sessions. This file makes the same knowledge available to every session type
+that loads this template's global instructions, interactive included.
