@@ -42,6 +42,13 @@ Use the tool's own `run_in_background: true` parameter, never shell-level backgr
 `enforce-background-for-long-running-commands` (see below) and produces the same
 denial-misread-as-in-flight failure described above.
 
+## Prefer Glob Over find for Simple File Listing (MANDATORY)
+
+Use the `Glob` tool, not `find`, to list files matching a name/path pattern inside the workspace - it
+is read-only by construction, always available, and does not go through the Bash-command hook chain
+at all. Reach for `find` only when the need is something `Glob` cannot express: ownership/permission
+predicates (`-user`, `-group`, `-perm`), time predicates (`-mtime`, `-newer`), or `-exec`.
+
 ## Reference: Installed Hook Set
 
 The exact hook set installed at `$HOME/.claude/hooks` (from `install-claude-hooks`) at the time
