@@ -110,6 +110,16 @@ Before any command that can discard uncommitted work (`git reset --hard`, `git c
 - Ensure `main` is up-to-date with `origin` before starting.
 - Continue in the same branch until the task changes.
 - Before continuing work on an existing branch, check if `origin/main` has advanced; if so, rebase first. This is done as part of the [Pre-Work Baseline Check](#pre-work-baseline-check-mandatory-before-starting-any-work) above, before the baseline hook runs; see [git-rebasing.instructions.md](git-rebasing.instructions.md) for the rebase procedure and version-conflict resolution.
+- **Before creating a new branch for an issue, check whether one already exists for it**: a previous session may have pushed work and then been interrupted before ever opening a PR.
+
+  ```bash
+  gh api "repos/<owner>/<repo>/branches" --paginate --jq '.[].name' \
+    | grep -E "^[A-Za-z]+/<issue-number>([^0-9]|$)"
+  ```
+
+  - No match: branch fresh from `main` as normal.
+  - Match found, not ahead of `main`: treat the same as no match; branch fresh from `main`.
+  - Match found and ahead of `main`: check it out and continue from there instead of branching again; rebase onto `origin/main` first if it has advanced (see [Pre-Work Baseline Check](#pre-work-baseline-check-mandatory-before-starting-any-work) above). Do not open a second branch/PR for the same issue.
 
 ## Pushing Branches
 
