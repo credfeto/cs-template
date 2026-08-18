@@ -113,8 +113,7 @@ Before any command that can discard uncommitted work (`git reset --hard`, `git c
 - **Before creating a new branch for an issue, check whether one already exists for it**: a previous session may have pushed work and then been interrupted before ever opening a PR. This is the branch-only counterpart to the PR check in [task-workflow.instructions.md's "Bot-Created PRs" section](task-workflow.instructions.md#bot-created-prs-mandatory-treat-as-your-own) ("Checking for existing work before branching"), which only catches work that already has a PR open.
 
   ```bash
-  gh api "repos/<owner>/<repo>/branches" --paginate --jq '.[].name' \
-    | grep -E "^[A-Za-z]+/<issue-number>\b"
+  git ls-remote --heads origin "*/<issue-number>-*"
   ```
 
   - No match: branch fresh from `main` as normal.
