@@ -293,7 +293,7 @@ Every sequence below starts with the [Pre-Work Baseline Check](git.instructions.
 | CI failure (unknown cause) | Pre-Work Baseline Check → CI Debugger |
 | Dependabot / dependency update | Pre-Work Baseline Check → Dependency Updater |
 
-Rows starting with `Changelog (placeholder)` assume the work item takes a changelog entry at all. If it hits the skip condition in [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), drop the leading `Changelog (placeholder) → Committer → PR Submitter` and start the row at the first `Code Writer` step instead — the PR then opens from that first real commit, as it did before this split existed.
+Rows starting with `Changelog (placeholder)` assume the work item takes a changelog entry at all. If it hits the skip condition in [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), the row runs unchanged: the `Changelog (placeholder)` step commits a `.deleteme.now` placeholder file instead of a `CHANGELOG.md` entry (see [agent-roles.instructions.md](agent-roles.instructions.md#changelog)), so the branch → placeholder commit → draft PR → STOP pattern stays uniform across template and non-template repos.
 
 For detailed agent role definitions, see [agent-roles.instructions.md](agent-roles.instructions.md).
 

@@ -115,8 +115,9 @@ If a change proposed by `/simplify` (Phase A) or a finding raised by `/code-revi
 
 Only when all four phases pass (or no reviewable changes):
 
-1. Update Workflow board to **Human Review** (if board data present), unless Phase D already moved it there on success.
-2. Enable auto-merge:
+1. Safety net: confirm `.deleteme.now` is not present in `git diff origin/main...HEAD --name-only`. A template-skip repo's placeholder should already have been removed by Code Writer's first real commit (see [Changelog](#changelog)) and flagged by Code Reviewer's Compliance sub-agent if missed; if it is still present, remove it in its own commit, re-run Code Tester, then continue.
+2. Update Workflow board to **Human Review** (if board data present), unless Phase D already moved it there on success.
+3. Enable auto-merge:
 
    ```bash
    gh pr merge --auto --merge <number> --repo <owner/repo>
@@ -420,6 +421,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - Rule Breaking: files that change linting rules or build rules in a way that weakens the repo's quality gates.
 - Language/framework rules: e.g. dotnet, shell, SQL instruction compliance where those files are present.
 - Documentation rules: README, CHANGELOG, and comment conventions from `documentation.instructions.md`.
+- Leftover placeholder: a `.deleteme.now` file still present in the diff (see [Changelog](#changelog)); it should have been removed by Code Writer's first real commit.
 
 ## Repo Auditor
 
@@ -468,12 +470,12 @@ Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](
 
 - **Placeholder**: runs first, before Code Writer touches any code, so the branch/PR can exist from the start of work on the item. Add a stub entry (best-guess `Type`, message `TBD - to be finalized after review`). Hand off straight to Committer for a changelog-only commit, then PR Submitter to open the draft PR.
 - **Correction**: replaces the placeholder (or a prior correction) once there is a real diff to describe. Runs after Code Tester and Code Reviewer are satisfied in the initial development loop, never before. Also re-runs after any AI Review Loop phase (Simplify, Code Review, Security Review — see [PR Workflow: AI Review Loop](#pr-workflow-ai-review-loop)) that actually changed files, so the entry keeps matching the diff those phases produced. Read `git diff origin/main...HEAD`, remove the previous entry and add the corrected one (`dotnet changelog` has no in-place edit).
-- **Skip case**: if the work item qualifies for a skip under [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), skip Placeholder entirely — there is nothing to commit yet, so Committer/PR Submitter cannot open a PR from an empty branch. Code Writer runs first as before, and PR Submitter opens the PR from that first real commit. Correction is likewise a no-op for these items.
+- **Skip case**: if the work item qualifies for a skip under [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), commit a `.deleteme.now` placeholder file at the repo root instead of a `CHANGELOG.md` entry (a short "delete before merge" comment as its content), so the branch → placeholder commit → draft PR → STOP pattern still works uniformly across template and non-template repos. Hand off straight to Committer for a placeholder-only commit, then PR Submitter to open the draft PR, exactly as for a real changelog placeholder. Code Writer removes `.deleteme.now` as part of its first real commit. Correction is a no-op for these items, same as before.
 
 ## Committer
 
 - Use `git` CLI only; never `gh` or the GitHub API for commit/push.
-- For the placeholder changelog entry (no code exists yet): commit `CHANGELOG.md` alone.
+- For the placeholder step (no code exists yet): commit the placeholder artefact alone — `CHANGELOG.md`, or `.deleteme.now` for template-skip repos (see [Changelog](#changelog)).
 - Otherwise: commit code+tests as one GPG-signed commit (Conventional Commits, original prompt in body as `Prompt: …`), and `CHANGELOG.md` as a separate GPG-signed commit whenever Changelog produced a correction alongside it.
 - Push immediately after. Do not open the PR; that is PR Submitter's job.
 - Do not use `--no-verify`. If a pre-commit hook fails: capture output, report to the producing agent, re-stage and retry. Escalate to Orchestrator after 3 failed cycles.
