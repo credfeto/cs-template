@@ -127,7 +127,7 @@ Only when all four phases pass (or no reviewable changes):
 
 ### Workflow Board
 
-Each generated `CLAUDE.md` may contain Workflow board data in this format:
+Each generated `CLAUDE.md` may contain Workflow board data in this format, as a cache of the lookup below so most sessions can skip the API round-trip:
 
 ```text
 Workflow board (see agent-roles.instructions.md for update commands):
@@ -145,7 +145,28 @@ Workflow board (see agent-roles.instructions.md for update commands):
   WF_COMPLETE=<option-id>
 ```
 
-If this section is **absent** from your CLAUDE.md, skip all board updates silently.
+If this section is **absent** from your CLAUDE.md, look up the repo's Workflow board instead of skipping updates:
+
+#### Looking Up the Board (when CLAUDE.md has no Workflow Board section)
+
+Every repo with a board names its GitHub Projects (v2) board **"Workflow"**, linked directly to that repo.
+
+```bash
+# Step 1: find the "Workflow" project linked to this repo (gives WF_PROJECT_ID)
+WF_PROJECT_ID=$(gh api graphql \
+  -f query='query($owner:String!,$repo:String!){repository(owner:$owner,name:$repo){projectsV2(first:20){nodes{id title}}}}' \
+  -f owner=<owner> -f repo=<repo> \
+  --jq '.data.repository.projectsV2.nodes[] | select(.title=="Workflow") | .id')
+
+# Step 2: resolve the Status field and its option IDs (gives WF_STATUS_FIELD_ID and each WF_* option id)
+gh api graphql \
+  -f query='query($project:ID!){node(id:$project){... on ProjectV2{field(name:"Status"){... on ProjectV2SingleSelectField{id options{id name}}}}}}' \
+  -f project="${WF_PROJECT_ID}"
+```
+
+Match each returned option's `name` to its `WF_*` variable: `Not Started`→`WF_NOT_STARTED`, `Planning`→`WF_PLANNING`, `Approved`→`WF_APPROVED`, `Development`→`WF_DEVELOPMENT`, `AI Simplify`→`WF_AI_SIMPLIFY`, `AI Review`→`WF_AI_REVIEW`, `AI Security Review`→`WF_AI_SECURITY_REVIEW`, `AI Coverage`→`WF_AI_COVERAGE`, `Human Review`→`WF_HUMAN_REVIEW`, `Complete`→`WF_COMPLETE`. The field's own `id` is `WF_STATUS_FIELD_ID`. Use these looked-up values for the rest of the session exactly as if they had come from CLAUDE.md.
+
+**Only if Step 1 finds no project titled "Workflow" linked to the repo** — there genuinely is no board — skip all board updates silently.
 
 To update the board status, run these two commands in sequence. Replace `<STATUS_OPTION_ID>` with the appropriate `WF_*` value from the CLAUDE.md, and `<ISSUE_OR_PR_NUMBER>` with the issue or PR number:
 
