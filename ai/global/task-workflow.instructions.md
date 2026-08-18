@@ -107,6 +107,7 @@ github is configured to automatically create PRs from pushed branches. These PRs
 **Checking for existing work before branching (MANDATORY):**
 
 - Check branch names in all open PRs, not just PR authors. If any open PR's `headRefName` contains the issue number, that is your work from a prior session; resume it instead of creating a new branch.
+- This only catches work that already has a PR open. A branch pushed but never turned into a PR (session died first) needs the separate check in [git.instructions.md's Branching section](git.instructions.md#branching).
 
 ## PR Title, Body, and Label Sync (MANDATORY)
 

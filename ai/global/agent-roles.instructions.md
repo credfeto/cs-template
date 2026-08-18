@@ -27,8 +27,8 @@ When picking up an **Issue** that has no existing PR:
 
    - `false` → Plan mode (steps 2–3 below).
    - `true` → Plan exists. How approval is signalled depends on whether a Workflow board is configured (the orchestrator passes this context in your CLAUDE.md):
-     - **Board configured**: check whether a human has set the board status to **Approved**. If yes → skip to implementation, checking for an existing branch first ([git.instructions.md#branching](git.instructions.md#branching) - a previous session may have pushed work and died before opening a PR). If not yet → revise or re-post the plan, mark Blocked, STOP (step 2).
-     - **No board**: check for a human approval comment posted **after** the plan comment (keywords: `approved` / `go ahead` / `looks good` / `lgtm`, case-insensitive, whole word). If found → skip to implementation, checking for an existing branch first ([git.instructions.md#branching](git.instructions.md#branching) - a previous session may have pushed work and died before opening a PR). If not → revise or re-post, mark Blocked, STOP (step 2).
+     - **Board configured**: check whether a human has set the board status to **Approved**. If yes → skip to implementation, checking for an existing branch first (see [git.instructions.md#branching](git.instructions.md#branching)). If not yet → revise or re-post the plan, mark Blocked, STOP (step 2).
+     - **No board**: check for a human approval comment posted **after** the plan comment (keywords: `approved` / `go ahead` / `looks good` / `lgtm`, case-insensitive, whole word). If found → skip to implementation, checking for an existing branch first (see [git.instructions.md#branching](git.instructions.md#branching)). If not → revise or re-post, mark Blocked, STOP (step 2).
 
 2. **Plan mode**: produce a concrete implementation plan using `/plan`, then post it as an issue comment in **exactly** this format:
 
