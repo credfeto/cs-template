@@ -116,9 +116,8 @@ Before any command that can discard uncommitted work (`git reset --hard`, `git c
   git ls-remote --heads origin "*/<issue-number>-*"
   ```
 
-  - No match: branch fresh from `main` as normal.
-  - Match found, not ahead of `main`: treat the same as no match; branch fresh from `main`.
-  - Match found and ahead of `main`: check it out and continue from there instead of branching again; rebase onto `origin/main` first if it has advanced (see [Pre-Work Baseline Check](#pre-work-baseline-check-mandatory-before-starting-any-work) above). Do not open a second branch/PR for the same issue.
+  - No match, or a match found but not ahead of `main`: branch fresh from `main` as normal.
+  - Match found and ahead of `main` (check with `git rev-list --count origin/main..<branch>`): check it out and continue from there instead of branching again, rebasing first per the bullet above if `origin/main` has advanced.
 
 ## Pushing Branches
 
