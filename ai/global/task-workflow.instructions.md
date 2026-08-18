@@ -293,7 +293,7 @@ Every sequence below starts with the [Pre-Work Baseline Check](git.instructions.
 | CI failure (unknown cause) | Pre-Work Baseline Check → CI Debugger |
 | Dependabot / dependency update | Pre-Work Baseline Check → Dependency Updater |
 
-Rows starting with `Changelog (placeholder)` assume the work item takes a changelog entry at all. If it hits the skip condition in [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), the row runs unchanged: the `Changelog (placeholder)` step commits a `.deleteme.now` placeholder file instead of a `CHANGELOG.md` entry (see [agent-roles.instructions.md](agent-roles.instructions.md#changelog) for why).
+Rows starting with `Changelog (placeholder)` assume the work item takes a changelog entry at all. If it hits the skip condition in [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), the row runs unchanged — see [agent-roles.instructions.md](agent-roles.instructions.md#changelog) for what the Changelog agent commits instead.
 
 For detailed agent role definitions, see [agent-roles.instructions.md](agent-roles.instructions.md).
 
