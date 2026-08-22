@@ -18,12 +18,15 @@
     </PropertyGroup>
 
     <!-- Package Icon -->
-    <PropertyGroup Condition="$(IsPacking) == 'True' AND Exists('$(SolutionDir)packageicon.png')">
+    <PropertyGroup>
+        <_PackageIconFile>$([System.IO.Path]::Combine('$(SolutionDir)', 'packageicon.png'))</_PackageIconFile>
+    </PropertyGroup>
+    <PropertyGroup Condition="$(IsPacking) == 'True' AND Exists('$(_PackageIconFile)')">
         <PackageIcon>packageicon.png</PackageIcon>
         <PackageIconUrl>https://avatars.githubusercontent.com/u/29401895</PackageIconUrl>
     </PropertyGroup>
-    <ItemGroup Condition="$(IsPacking) == 'True' AND Exists('$(SolutionDir)packageicon.png')">
-        <None Include="$(SolutionDir)packageicon.png" Pack="true" PackagePath="\" />
+    <ItemGroup Condition="$(IsPacking) == 'True' AND Exists('$(_PackageIconFile)')">
+        <None Include="$(_PackageIconFile)" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <!-- License -->
