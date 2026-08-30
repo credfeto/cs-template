@@ -164,11 +164,13 @@ WF_PROJECT_ID=$(gh api graphql \
   -f owner=<owner> -f repo=<repo> \
   --jq '.data.repository.projectsV2.nodes[] | select(.title=="Workflow") | .id')
 
-# Step 2: resolve the Status field and its option IDs (gives WF_STATUS_FIELD_ID and each WF_* option id)
+# Step 2: resolve the Workflow Status field and its option IDs (gives WF_STATUS_FIELD_ID and each WF_* option id)
 gh api graphql \
-  -f query='query($project:ID!){node(id:$project){... on ProjectV2{field(name:"Status"){... on ProjectV2SingleSelectField{id options{id name}}}}}}' \
+  -f query='query($project:ID!){node(id:$project){... on ProjectV2{field(name:"Workflow Status"){... on ProjectV2SingleSelectField{id options{id name}}}}}}' \
   -f project="${WF_PROJECT_ID}"
 ```
+
+**Field name is `"Workflow Status"`, never the bare `"Status"`.** Every "Workflow" project also carries GitHub's own built-in `Status` field (default options: Todo/In Progress/Done) alongside the custom `Workflow Status` field the orchestrator creates (see `_wf_create_project` in `credfeto-orchestrator`'s `lib/workflow-board`) — the two coexist on the same project. Querying `field(name:"Status")` silently resolves to the wrong, built-in field: it returns real option IDs (so nothing errors), but none of them map to any `WF_*` value, which was previously misread as "this board has no Approved option" / "no board configured" instead of "wrong field name" (confirmed live: `credfeto/credfeto-orchestrator#1400`, where this caused an issue to sit with no board card and no way to mark it Approved). Always query by the exact string `"Workflow Status"`.
 
 Match each returned option's `name` to its `WF_*` variable: `Not Started`→`WF_NOT_STARTED`, `Planning`→`WF_PLANNING`, `Approved`→`WF_APPROVED`, `Development`→`WF_DEVELOPMENT`, `AI Simplify`→`WF_AI_SIMPLIFY`, `AI Review`→`WF_AI_REVIEW`, `AI Security Review`→`WF_AI_SECURITY_REVIEW`, `AI Coverage`→`WF_AI_COVERAGE`, `Human Review`→`WF_HUMAN_REVIEW`, `Complete`→`WF_COMPLETE`. The field's own `id` is `WF_STATUS_FIELD_ID`. Use these looked-up values for the rest of the session exactly as if they had come from CLAUDE.md.
 
