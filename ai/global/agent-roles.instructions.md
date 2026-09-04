@@ -81,7 +81,7 @@ After all code changes are pushed and all required CI checks pass, **before** en
    - Track each round's diff size (lines changed by that round's `/simplify` commit) against the previous round's.
    - Once `SIMPLIFY_THRASH_LIMIT` rounds have run, if the current round is thrashing (its diff is flat or larger than the previous round's, i.e. not shrinking): give up immediately, even though `MAX_SIMPLIFY_ITERATIONS` has not been reached.
    - Otherwise, keep re-running up to `MAX_SIMPLIFY_ITERATIONS` rounds total; once that hard cap is reached without converging to no changes, give up regardless of whether the diff was still shrinking.
-   - Either way, giving up means: post a PR comment noting that simplify did not converge, run step 4's sweep on the diff as it currently stands, excluding any construct a round reverted, then proceed to Phase B. Do not add `Blocked` and do not `STOP`: non-convergence in Phase A never blocks the PR, because `/code-review` in Phase B re-covers the same reuse/simplification/efficiency categories as a safety net (see Conflict Resolution below). Phases B and C below have their own, similarly non-blocking, self-detected-non-convergence exit; exhausting either phase's numeric round cap still blocks (see each phase's step 4). Phase D's coverage gate has its own, separately documented blocking conditions, not limited to cap exhaustion (see Phase D step 3 below).
+   - Either way, giving up means: post a PR comment noting that simplify did not converge, run step 4 in full (sweep, commit, changelog correction, push, and the 25-file gate) on the diff as it currently stands, then proceed to Phase B. Do not add `Blocked` (other than for the 25-file sweep gate) and do not `STOP`: non-convergence in Phase A never blocks the PR, because `/code-review` in Phase B re-covers the same reuse/simplification/efficiency categories as a safety net (see Conflict Resolution below). Phases B and C below have their own, similarly non-blocking, self-detected-non-convergence exit; exhausting either phase's numeric round cap still blocks (see each phase's step 4). Phase D's coverage gate has its own, separately documented blocking conditions, not limited to cap exhaustion (see Phase D step 3 below).
 
 #### Phase B: Code review (up to `MAX_CODE_REVIEW_ITERATIONS` rounds)
 
@@ -96,7 +96,7 @@ After all code changes are pushed and all required CI checks pass, **before** en
      ```
 
    - Otherwise, if substantially repeating a prior round (not finding anything new; not converging) AND at least `MIN_REVIEW_CONVERGENCE_ROUNDS` rounds have now run: post a PR comment summarising the unresolved findings and stating that code review is not converging, advance the board to **AI Security Review** (if board data present), post a one-line status comment, then proceed to Phase C. Do NOT add `Blocked`: this means no new correctness issues are surfacing, not that a known one is safe to ignore; the posted comment is what carries the unresolved findings forward to Human Review.
-   - Otherwise (either substantially new, or a repeat but fewer than `MIN_REVIEW_CONVERGENCE_ROUNDS` rounds have run so far, so one failed fix attempt is not yet enough evidence to give up, and the round cap has not been reached): fix each construct (findings grouped by construct) in its own commit, with a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory); after each fix and its sweep, run Changelog (correction) and commit `CHANGELOG.md` separately if the entry changed; push; return to step 2.
+   - Otherwise (either substantially new, or a repeat but fewer than `MIN_REVIEW_CONVERGENCE_ROUNDS` rounds have run so far, so one failed fix attempt is not yet enough evidence to give up, and the round cap has not been reached): fix each construct (findings grouped by construct) in its own commit, with a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) (findings confined to files a sweep added are not substantively new for the convergence judgment above); after each fix and its sweep, run Changelog (correction) and commit `CHANGELOG.md` separately if the entry changed; push; return to step 2.
 
 #### Conflict Resolution: Simplify/Code Review vs. Static Analyzer
 
@@ -110,7 +110,7 @@ If a change proposed by `/simplify` (Phase A) or a finding raised by `/code-revi
 4. This mirrors Phase B step 4 exactly (substituting security-review for code-review); keep both in sync when editing either. Judge convergence yourself from the PR's history of prior security-review comments: are this round's findings substantively new/distinct, or substantially a repeat of findings already reported (and left unresolved, or fixed and now recurring) in an earlier round? `MIN_REVIEW_CONVERGENCE_ROUNDS` must be set below `MAX_SECURITY_REVIEW_ITERATIONS`; otherwise the round-cap bullet below always fires first and the non-blocking exit can never trigger.
    - If `MAX_SECURITY_REVIEW_ITERATIONS` rounds have already run (judged from the PR's history of security-review comments) and findings remain, whether or not this round's findings are themselves new: post a PR comment listing the unresolved findings, add `Blocked` label, **STOP**.
    - Otherwise, if substantially repeating a prior round (not finding anything new; not converging) AND at least `MIN_REVIEW_CONVERGENCE_ROUNDS` rounds have now run: post a PR comment summarising the unresolved findings and stating that security review is not converging, advance the board to **AI Coverage** (if board data present), post a one-line status comment, then proceed to Phase D. Do NOT add `Blocked`: the same principle as Phase B's exit applies here (see Phase B step 4 above).
-   - Otherwise (either substantially new, or a repeat but fewer than `MIN_REVIEW_CONVERGENCE_ROUNDS` rounds have run so far, so one failed fix attempt is not yet enough evidence to give up, and the round cap has not been reached): post findings as a PR comment if not already inline, fix each construct (findings grouped by construct) in its own commit, with a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory); after each fix and its sweep, run Changelog (correction) and commit `CHANGELOG.md` separately if the entry changed; push; return to step 2.
+   - Otherwise (either substantially new, or a repeat but fewer than `MIN_REVIEW_CONVERGENCE_ROUNDS` rounds have run so far, so one failed fix attempt is not yet enough evidence to give up, and the round cap has not been reached): post findings as a PR comment if not already inline, fix each construct (findings grouped by construct) in its own commit, with a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) (findings confined to files a sweep added are not substantively new for the convergence judgment above); after each fix and its sweep, run Changelog (correction) and commit `CHANGELOG.md` separately if the entry changed; push; return to step 2.
 
 #### Phase D: AI Coverage (up to `MAX_COVERAGE_ITERATIONS` rounds)
 
@@ -291,8 +291,8 @@ The same rule applies when picking up an **issue**: if any comment on that issue
 Reply to every PR or issue comment that prompted an action. "Every PR or issue comment" spans both comment surfaces: top-level PR/issue comments and review summaries (`gh pr view <n> --json comments,reviews`) **and** inline/diff-level review comments (`gh api repos/<owner>/<repo>/pulls/<n>/comments`); a review can carry an empty top-level body with the actual feedback only in an inline comment, so both must be checked before concluding there is nothing to reply to.
 
 - Code change made: reply with `Fixed in <commit-sha>: <one sentence describing what changed and why>`.
-- [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) found further occurrences: add `Swept in <sweep-sha>: <files touched>` on the next line (the fix SHA when every hit was in a file the fix touched); the per-file reasons are in that commit's body.
-- Already fixed by an earlier sweep in this PR (no new commit): reply with `Already swept in <sweep-sha>`.
+- [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) found further occurrences: add `Swept in <sha>: <files touched>` on the next line, one line per commit that carries sweep hunks (the fix SHA when every hit was in a file the fix touched); the per-file reasons are in that commit's body.
+- Already fixed by an earlier sweep in this PR (no new commit): reply with `Already swept in <sha>`, citing the commit whose body carries the `Construct:` line.
 - Question answered inline (no code change): reply with the full answer.
 - No reply means no acknowledgement; always close the loop.
 
@@ -340,6 +340,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - Check coverage against `git diff origin/main...HEAD`.
 - On build failure, test failure, or uncovered code: report file paths/line ranges to the calling agent; stop, do not proceed.
 - Loop with Code Writer until build passes, all tests pass, and all new/changed code is covered.
+- Carry any sweep record in the incoming hand-off through to the outgoing report unchanged.
 - Do not modify code or tests; report and verify only.
 
 ## Code Reviewer
@@ -347,7 +348,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - Run `git diff origin/main...HEAD`.
 - Launch all the sub-agents **in parallel**: Reuse, Quality, Efficiency, Correctness, Security, Compliance.
 - Each sub-agent reports `{"clean": true}` or `{"clean": false, "findings": [{"file": "...", "line": ..., "issue": "...", "suggestion": "..."}]}`.
-- Fix each construct (real findings grouped by construct) in its own commit, with a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) handed over as for Code Writer; skip false positives. Re-run Code Tester after fixes.
+- Fix each construct (real findings grouped by construct) as its own change set, with a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) handed over as for Code Writer; skip false positives. Re-run Code Tester after fixes. The outgoing report carries every sweep record, incoming and own, unchanged.
 - If fixing a finding requires knowledge outside the instruction files, invoke Coding Researcher first; do not guess or fabricate. If Coding Researcher returns **Not possible**, leave the finding unresolved and escalate to Orchestrator with the explanation.
 - Report `{"clean": true}` or `{"clean": false, "fixes": [...]}`. Cap at 5 iterations.
 - After 5 iterations, report any unresolved findings to the Orchestrator; Orchestrator adds each as a PR comment for human consideration.
@@ -479,7 +480,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - Fetch **both** comment surfaces before deciding there is nothing to address: top-level PR comments and review summaries (`gh pr view <n> --repo <owner/repo> --json comments,reviews,reviewDecision`) **and** inline/diff-level review comments (`gh api repos/<owner>/<repo>/pulls/<n>/comments`). A reviewer can submit a `CHANGES_REQUESTED` review with an empty top-level summary and put their actual feedback only in an inline diff comment; the review decision alone is enough to treat the PR as having unaddressed work, and the inline-comment endpoint is the only place its content is visible.
 - If a fix requires knowledge outside the instruction files, invoke Coding Researcher first; do not guess or fabricate. If Coding Researcher returns **Not possible**, stop and escalate to Orchestrator with the explanation; do not partially apply the fix.
 - Convert to draft before starting (`gh pr ready <number> --undo`).
-- One fix commit per review comment (or per group of comments reporting the same construct), plus a sweep commit where the [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) finds further occurrences. Hand off to Code Tester after each fix and its sweep.
+- One fix change set per construct (comments grouped by construct), with a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) handed over as for Code Writer. Hand off to Code Tester after each fix and its sweep.
 - Respond to **every** review comment without exception, per [Comment Replies](#comment-replies-mandatory).
 
 ## Rebase Agent
@@ -508,8 +509,7 @@ Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](
 
 - Use `git` CLI only; never `gh` or the GitHub API for commit/push.
 - For the placeholder step (no code exists yet): commit the placeholder artefact alone: `CHANGELOG.md`, or `.deleteme.now` for template-skip repos (see [Changelog](#changelog)).
-- Otherwise: commit code+tests as one GPG-signed commit (Conventional Commits, original prompt in body as `Prompt: …`), excluding any handed-over sweep change set, and `CHANGELOG.md` as a separate GPG-signed commit whenever Changelog produced a correction alongside it.
-- Commit each handed-over [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) change set as its own GPG-signed commit after the fix commit, per [Pattern Sweep Commits](git-commits.instructions.md#pattern-sweep-commits).
+- Otherwise: commit each handed-over fix change set as its own GPG-signed commit, in the order handed over (Conventional Commits, original prompt in body as `Prompt: …`), excluding the files its sweep record lists; then commit those files as the sweep commit per [Pattern Sweep Commits](git-commits.instructions.md#pattern-sweep-commits). A sweep-only file that a later fix change set also touches belongs to that later fix commit. Commit `CHANGELOG.md` as a separate GPG-signed commit whenever Changelog produced a correction alongside it.
 - Push immediately after. Do not open the PR; that is PR Submitter's job.
 - Do not use `--no-verify`. If a pre-commit hook fails: capture output, report to the producing agent, re-stage and retry. Escalate to Orchestrator after 3 failed cycles.
 
