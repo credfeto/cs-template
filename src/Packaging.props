@@ -4,8 +4,7 @@
     <!-- Sarif -->
     <Target Name="_SetSarifErrorLog" BeforeTargets="CoreCompile" Condition="$(EnableSarif)=='True' And !$(MSBuildProjectName.EndsWith('.Tests'))">
         <PropertyGroup>
-            <_SarifLogFile>$([MSBuild]::NormalizePath('$(SolutionDir)', '..', 'results', '$(MSBuildProjectName).$(TargetFramework).sarif'))</_SarifLogFile>
-            <ErrorLog>$(_SarifLogFile),version=2.1</ErrorLog>
+            <ErrorLog>$([MSBuild]::NormalizePath('$(SolutionDir)', '..', 'results', '$(MSBuildProjectName).$(TargetFramework).sarif')),version=2.1</ErrorLog>
         </PropertyGroup>
     </Target>
 
