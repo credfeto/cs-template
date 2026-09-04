@@ -76,15 +76,16 @@ When a mock setup expression (NSubstitute, Moq, or equivalent) is used in more t
 
 ## Pattern Sweep (MANDATORY)
 
-After fixing a bug, or accepting a finding from `/simplify`, `/code-review`, `/security-review`, or a human PR review comment, search the entire repository for other occurrences of the same pattern before moving on. A fix applied to one site while the same construct survives elsewhere is an incomplete fix.
+After fixing a bug, or accepting a finding from `/simplify`, `/code-review`, `/security-review`, or a human PR review comment, search the entire repository for other occurrences of the same construct before moving on. A fix applied to one site while the same construct survives elsewhere is an incomplete fix.
 
-- Search for the construct, not the symptom: the same API misuse, the same boundary condition, the same missing guard, the same duplicated helper, the same insecure call. Use whatever search fits the construct (identifier, call shape, regular expression); do not stop at the file or project the finding was raised in.
-- Fix every occurrence found, in a **separate commit** from the original fix, in the **same PR**. Cover each fixed occurrence with a test wherever the original fix needed one.
-- One sweep per finding: the original fix commit, then one sweep commit covering every occurrence of that finding. Do not raise a separate commit per occurrence.
-- The sweep commit body must list every file touched and, for each, name the finding it derives from and why that site matches; see [Pattern Sweep Commits](git-commits.instructions.md#pattern-sweep-commits). When the finding came from a review comment, the reply to that comment must include the sweep commit SHA and the same list, so the reviewer sees the widening.
+- Search for the construct, not the symptom: the same API misuse, the same boundary condition, the same missing guard, the same duplicated helper, the same insecure call. Use whatever search fits the construct (identifier, call shape, regular expression).
+- One sweep per construct, not per finding: when several findings in a round report the same construct at different sites, group them and fix them with one fix commit and one sweep. Skip the sweep if this PR already carries a sweep commit for the same construct and nothing since has reintroduced it.
+- Fix every occurrence in one sweep commit per construct, separate from the original fix commit and in the same PR; never one commit per occurrence. Cover each fixed occurrence with a test wherever the original fix needed one.
+- Do the sweep in the working tree before handing off for build/test verification, so one build and test run covers both the fix and the sweep; commit them afterwards as two commits, fix first, then sweep.
+- Commit body: see [Pattern Sweep Commits](git-commits.instructions.md#pattern-sweep-commits). Review-comment reply: see [Comment Replies](agent-roles.instructions.md#comment-replies-mandatory).
 - If the sweep finds nothing, no commit or comment is needed.
 - A sweep hit that the build-time static analyser stack already enforces differently is left as-is; see [Conflict Resolution](agent-roles.instructions.md#conflict-resolution-simplifycode-review-vs-static-analyzer).
-- Repo Auditor does not sweep: it already reviews the full file set and raises issues rather than committing.
+- [Repo Auditor](agent-roles.instructions.md#repo-auditor) does not sweep: it never fixes findings, so the rule never triggers for it.
 
 ## Compile-Time Configuration
 
