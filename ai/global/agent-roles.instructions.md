@@ -291,7 +291,7 @@ The same rule applies when picking up an **issue**: if any comment on that issue
 Reply to every PR or issue comment that prompted an action. "Every PR or issue comment" spans both comment surfaces: top-level PR/issue comments and review summaries (`gh pr view <n> --json comments,reviews`) **and** inline/diff-level review comments (`gh api repos/<owner>/<repo>/pulls/<n>/comments`); a review can carry an empty top-level body with the actual feedback only in an inline comment, so both must be checked before concluding there is nothing to reply to.
 
 - Code change made: reply with `Fixed in <commit-sha>: <one sentence describing what changed and why>`.
-- [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) found further occurrences: add `Swept in <sweep-sha>: <files touched>` on the next line; the per-file reasons are in that commit's body.
+- [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) found further occurrences: add `Swept in <sweep-sha>: <files touched>` on the next line (the fix SHA when every hit was in a file the fix touched); the per-file reasons are in that commit's body.
 - Already fixed by an earlier sweep in this PR (no new commit): reply with `Already swept in <sweep-sha>`.
 - Question answered inline (no code change): reply with the full answer.
 - No reply means no acknowledgement; always close the loop.
