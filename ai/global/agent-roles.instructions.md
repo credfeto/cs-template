@@ -331,7 +331,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 
 - Implement the GitHub issue: read all relevant instruction files, write production code and tests.
 - If implementation requires knowledge outside the instruction files (unfamiliar API, complex library usage, etc.), invoke Coding Researcher first; do not guess or fabricate. If Coding Researcher returns **Not possible**, stop, do not partially implement, and escalate to Orchestrator with the explanation and any suggested alternative.
-- After fixing a bug, run the [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) and include the sweep change set in the hand-off report.
+- After fixing a bug, run the [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) and append its sweep record to the hand-off report.
 - Do not commit, push, or update the changelog; hand off to Code Tester when done.
 
 ## Code Tester
