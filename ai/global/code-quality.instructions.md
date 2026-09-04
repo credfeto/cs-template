@@ -81,6 +81,7 @@ After fixing a bug, or accepting a finding from `/simplify`, `/code-review`, `/s
 - Search for the construct, not the symptom: the same API misuse, boundary condition, missing guard, duplicated helper, or insecure call. Use whatever search fits the construct (identifier, call shape, regular expression).
 - One sweep, and one sweep commit, per construct, not per finding or per occurrence: when several findings report the same construct at different sites, one sweep covers them all. Skip the sweep if this PR already carries a sweep commit for the same construct and nothing since has reintroduced it.
 - Sweep in the working tree before handing off for build/test verification, so one run covers both the fix and the sweep; then commit fix first, sweep second, in the same PR.
+- A sweep change set handed to a committing role is the list of files touched only by the sweep plus the per-file rationale for its commit body. A sweep hunk in a file the fix also touches goes into the fix commit and is listed in that commit's body with the same rationale.
 - A sweep commit changes only the matching sites. Swept files are exempt from [Incidental File Cleanup](#incidental-file-cleanup); raise a GitHub issue for anything else noticed there, as for pre-existing [deprecation warnings](#deprecation-warnings-during-tests).
 - Commit body: see [Pattern Sweep Commits](git-commits.instructions.md#pattern-sweep-commits). Review-comment reply: see [Comment Replies](agent-roles.instructions.md#comment-replies-mandatory).
 - If the sweep finds nothing, no commit or comment is needed.

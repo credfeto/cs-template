@@ -331,7 +331,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 
 - Implement the GitHub issue: read all relevant instruction files, write production code and tests.
 - If implementation requires knowledge outside the instruction files (unfamiliar API, complex library usage, etc.), invoke Coding Researcher first; do not guess or fabricate. If Coding Researcher returns **Not possible**, stop, do not partially implement, and escalate to Orchestrator with the explanation and any suggested alternative.
-- After fixing a bug, run the [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) and hand the sweep over as a separate change set.
+- After fixing a bug, run the [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) and hand the sweep over as a separate change set: the files touched only by the sweep and the per-file rationale for its commit body.
 - Do not commit, push, or update the changelog; hand off to Code Tester when done.
 
 ## Code Tester
@@ -509,7 +509,7 @@ Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](
 - Use `git` CLI only; never `gh` or the GitHub API for commit/push.
 - For the placeholder step (no code exists yet): commit the placeholder artefact alone: `CHANGELOG.md`, or `.deleteme.now` for template-skip repos (see [Changelog](#changelog)).
 - Otherwise: commit code+tests as one GPG-signed commit (Conventional Commits, original prompt in body as `Prompt: …`), and `CHANGELOG.md` as a separate GPG-signed commit whenever Changelog produced a correction alongside it.
-- Commit each handed-over [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) change set as its own GPG-signed commit per [Pattern Sweep Commits](git-commits.instructions.md#pattern-sweep-commits).
+- Commit each handed-over [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) change set (the listed files, with the supplied per-file rationale in the body) as its own GPG-signed commit after the fix commit, per [Pattern Sweep Commits](git-commits.instructions.md#pattern-sweep-commits).
 - Push immediately after. Do not open the PR; that is PR Submitter's job.
 - Do not use `--no-verify`. If a pre-commit hook fails: capture output, report to the producing agent, re-stage and retry. Escalate to Orchestrator after 3 failed cycles.
 
