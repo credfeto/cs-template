@@ -33,6 +33,7 @@ If hooks or formatters modify files **not in your intended change set**:
 
 A commit produced by the [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) rule must, in addition to the rules above:
 
-- Use the same Conventional Commits type as the original fix commit, with a title that states it is a sweep, e.g. `fix: apply null-guard fix to remaining call sites`.
-- Reference the original fix commit SHA and, where one exists, the review comment or finding it derives from.
+- Use the Conventional Commits type of the fix commit it derives from (the first, when it derives from several), with a title that states it is a sweep, e.g. `fix: apply null-guard fix to remaining call sites`.
+- State the construct searched for in one line, so a later round can tell whether a sweep for it already exists in the PR.
+- Reference every fix commit SHA it derives from and, where one exists, the review comment or finding.
 - List every file touched, one line per file, each stating why that site matches the original finding.
