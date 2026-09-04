@@ -79,12 +79,12 @@ When a mock setup expression (NSubstitute, Moq, or equivalent) is used in more t
 After fixing a bug, or accepting a finding from `/simplify`, `/code-review`, `/security-review`, or a human PR review comment, search the entire repository for other occurrences of the same construct before moving on. A fix applied to one site while the same construct survives elsewhere is an incomplete fix.
 
 - Search for the construct, not the symptom: the same API misuse, boundary condition, missing guard, duplicated helper, or insecure call. Use whatever search fits the construct (identifier, call shape, regular expression).
-- One sweep per construct, not per finding: when several findings report the same construct at different sites, one sweep covers them all. Skip the sweep if this PR already carries a sweep commit for the same construct and nothing since has reintroduced it.
-- Sweep in the working tree before handing off for build/test verification, so one run covers both the fix and the sweep; then commit as two commits in the same PR, fix first, then one sweep commit per construct (never one per occurrence).
+- One sweep, and one sweep commit, per construct, not per finding or per occurrence: when several findings report the same construct at different sites, one sweep covers them all. Skip the sweep if this PR already carries a sweep commit for the same construct and nothing since has reintroduced it.
+- Sweep in the working tree before handing off for build/test verification, so one run covers both the fix and the sweep; then commit fix first, sweep second, in the same PR.
 - A sweep commit changes only the matching sites. Swept files are exempt from [Incidental File Cleanup](#incidental-file-cleanup); raise a GitHub issue for anything else noticed there, as for pre-existing [deprecation warnings](#deprecation-warnings-during-tests).
 - Commit body: see [Pattern Sweep Commits](git-commits.instructions.md#pattern-sweep-commits). Review-comment reply: see [Comment Replies](agent-roles.instructions.md#comment-replies-mandatory).
 - If the sweep finds nothing, no commit or comment is needed.
-- A sweep hit that the build-time static analyser stack already enforces differently is left as-is; see [Conflict Resolution](agent-roles.instructions.md#conflict-resolution-simplifycode-review-vs-static-analyzer).
+- A sweep hit that the build-time static analyser stack already enforces differently is left as-is, on the same principle as [Conflict Resolution](agent-roles.instructions.md#conflict-resolution-simplifycode-review-vs-static-analyzer).
 
 ## Compile-Time Configuration
 
