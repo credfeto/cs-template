@@ -37,7 +37,7 @@ Pre-commit and its component tools (see [Fixing Pre-Commit Failures](code-qualit
 This does not remove the security review, only the wait:
 
 - Still carry out the full security review above for any package this newly introduces to the repo.
-- If working from a GitHub issue or PR, post the review's findings as a normal comment for visibility; do not follow the [Blocked Label](agent-roles.instructions.md#blocked-label) workflow for this case. Otherwise, share the findings with the human directly (e.g. in chat).
-- Proceed with the fix and the current work without waiting for sign-off.
+- If the review finds a genuine blocker (a known vulnerability advisory, a provenance/typosquat mismatch, an incompatible licence, or a maintenance status so poor the package cannot be trusted), this exception does not apply: fall back to the full approval-and-wait process above, since the tool's output cannot have authorised a fix its own security review flags as unsafe.
+- If the review finds no blocker: post the findings for visibility and proceed with the fix and the current work without waiting for sign-off. If working from a GitHub issue or PR, post them as a normal comment; do not follow the [Blocked Label](agent-roles.instructions.md#blocked-label) workflow for this case. If not (no issue or PR), share them with the human directly (e.g. in chat).
 
 This exception applies only when the tool's output pins down the exact remediation with no choice among alternatives left to the agent (for example, several packages could resolve the same advisory, or the fix could be a version bump or a package swap): any such choice remains a discretionary package decision, not a tool mandate, and the full approval-and-wait process above still applies.
