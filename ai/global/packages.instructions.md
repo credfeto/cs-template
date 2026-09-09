@@ -32,12 +32,12 @@ If working from a GitHub issue or PR, follow the [Blocked Label](agent-roles.ins
 
 ## Conflict Resolution: Pre-Commit/Component-Tool-Mandated Package Changes (MANDATORY)
 
-Pre-commit and its component tools (`dotnet buildcheck`, analyzers, linters, `npm audit`, `pip-audit`, and others; see [Fixing Pre-Commit Failures](code-quality.instructions.md#fixing-pre-commit-failures-mandatory)) are configured by humans, so a tool-reported error demanding a specific package change is itself a human-authorised instruction, not a discretionary choice by the agent. When a tool's own output pins down the exact remediation, adding a package reference, changing an existing reference's metadata or version, or removing one, apply the fix and proceed without pausing for a fresh approval round-trip, even when it introduces a package not previously referenced anywhere in the repo.
+Pre-commit and its component tools (see [Fixing Pre-Commit Failures](code-quality.instructions.md#fixing-pre-commit-failures-mandatory)) are configured by humans, so a tool-reported error demanding a specific package change is itself a human-authorised instruction, not a discretionary choice by the agent. When a tool's own output pins down the exact remediation, adding a package reference, changing an existing reference's metadata or version, or removing one, apply the fix and proceed without pausing for a fresh approval round-trip, even when it introduces a package not previously referenced anywhere in the repo.
 
 This does not remove the security review, only the wait:
 
-- Still carry out the full security review above (provenance, known vulnerabilities, maintenance health, licence, footprint) for any package this newly introduces to the repo.
-- Post the review's findings for visibility, as a normal comment. Do not follow the [Blocked Label](agent-roles.instructions.md#blocked-label) workflow for this case.
+- Still carry out the full security review above for any package this newly introduces to the repo.
+- If working from a GitHub issue or PR, post the review's findings as a normal comment for visibility; do not follow the [Blocked Label](agent-roles.instructions.md#blocked-label) workflow for this case. Otherwise, share the findings with the human directly (e.g. in chat).
 - Proceed with the fix and the current work without waiting for sign-off.
 
-This exception applies only while the tool's output pins down the specific remediation (which package, which version, which reference to change), with no choice left to the agent among multiple viable packages or approaches. If the agent must choose between alternatives to satisfy the tool (for example, several packages could resolve the same advisory, or the fix could be a version bump or a package swap), that choice is a discretionary package decision, not a tool mandate, and the full approval-and-wait process above still applies.
+This exception applies only when the tool's output pins down the exact remediation with no choice among alternatives left to the agent (for example, several packages could resolve the same advisory, or the fix could be a version bump or a package swap): any such choice remains a discretionary package decision, not a tool mandate, and the full approval-and-wait process above still applies.
