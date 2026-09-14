@@ -15,13 +15,15 @@ Applies everywhere a list of this kind is produced: in instruction files, and in
 
 ### Named Anchors for Cross-Referenced Steps
 
-Never reference a step by its number from elsewhere (same file or another) — a plain "step 2" or "item 4" breaks silently the next time that list is renumbered. Instead, give the target step a named, invisible HTML anchor and link to it:
+Never reference a step by its number from **another list or file** — a plain "step 2" or "item 4" breaks silently the next time that list is renumbered, and the reference lives far enough from its target that an editor renumbering one won't think to check the other. Instead, give the target step a named, invisible HTML anchor and link to it:
 
 ```markdown
-- **P4.** <a id="phase-b-fix-or-stop"></a>Otherwise, if substantially repeating a prior round...
+- **P4.** <a id="phase-b-convergence"></a>Otherwise, judge convergence yourself from the PR's history of prior code-review comments...
 ```
 
-Place the `<a id="...">` tag inline at the very start of the item's own text, never on its own line — a bare HTML block between list items terminates the list under CommonMark. Name the anchor after the step's content (`phase-b-fix-or-stop`), not its position (`phase-b-p4`), so the link survives future renumbering. Reference it from elsewhere as a normal Markdown link: `[P4](agent-roles.instructions.md#phase-b-fix-or-stop)`. This repo's `.markdownlint.json` allows `<a>` via an MD033 override for exactly this purpose.
+Place the `<a id="...">` tag inline at the very start of the item's own text, never on its own line — a bare HTML block between list items terminates the list under CommonMark. Name the anchor after the step's content (`phase-b-convergence`), not its position (`phase-b-p4`), so the link survives future renumbering. Reference it from elsewhere as a normal Markdown link: `[Phase B's P4](agent-roles.instructions.md#phase-b-convergence)`. This repo's `.markdownlint.json` allows `<a>` via an MD033 override for exactly this purpose.
+
+A step referring to a **sibling step within its own list** (e.g. "return to P2", "once P4 is clean, go to P5") does not need an anchor: renumbering that list is a single, self-contained edit, and its own internal references get fixed as part of the same edit — there's no separate file or list left stale. Only add an anchor once the reference crosses to different content that could be edited independently.
 
 ## Assignment
 
