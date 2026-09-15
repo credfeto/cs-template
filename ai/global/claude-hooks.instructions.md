@@ -73,16 +73,17 @@ is modelled as a read of everything under it. Without the exclusions required by
 it cannot be proven that a `.env`/`.database`/`.claude` path will not be read, so the call
 escalates, and under `dontAsk` an escalation comes back as a denial rather than a prompt.
 
-Confirmed in practice: `find /home/markr/work ...` without the mandated exclusions was denied this
-way, message-for-message, while the identical command scoped under a subtree with no secret-bearing
-file ran clean. `funfair-tech/funfair-server-common#728` is a live example of the wider risk this
-section addresses: `pre-commit-check` got a genuine hook denial in the foreground (named hook,
-stated fix) and a permission denial in the background (naming neither), and the two were read as
-one broken session rather than two different denial shapes, then escalated to a human on the first
-occurrence. This is a different failure from `credfeto/credfeto-notification-bot#280` above, where
-two genuine hook denials were wrongly averaged into one theory; here, one denial was a hook and the
-other wasn't. Identify which part of the command is being modelled as a broad read, narrow or
-exclude it, and retry before escalating to a human.
+Confirmed in practice: a `find` over a work tree containing a `.claude` directory, run without the
+mandated exclusions, was denied this way, message-for-message; the identical command scoped to a
+subtree with no secret-bearing file ran clean. This is also a live, more general risk: an agent
+working an unrelated issue in another repository hit both denial shapes on the same underlying
+command (`pre-commit-check`), a genuine hook denial in the foreground (named hook, stated fix) and a
+permission denial in the background (naming neither), read the two as one broken session rather
+than two different denial shapes, and escalated to a human on the first occurrence. This is a
+different failure from `credfeto/credfeto-notification-bot#280` above, where two genuine hook
+denials were wrongly averaged into one theory; here, one denial was a hook and the other wasn't.
+Identify which part of the command is being modelled as a broad read, narrow or exclude it, and
+retry before escalating to a human.
 
 ## Prefer the Tool's Own Backgrounding Parameter (MANDATORY)
 
@@ -94,7 +95,8 @@ denial-misread-as-in-flight failure described above.
 ## Reference: Installed Hook Set
 
 The exact hook set installed at `$HOME/.claude/hooks` (from `install-claude-hooks`) at the time
-this file was written:
+this file was written, in the order they run (the three `reject-obfuscated-commands` data files
+are listed directly after it rather than at their own position, since they have none):
 
 | Hook | Blocks | Why |
 | --- | --- | --- |
@@ -103,13 +105,13 @@ this file was written:
 | `command-blocklist` (data file, not a hook) | N/A | Known-bad command names for `reject-obfuscated-commands` (e.g. `eval`, `source`, `bash`, and wrapper commands including `timeout` and `xargs`) that are rejected even though they are plain bare words, because each one hides or re-enters execution in a way this check cannot see through, or (for the wrapper commands) can smuggle another command past name-based checks. This is why a shell `timeout` wrapper around `dotnet test`/`dotnet build`/`git commit` is always rejected, `run_in_background: true` or not — see [Never Truncate Test/Commit Commands](task-workflow.instructions.md#never-truncate-testcommit-commands-mandatory). |
 | `env-var-blocklist` (data file, not a hook) | N/A | Environment variables (`PATH`, `IFS`, `LD_PRELOAD`, `GIT_*`, and similar) that `reject-obfuscated-commands` refuses to let a command assign, because they change how *other* commands are located, parsed, or attributed. |
 | `enforce-allowed-dirs` | `cd`/`pushd`, `git -C`, `npm --prefix`, `find` starting points, and `rm`/`mv`/`cp` operands outside a configured allowlist of directory roots, plus flags on those same commands that turn a path argument into code execution (`git --exec-path`/`--git-dir`/`--work-tree`, most `git -c` keys, `npm --script-shell`, `find -exec`/`-delete`, `rm --no-preserve-root`) | The permission-rule syntax has no typed placeholder for "a directory goes here", so a wildcarded directory position also matches any option injected there; this hook does the positional check statically instead. Configured via `allowed-dirs` (or a host-local `allowed-dirs.local` override); a directory outside every configured root blocks. |
-| `block-no-verify` | `--no-verify`/`-n` on any git command that would skip commit hooks, and the equivalent on `mcp__github__.*` tool calls | Enforces "never bypass hooks or formatters": a failing pre-commit hook must be fixed and retried, not skipped. Installed globally on `PATH` rather than shipped under `claude-hooks/`, which is why it is the one entry in `claude-settings.json` without the `$HOME/.claude/hooks/` prefix every other hook uses. |
-| `enforce-git-dash-c` | Any git subcommand not written as `git -C <dir> <command>` | See [Running Git Commands in a Specific Directory](git.instructions.md#running-git-commands-in-a-specific-directory). |
+| `block-no-verify` | `--no-verify`/`-n` on any git command that would skip commit hooks, and the equivalent on `mcp__github__.*` tool calls | Enforces "never bypass hooks or formatters": a failing pre-commit hook must be fixed and retried, not skipped. Installed globally on `PATH` rather than shipped under `claude-hooks/`, which is why its `claude-settings.json` entries (registered for both the `Bash` matcher and the `mcp__github__.*` matcher) omit the `$HOME/.claude/hooks/` prefix every other hook uses. |
 | `enforce-git-identity` | Git subcommands that create or rewrite commits (or precede one, like `fetch`) unless git identity and GPG signing are correctly configured | Prevents an unsigned or misattributed commit from being created at all, rather than relying on review to catch it afterwards. |
-| `enforce-ssh-host-and-key` | Any `ssh` call other than exactly `ssh user@host command...` with no flags, and one when no usable key is loaded in the forwarded ssh-agent | `ssh` has a blanket allow entry; the danger is in the destination, not the verb, which a permission-rule prefix pattern cannot scope. Restricts the host to a private-network suffix and requires the agent to hold a working key first, since this container never mounts raw private key files. |
-| `enforce-background-for-long-running-commands` | `git commit`, `pre-commit` (direct invocation), `pre-commit-check` (this template's wrapper around it), `dotnet build`, `dotnet test`, `npm test`, and `bun test` unless the call sets `run_in_background: true` | See [Never Truncate Test/Commit Commands](task-workflow.instructions.md#never-truncate-testcommit-commands-mandatory) for why none of these have a safe foreground timeout. |
+| `enforce-git-dash-c` | Any git subcommand not written as `git -C <dir> <command>` | See [Running Git Commands in a Specific Directory](git.instructions.md#running-git-commands-in-a-specific-directory). |
 | `block-git-worktree` | `git worktree add`, and the equivalent native `EnterWorktree` tool call | Worktrees split repo state across multiple linked checkouts sharing one object store; this template's tooling assumes a single checkout per repo directory, and an errant `worktree add` has previously left the primary checkout bare with no work tree of its own. See [Avoid `git worktree`](git.instructions.md#avoid-git-worktree). |
 | `block-dotnet-tool-install` | `dotnet tool install` (local or global) and `dotnet new tool-manifest` | This container's .NET global tools are pinned and baked into the image at build time; installing an unpinned tool at runtime would bypass the dependency-selection review the pinned set went through. |
+| `enforce-ssh-host-and-key` | Any `ssh` call other than exactly `ssh user@host command...` with no flags, and one when no usable key is loaded in the forwarded ssh-agent | `ssh` has a blanket allow entry; the danger is in the destination, not the verb, which a permission-rule prefix pattern cannot scope. Restricts the host to a private-network suffix and requires the agent to hold a working key first, since this container never mounts raw private key files. |
+| `enforce-background-for-long-running-commands` | `git commit`, `pre-commit` (direct invocation), `pre-commit-check` (this template's wrapper around it), `dotnet build`, `dotnet test`, `npm test`, and `bun test` unless the call sets `run_in_background: true` | See [Never Truncate Test/Commit Commands](task-workflow.instructions.md#never-truncate-testcommit-commands-mandatory) for why none of these have a safe foreground timeout. |
 | `cache-gh-lookups` | Nothing; it never blocks | Rewrites a bare `gh api user --jq '.login'` call to read a cached copy instead of hitting the API every time, falling through unchanged on any parse failure. |
 
 If a command is blocked by a hook not listed here, or this table no longer matches
