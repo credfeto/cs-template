@@ -164,10 +164,10 @@ Every repo with a board names its GitHub Projects (v2) board **"Workflow"**, lin
 
 ```bash
 # Step 1: find the "Workflow" project linked to this repo (gives WF_PROJECT_ID and WF_PROJECT_NUMBER)
-read -r WF_PROJECT_ID WF_PROJECT_NUMBER <<<"$(gh api graphql \
+IFS=$'\t' read -r WF_PROJECT_ID WF_PROJECT_NUMBER <<<"$(gh api graphql \
   -f query='query($owner:String!,$repo:String!){repository(owner:$owner,name:$repo){projectsV2(first:20){nodes{id number title}}}}' \
   -f owner=<owner> -f repo=<repo> \
-  --jq '.data.repository.projectsV2.nodes[] | select(.title=="Workflow") | "\(.id) \(.number)"')"
+  --jq '.data.repository.projectsV2.nodes[] | select(.title=="Workflow") | [.id,(.number|tostring)] | @tsv')"
 
 # Step 2: resolve the Workflow Status field and its option IDs (gives WF_STATUS_FIELD_ID and each WF_* option id)
 gh api graphql \
@@ -181,9 +181,9 @@ Match each returned option's `name` to its `WF_*` variable: `Not Started`→`WF_
 
 **Only if Step 1 finds no project titled "Workflow" linked to the repo** — there genuinely is no board — skip all board updates silently.
 
-**Use the structured `gh project` subcommands below, never raw `gh api graphql` mutations.** A `gh api graphql` call whose query string contains the literal word `mutation` is deterministically denied by the agent sandbox's permission system, even though the equivalent `query`-shaped call succeeds (confirmed live: `credfeto/cs-template#1046`). The `gh project item-add`/`item-edit`/`item-list` subcommands below are pre-approved as ordinary `gh` invocations and cover the same add-item/set-status/verify sequence without ever constructing a raw mutation string.
+**Use the structured `gh project` subcommands below, never raw `gh api graphql` mutations.** A `gh api graphql` call whose query string contains the literal word `mutation` is deterministically denied by the agent sandbox's permission system, even though the equivalent `query`-shaped call succeeds (confirmed live: `credfeto/cs-template#1046`). The `gh project item-add`/`item-edit` subcommands below are pre-approved as ordinary `gh` invocations and cover the add-item/set-status steps without ever constructing a raw mutation string; the read-only verify step may keep using `gh api graphql` since a `query` is never subject to this denial.
 
-To update the board status, replace `<STATUS_OPTION_ID>` with the appropriate `WF_*` value, `<STATUS_NAME>` with its human-readable name (e.g. `Development`), `<owner>` with the repo owner, and `<ISSUE_OR_PR_URL>` with the issue or PR's full URL:
+To update the board status, replace `<STATUS_OPTION_ID>` with the appropriate `WF_*` value, `<owner>` with the repo owner, and `<ISSUE_OR_PR_URL>` with the issue or PR's full URL:
 
 ```bash
 # Step 1: add the item to the project and capture its project item ID
@@ -196,18 +196,18 @@ gh project item-edit --project-id "${WF_PROJECT_ID}" --id "${ITEM_ID}" \
   --field-id "${WF_STATUS_FIELD_ID}" --single-select-option-id "<STATUS_OPTION_ID>"
 
 # Step 3: verify the write actually persisted; retry up to 3 times with backoff if not.
-# `item-list --format json` cannot be combined with --field/--field-id, and the custom
-# "Workflow Status" field is not guaranteed to surface under the key "Status" (in one
-# project it came back as "workflow Status" instead, alongside GitHub's own built-in
-# "Status" field) - so search every key/value pair on the matched item for the expected
-# status name rather than assuming a specific key.
+# This is a read-only `query`, not a `mutation`, so it is not subject to the sandbox
+# denial above; unlike Steps 1-2 it can stay a raw graphql call, and it can look up the
+# specific field/item directly instead of scanning the whole project's item list.
 for attempt in 1 2 3; do
-  ACTUAL=$(gh project item-list "${WF_PROJECT_NUMBER}" --owner <owner> --format json --limit 200 \
-    --jq ".items[] | select(.id==\"${ITEM_ID}\") | to_entries[] | select(.value==\"<STATUS_NAME>\") | .key")
-  [ -n "$ACTUAL" ] && break
+  ACTUAL=$(gh api graphql \
+    -f query='query($i:ID!){node(id:$i){... on ProjectV2Item{fieldValues(first:50){nodes{... on ProjectV2ItemFieldSingleSelectValue{optionId field{... on ProjectV2SingleSelectField{id}}}}}}}}' \
+    -f i="${ITEM_ID}" \
+    --jq ".data.node.fieldValues.nodes[] | select(.field.id==\"${WF_STATUS_FIELD_ID}\") | .optionId")
+  [ "$ACTUAL" = "<STATUS_OPTION_ID>" ] && break
   sleep "$attempt"
 done
-[ -n "$ACTUAL" ] || echo "::warning::Workflow board write did not persist after 3 attempts"
+[ "$ACTUAL" = "<STATUS_OPTION_ID>" ] || echo "::warning::Workflow board write did not persist after 3 attempts"
 ```
 
 **Step 3 is MANDATORY, not optional.** `gh project item-edit` can return success on an item that was just added by `gh project item-add` in Step 1, without the field write actually persisting: a known eventual-consistency race in the underlying Projects v2 API on freshly-added items. Reporting success (a log line, a `core.notice`, a status comment) without this read-back verification is a real bug that shipped and went unnoticed because nothing threw (see `funfair-tech/funfair-server-template` issue #918, fixed in PR #920, for the incident this rule is drawn from). Never skip the verification step to save a round-trip.
