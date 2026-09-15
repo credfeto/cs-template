@@ -3,9 +3,9 @@
 [Back to Global Instructions Index](index.md)
 
 This template's development containers (and any interactive session with the hooks installed via
-`install-claude-hooks`) run a fixed set of Claude Code `PreToolUse` hooks, most matched against
-every Bash tool call, plus a couple also matched against a specific non-Bash tool instead (see the
-reference table below). This file covers how to interpret a hook **denial** correctly, and how to
+`install-claude-hooks`) run a fixed set of Claude Code `PreToolUse` hooks. Most match every Bash
+tool call; a couple also match a specific non-Bash tool call (see the reference table below). This
+file covers how to interpret a hook **denial** correctly, and how to
 tell one apart from a denial coming from Claude Code's separate permission system; for how to
 background and poll long-running commands once a call has actually been accepted, see
 [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory)
@@ -76,13 +76,13 @@ escalates, and under `dontAsk` an escalation comes back as a denial rather than 
 Confirmed in practice: `find /home/markr/work ...` without the mandated exclusions was denied this
 way, message-for-message, while the identical command scoped under a subtree with no secret-bearing
 file ran clean. `funfair-tech/funfair-server-common#728` is a live example of the wider risk this
-section addresses: a permission denial in a form matching no hook's message shape was read as a
-broken session and escalated to a human on the first occurrence, instead of being checked against
-the message-shape distinction above. This is a different failure from
-`credfeto/credfeto-notification-bot#280` above, where two genuine hook denials were wrongly averaged
-into one theory; here, one denial was a hook and the other wasn't. Identify which part of the
-command is being modelled as a broad read, narrow or exclude it, and retry before escalating to a
-human.
+section addresses: `pre-commit-check` got a genuine hook denial in the foreground (named hook,
+stated fix) and a permission denial in the background (naming neither), and the two were read as
+one broken session rather than two different denial shapes, then escalated to a human on the first
+occurrence. This is a different failure from `credfeto/credfeto-notification-bot#280` above, where
+two genuine hook denials were wrongly averaged into one theory; here, one denial was a hook and the
+other wasn't. Identify which part of the command is being modelled as a broad read, narrow or
+exclude it, and retry before escalating to a human.
 
 ## Prefer the Tool's Own Backgrounding Parameter (MANDATORY)
 
