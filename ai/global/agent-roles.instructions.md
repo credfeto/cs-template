@@ -196,7 +196,6 @@ gh project item-edit --project-id "${WF_PROJECT_ID}" --id "${ITEM_ID}" \
   --field-id "${WF_STATUS_FIELD_ID}" --single-select-option-id "<STATUS_OPTION_ID>"
 
 # Step 3: verify the write actually persisted; retry up to 3 times with backoff if not.
-# Unlike Steps 1-2 this stays a raw graphql call (it's a query, not a mutation), and it
 # looks up the specific field/item directly instead of scanning the whole project's item list.
 for attempt in 1 2 3; do
   ACTUAL=$(gh api graphql \
