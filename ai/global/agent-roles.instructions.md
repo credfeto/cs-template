@@ -181,7 +181,7 @@ Match each returned option's `name` to its `WF_*` variable: `Not Started`→`WF_
 
 **Only if Step 1 finds no project titled "Workflow" linked to the repo** — there genuinely is no board — skip all board updates silently.
 
-**Use the structured `gh project` subcommands below, never raw `gh api graphql` mutations.** A `gh api graphql` call whose query string contains the literal word `mutation` is deterministically denied by the agent sandbox's permission system, even though the equivalent `query`-shaped call succeeds (confirmed live: `credfeto/cs-template#1046`). The `gh project item-add`/`item-edit` subcommands below are pre-approved as ordinary `gh` invocations and cover the add-item/set-status steps without ever constructing a raw mutation string; the read-only verify step may keep using `gh api graphql` since a `query` is never subject to this denial.
+**Use the structured `gh project` subcommands below, never raw `gh api graphql` mutations.** A `gh api graphql` call whose query string contains the literal word `mutation` is deterministically denied by the agent sandbox's permission system, even though the equivalent `query`-shaped call succeeds (confirmed live: `credfeto/cs-template#1046`). The `gh project item-add`/`item-edit` subcommands below are pre-approved as ordinary `gh` invocations and cover the add-item/set-status steps without ever constructing a raw mutation string.
 
 To update the board status, replace `<STATUS_OPTION_ID>` with the appropriate `WF_*` value, `<owner>` with the repo owner, and `<ISSUE_OR_PR_URL>` with the issue or PR's full URL:
 
