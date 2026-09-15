@@ -4,8 +4,7 @@
 
 This template's development containers (and any interactive session with the hooks installed via
 `install-claude-hooks`) run a fixed set of Claude Code `PreToolUse` hooks, most matched against
-every Bash tool call, plus two also matched against a specific non-Bash tool instead
-(`block-no-verify` against `mcp__github__.*`, `block-git-worktree` against `EnterWorktree`; see the
+every Bash tool call, plus a couple also matched against a specific non-Bash tool instead (see the
 reference table below). This file covers how to interpret a hook **denial** correctly, and how to
 tell one apart from a denial coming from Claude Code's separate permission system; for how to
 background and poll long-running commands once a call has actually been accepted, see
@@ -51,10 +50,10 @@ independent, correctly-working checks.
 
 ## A Permission Denial Is Not a Hook Denial (MANDATORY)
 
-Claude Code has a second, separate way to refuse a command: the permission system itself, sitting
-above the hook chain. Under `permissions.defaultMode: "dontAsk"`, a command that would normally
-prompt for approval is auto-denied instead. This is not a `PreToolUse` hook running; no hook name
-appears anywhere in the message.
+Claude Code has a second way to refuse a command: the permission system itself, sitting above the
+hook chain. Under `permissions.defaultMode: "dontAsk"`, a command that would normally prompt for
+approval is auto-denied instead. This is not a `PreToolUse` hook running; no hook name appears
+anywhere in the message.
 
 Tell the two apart by the message shape, not by guessing at a cause:
 
@@ -69,19 +68,21 @@ applies identically to a permission denial; do not wait for it to finish.
 
 The most common cause of a permission denial is a search command that omits its mandated
 exclusions. A Bash command naming a directory (`find <dir>`, `grep -r ... <dir>`, `cd <dir> && ...`)
-is modelled as a read of everything under it; without the exclusions required by
-[Exclude Secret-Bearing Files From Repo Searches](tool-preferences.instructions.md#exclude-secret-bearing-files-from-repo-searches-mandatory)
-it cannot be proven that a `.env`/`.database`/`.claude` path will not be read, so it escalates, and
-under `dontAsk` an escalation comes back as a denial rather than a prompt. The fix is to add the
-exclusions and retry, not to conclude the session's Bash or backgrounding permissions are broken.
+is modelled as a read of everything under it. Without the exclusions required by
+[Exclude Secret-Bearing Files From Repo Searches](tool-preferences.instructions.md#exclude-secret-bearing-files-from-repo-searches-mandatory),
+it cannot be proven that a `.env`/`.database`/`.claude` path will not be read, so the call
+escalates, and under `dontAsk` an escalation comes back as a denial rather than a prompt.
 
-Confirmed in practice: an agent reported `pre-commit-check` unrunnable in any form, foreground
-blocked by `enforce-background-for-long-running-commands`, background denied by the permission
-system, and escalated to a human to check session Bash permissions before either was actually the
-cause. This is a different failure from `credfeto/credfeto-notification-bot#280` above, where two
-genuine hook denials were wrongly averaged into one theory; here, one denial was a hook and the
-other was not a hook denial at all. Retry once with the search exclusions applied and once scoped
-to a narrower directory before escalating to a human.
+Confirmed in practice: `find /home/markr/work ...` without the mandated exclusions was denied this
+way, message-for-message, while the identical command scoped under a subtree with no secret-bearing
+file ran clean. `funfair-tech/funfair-server-common#728` is a live example of the wider risk this
+section addresses: a permission denial in a form matching no hook's message shape was read as a
+broken session and escalated to a human on the first occurrence, instead of being checked against
+the message-shape distinction above. This is a different failure from
+`credfeto/credfeto-notification-bot#280` above, where two genuine hook denials were wrongly averaged
+into one theory; here, one denial was a hook and the other wasn't. Identify which part of the
+command is being modelled as a broad read, narrow or exclude it, and retry before escalating to a
+human.
 
 ## Prefer the Tool's Own Backgrounding Parameter (MANDATORY)
 
@@ -107,9 +108,9 @@ this file was written:
 | `enforce-git-identity` | Git subcommands that create or rewrite commits (or precede one, like `fetch`) unless git identity and GPG signing are correctly configured | Prevents an unsigned or misattributed commit from being created at all, rather than relying on review to catch it afterwards. |
 | `enforce-ssh-host-and-key` | Any `ssh` call other than exactly `ssh user@host command...` with no flags, and one when no usable key is loaded in the forwarded ssh-agent | `ssh` has a blanket allow entry; the danger is in the destination, not the verb, which a permission-rule prefix pattern cannot scope. Restricts the host to a private-network suffix and requires the agent to hold a working key first, since this container never mounts raw private key files. |
 | `enforce-background-for-long-running-commands` | `git commit`, `pre-commit` (direct invocation), `pre-commit-check` (this template's wrapper around it), `dotnet build`, `dotnet test`, `npm test`, and `bun test` unless the call sets `run_in_background: true` | See [Never Truncate Test/Commit Commands](task-workflow.instructions.md#never-truncate-testcommit-commands-mandatory) for why none of these have a safe foreground timeout. |
-| `block-git-worktree` | `git worktree add` | Worktrees split repo state across multiple linked checkouts sharing one object store; this template's tooling assumes a single checkout per repo directory, and an errant `worktree add` has previously left the primary checkout bare with no work tree of its own. See [Avoid `git worktree`](git.instructions.md#avoid-git-worktree). |
+| `block-git-worktree` | `git worktree add`, and the equivalent native `EnterWorktree` tool call | Worktrees split repo state across multiple linked checkouts sharing one object store; this template's tooling assumes a single checkout per repo directory, and an errant `worktree add` has previously left the primary checkout bare with no work tree of its own. See [Avoid `git worktree`](git.instructions.md#avoid-git-worktree). |
 | `block-dotnet-tool-install` | `dotnet tool install` (local or global) and `dotnet new tool-manifest` | This container's .NET global tools are pinned and baked into the image at build time; installing an unpinned tool at runtime would bypass the dependency-selection review the pinned set went through. |
-| `cache-gh-lookups` | Nothing; it never blocks | Rewrites a bare `gh api user --jq '.login'` call to read a cached copy instead of hitting the API every time, falling through unchanged on any parse failure. A denial can never be attributed to this hook. |
+| `cache-gh-lookups` | Nothing; it never blocks | Rewrites a bare `gh api user --jq '.login'` call to read a cached copy instead of hitting the API every time, falling through unchanged on any parse failure. |
 
 If a command is blocked by a hook not listed here, or this table no longer matches
 `$HOME/.claude/hooks` on a given container, treat the table as stale rather than the denial as
