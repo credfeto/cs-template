@@ -27,8 +27,8 @@ When picking up an **Issue** that has no existing PR:
 
   - `false` → Plan mode (P3–P4 below).
   - `true` → Plan exists. How approval is signalled depends on whether a Workflow board is configured (the orchestrator passes this context in your CLAUDE.md):
-    - **Board configured**: check whether a human has set the board status to **Approved**. If yes → skip to implementation. If not yet → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
-    - **No board**: check for a human approval comment posted **after** the plan comment (keywords: `approved` / `lgtm`, case-insensitive, whole word). If found → skip to implementation. If not → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
+    - **Board configured**: check whether a human (an `OWNER`, `MEMBER` or `COLLABORATOR`; the board only lets people with project write access move a card) has set the board status to **Approved**. If yes → skip to implementation. If not yet → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
+    - **No board**: check for a human approval comment from an `OWNER`, `MEMBER` or `COLLABORATOR` (by `authorAssociation`) posted **after** the plan comment (keywords: `approved` / `lgtm`, case-insensitive, whole word). If found → skip to implementation. If not → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
 
   Either way, before skipping to implementation, check for an existing branch first (see [git.instructions.md#branching](git.instructions.md#branching)).
 
@@ -62,8 +62,8 @@ When picking up an **Issue** that has no existing PR:
   ```
 
   **Approval requires an explicit human action; the orchestrator never removes `Blocked` automatically (sole exception: live-chat approval in an interactive session, [P5](#waiting-for-approval-in-an-interactive-session)):**
-  - **Board configured**: human sets board status to **Approved** and removes `Blocked`.
-  - **No board**: human posts an approval comment (`approved` / `lgtm`) and removes `Blocked`.
+  - **Board configured**: a human (`OWNER`, `MEMBER` or `COLLABORATOR`) sets board status to **Approved** and removes `Blocked`.
+  - **No board**: a human (`OWNER`, `MEMBER` or `COLLABORATOR`) posts an approval comment (`approved` / `lgtm`) and removes `Blocked`.
 
   Revise a plan by posting a new `## Implementation Plan` comment, never by editing one in place, so approval is always judged against the latest plan comment.
 
