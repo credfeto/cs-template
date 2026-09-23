@@ -22,7 +22,7 @@ When picking up an **Issue** that has no existing PR:
 
   ```bash
   gh issue view <number> --repo <owner/repo> --json comments \
-    --jq '[.comments[].body] | any(test("^\\s*## Implementation Plan"; "i"))'
+    --jq '[.comments[].body] | any(test("^## Implementation Plan"; "i"))'
   ```
 
   - `false` → Plan mode (P3–P4 below).
@@ -88,7 +88,7 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
 
      ```bash
      gh issue view <number> --repo <owner/repo> --json labels,comments \
-       --jq '([.comments[] | select(.body | test("^\\s*## Implementation Plan"; "i"))] | last | .createdAt) as $plan
+       --jq '([.comments[] | select(.body | test("^## Implementation Plan"; "i"))] | last | .createdAt) as $plan
              | {blocked: ([.labels[].name] | index("Blocked") != null),
                 plan: $plan,
                 afterPlan: [.comments[]
