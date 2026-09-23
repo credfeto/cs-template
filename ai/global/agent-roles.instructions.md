@@ -75,16 +75,16 @@ When picking up an **Issue** that has no existing PR:
 
 #### Waiting for Approval in an Interactive Session
 
-Interactive sessions only; an unattended run stops at Plan First P4 and must not poll.
+Interactive sessions only; an unattended run stops at Plan First P4 and must not poll. A session counts as interactive only once a human has typed a message in it; an injected prompt or task notification does not count. If unsure, assume it is unattended, as in [Pre-Work Baseline Check](git.instructions.md#pre-work-baseline-check-mandatory-before-starting-any-work).
 
-- **P1.** After Plan First P4 has posted the plan and added `Blocked`, stop working on the issue but keep watching it: start a dynamic-pacing loop instead of ending the turn:
+- **P1.** After Plan First P4 has posted the plan and added `Blocked`, "STOP" there means stop working on the issue, not stop watching it: start a dynamic-pacing loop instead of ending the turn:
 
   ```text
   /loop check whether issue <number> in <owner/repo> has been approved; if not, wait
   ```
 
 - **P2.** Each tick, run these checks in order and stop at the first that says "not yet", so a still-blocked issue costs one call:
-  1. Read the labels, the latest plan comment's `createdAt`, and any approval-keyword comments (the [Plan First P4](#issue-workflow-plan-first-new-issues-only) keywords) created after it. Not approved while `blocked` is `true`:
+  1. Read the labels, the latest plan comment's `createdAt`, and any comments that open with an approval keyword (the [Plan First P4](#issue-workflow-plan-first-new-issues-only) keywords) created after it. Not approved while `blocked` is `true`, or while there is no plan comment yet:
 
      ```bash
      gh issue view <number> --repo <owner/repo> --json labels,comments \
@@ -92,25 +92,25 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
              | {blocked: ([.labels[].name] | index("Blocked") != null),
                 plan: $plan,
                 approvedAfterPlan: [.comments[]
-                  | select(.createdAt > $plan and (.body | test("\\b(approved|go ahead|looks good|lgtm)\\b"; "i")))
+                  | select($plan != null and .createdAt > $plan and (.body | test("^\\s*(approved|go ahead|looks good|lgtm)\\b"; "i")))
                   | .author.login]}'
      ```
 
-  2. **No board**: approved when `approvedAfterPlan` holds a trusted human commenter.
-  3. **Board configured**: read the card's `Workflow Status` as in [Looking Up the Board](#looking-up-the-board-when-claudemd-has-no-workflow-board-section) and approve only when it is `Approved`. No output means the card is not listed yet (`gh project item-list` can lag), so treat it as not approved:
+  2. **No board**: approved when `approvedAfterPlan` holds a trusted commenter (as in [Human Comment Requests](#human-comment-requests-run-first-mandatory)). Ignore the agent's own status comments.
+  3. **Board configured**: `Blocked` must be gone and the card `Approved`; if only one of the two has happened, the human's approval is incomplete, so keep waiting and mention the mismatch to them in chat once. Read the card's `Workflow Status` as in [Looking Up the Board](#looking-up-the-board-when-claudemd-has-no-workflow-board-section) and approve only when it is `Approved`. No output means the card is not listed yet (`gh project item-list` can lag), so treat it as not approved:
 
      ```bash
      gh project item-list "${WF_PROJECT_NUMBER}" --owner <owner> --format json -L 1000 \
        --jq '.items[] | select(.content.number==<number> and .content.repository=="<owner>/<repo>") | .["workflow Status"]'
      ```
 
-- **P3.** Record `plan` on the first tick. If a later tick returns a different `plan`, the plan changed: earlier approvals no longer count, so restart from Plan First P4 with the new plan (`Blocked` re-added, board back to **Planning**).
+- **P3.** Record `plan` on the first tick. If a later tick returns a different `plan`, the plan changed and earlier approvals no longer count. If you revised the plan, restart from Plan First P4 with the new plan (`Blocked` re-added, board back to **Planning**); if someone else posted it, tell the human in chat and wait for their direction instead of treating it as the plan.
 
-- **P4.** Pace the loop with `ScheduleWakeup`, passing the same `/loop` prompt back each tick:
+- **P4.** Pace the loop with `ScheduleWakeup` (`delaySeconds`, `prompt`, `reason`, `noop`; `stop: true` ends the loop), passing the same `/loop` prompt back each tick. Where `ScheduleWakeup` is unavailable, use `/loop 20m` with the same prompt instead:
   - Wait `delaySeconds: 1200` (20 minutes) with `noop: true` while nothing has changed. There is no wait cap: the loop ends when the session does, and the 30-minute deadline in [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory) governs commands, not a wait for a human.
   - On approval, whether found on a tick or given in chat (P5), stop the loop with `ScheduleWakeup` and `stop: true`, check for an existing branch as in Plan First P2, and continue to implementation.
 
-- **P5.** **Live-chat approval ends the wait immediately.** If the human types `approved` or `lgtm` (whole word, case-insensitive) into the chat, do not wait for the next tick:
+- **P5.** **Live-chat approval ends the wait immediately.** If the human types a message that unambiguously approves the plan, such as a bare `approved` or `lgtm`, do not wait for the next tick. A question ("is this approved yet?"), a negation ("not approved") or a passing mention does not count; if in doubt, ask:
   1. Post the mirror comment on the issue as in [Blocked Label](#blocked-label) P4.
   2. Remove the label: `gh issue edit <number> --repo <owner/repo> --remove-label Blocked`.
   3. If board data is present, set `Workflow Status` to **Approved** using the [Workflow Board](#workflow-board) update procedure, including its read-back verification.
