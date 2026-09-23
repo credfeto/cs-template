@@ -107,7 +107,7 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
 
   Decide as follows, using the same rules as Plan First P2 and P4:
   - **Approved**: `blocked` is `false` and `plan` is not null, and either the card is `Approved` (board configured) or a comment in `afterPlan` approves (no board), and `plan` still equals the baseline (P3).
-  - **Half-finished**: the approval signal is present but `blocked` is still `true` (the human has not finished clearing it). Keep waiting and tell the human in chat; do not repeat it on later ticks unless the state changes.
+  - **Half-finished**: the approval signal is present but `blocked` is still `true` (the human has not finished clearing it). Keep waiting and tell the human in chat when you first see it.
   - **Otherwise**: not yet, and wait silently. If `plan` is null, no plan comment was found: tell the human and stop the loop.
 
 - **P3.** The plan baseline is the `plan` value from the P1 read (the latest plan comment's `createdAt`, whether just posted or found on resume); carry it in the `/loop` prompt (P1) so it is explicit on every tick. The plan comment is found by its heading alone, so a plan posted under any account is seen. If a later tick returns a different `plan`, the plan changed and earlier approvals no longer count. On the board, a card only stays `Approved` for a plan that has not been re-posted, because every re-post resets the card to **Planning** (Plan First P4). If you revised the plan, restart from Plan First P4 with the new plan (`Blocked` re-added, board back to **Planning**, new baseline in the prompt); if someone else posted it, tell the human in chat and wait for their direction instead of treating it as the plan.
