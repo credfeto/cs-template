@@ -22,7 +22,7 @@ When picking up an **Issue** that has no existing PR:
 
   ```bash
   gh issue view <number> --repo <owner/repo> --json comments \
-    --jq '[.comments[].body] | any(test("## Implementation Plan"; "i"))'
+    --jq '[.comments[].body] | any(test("^\\s*## Implementation Plan"; "i"))'
   ```
 
   - `false` → Plan mode (P3–P4 below).
