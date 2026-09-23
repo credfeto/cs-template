@@ -77,28 +77,27 @@ When picking up an **Issue** that has no existing PR:
 
 Interactive sessions only; an unattended run stops at Plan First P4 and must not poll. A session counts as interactive only once a human has typed a message in it; an injected prompt or task notification does not count. If unsure, assume it is unattended, as in [Pre-Work Baseline Check](git.instructions.md#pre-work-baseline-check-mandatory-before-starting-any-work).
 
-- **P1.** After Plan First P4 has posted the plan and added `Blocked`, "STOP" there means stop working on the issue, not stop watching it: start a dynamic-pacing loop instead of ending the turn. `<plan-createdAt>` is the baseline described in P3, filled in from the first tick:
+- **P1.** After Plan First P4 has posted the plan and added `Blocked`, "STOP" there means stop working on the issue, not stop watching it: start a dynamic-pacing loop instead of ending the turn. `<plan-createdAt>` is the `createdAt` of the plan comment you just posted (see P3):
 
   ```text
   /loop check whether issue <number> in <owner/repo> has been approved (plan baseline <plan-createdAt>); if not, wait
   ```
 
 - **P2.** Each tick, read all of the following, then decide (do not stop early, so a half-finished approval can be flagged):
-  1. The labels, the latest plan comment's `createdAt`, and any later comments from a trusted commenter that open with an approval keyword (the [Plan First P4](#issue-workflow-plan-first-new-issues-only) keywords). A trusted commenter is one whose `authorAssociation` is `OWNER`, `MEMBER` or `COLLABORATOR`. Comments the agent posts itself never open with an approval keyword, so they cannot match:
+  1. The labels, the latest plan comment's `createdAt`, and the comments a trusted commenter (`authorAssociation` of `OWNER`, `MEMBER` or `COLLABORATOR`) posted after it:
 
      ```bash
      gh issue view <number> --repo <owner/repo> --json labels,comments \
-       --jq '([.comments[] | select(.body | test("## Implementation Plan"; "i"))] | last | .createdAt) as $plan
+       --jq '([.comments[] | select(.body | test("^\\s*## Implementation Plan"; "i"))] | last | .createdAt) as $plan
              | {blocked: ([.labels[].name] | index("Blocked") != null),
                 plan: $plan,
-                approvedAfterPlan: [.comments[]
+                afterPlan: [.comments[]
                   | select($plan != null and .createdAt > $plan
-                    and (.authorAssociation | IN("OWNER", "MEMBER", "COLLABORATOR"))
-                    and (.body | test("^\\s*(approved|go ahead|looks good|lgtm)\\b"; "i")))
-                  | .author.login]}'
+                    and (.authorAssociation | IN("OWNER", "MEMBER", "COLLABORATOR")))
+                  | .body]}'
      ```
 
-     Read each matched comment: a question, a negation or a qualified approval ("approved, but ...") does not count.
+     Read `afterPlan` and judge it as Plan First P2 does: a comment approves only if it uses one of the Plan First P4 keywords as an unconditional approval, not a question, a negation or a qualified approval ("approved, but ..."). The agent's own mirror comments (P5) are harmless: they are only posted once the wait is over.
   2. **Board configured only**: the card's `Workflow Status`, as in [Looking Up the Board](#looking-up-the-board-when-claudemd-has-no-workflow-board-section). No output means the card is not listed yet (`gh project item-list` can lag), so treat it as not approved:
 
      ```bash
@@ -107,17 +106,17 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
      ```
 
   Decide as follows, using the same rules as Plan First P2 and P4:
-  - **Approved**: `blocked` is `false` and there is a plan comment, and either the card is `Approved` (board configured) or `approvedAfterPlan` is not empty (no board).
-  - **Half-finished**: the approval signal is present but `blocked` is still `true` (the human has not finished clearing it), or the reverse. Keep waiting and mention the mismatch to the human in chat once.
-  - **Otherwise**: not yet.
+  - **Approved**: `blocked` is `false` and there is a plan comment, and either the card is `Approved` (board configured) or a comment in `afterPlan` approves (no board), and `plan` still equals the baseline (P3).
+  - **Half-finished**: the approval signal is present but `blocked` is still `true` (the human has not finished clearing it). Keep waiting and mention it to the human in chat once.
+  - **Otherwise**: not yet, and wait silently.
 
-- **P3.** The plan baseline is the `plan` value from the first tick; carry it forward in the `/loop` prompt (P1) because nothing else survives between ticks. If a later tick returns a different `plan`, the plan changed and earlier approvals no longer count. If you revised the plan, restart from Plan First P4 with the new plan (`Blocked` re-added, board back to **Planning**, new baseline in the prompt); if someone else posted it, tell the human in chat and wait for their direction instead of treating it as the plan.
+- **P3.** The plan baseline is the `createdAt` of the plan comment you posted at Plan First P3; carry it forward in the `/loop` prompt (P1) because nothing else survives between ticks. If a later tick returns a different `plan`, the plan changed and earlier approvals no longer count. If you revised the plan, restart from Plan First P4 with the new plan (`Blocked` re-added, board back to **Planning**, new baseline in the prompt); if someone else posted it, tell the human in chat and wait for their direction instead of treating it as the plan.
 
-- **P4.** Pace the loop with `ScheduleWakeup` (`delaySeconds`, `prompt`, `reason`, `noop`; `stop: true` ends the loop), passing the `/loop` prompt from P1 back each tick. If `ScheduleWakeup` is unavailable, do not poll: tell the human the issue is waiting and that saying `approved` in chat (P5) will continue the work.
+- **P4.** Pace the loop with `ScheduleWakeup`, as the `/loop` skill's dynamic mode does (it defines the parameters, including `noop` and `stop`), passing the `/loop` prompt from P1 back each tick. If `ScheduleWakeup` is unavailable, do not poll: tell the human the issue is waiting and that saying `approved` in chat (P5) will continue the work.
   - Wait `delaySeconds: 1200` (20 minutes) with `noop: true` while nothing has changed. There is no wait cap: the loop ends when the session does, and the 30-minute deadline in [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory) governs commands, not a wait for a human.
   - On approval, whether found on a tick or given in chat (P5), stop the loop with `ScheduleWakeup` and `stop: true`, check for an existing branch as in Plan First P2, and continue to implementation.
 
-- **P5.** **Live-chat approval ends the wait immediately.** If the human's chat message opens with the literal word `approved` or `lgtm` (case-insensitive) and is otherwise an unconditional approval, do not wait for the next tick. A question ("is this approved yet?"), a negation ("not approved"), a qualified approval or a passing mention does not count; if in doubt, ask:
+- **P5.** **Live-chat approval ends the wait immediately.** If the human's chat message opens with the literal word `approved` or `lgtm` (case-insensitive) and is otherwise an unconditional approval, do not wait for the next tick. This is deliberately narrower than the four GitHub keywords: it is the one place the agent acts on a chat message alone, so it matches the literal words in the user-level approval rule. Other equivalents typed in chat (`go ahead`, `looks good`) are still valid approval per "Check GitHub's live state" above, but then the human clears `Blocked` and moves the card themselves. A question ("is this approved yet?"), a negation ("not approved"), a qualified approval or a passing mention does not count; if in doubt, ask:
   1. Post the mirror comment on the issue as in [Blocked Label](#blocked-label) P4.
   2. Remove the label: `gh issue edit <number> --repo <owner/repo> --remove-label Blocked`.
   3. If board data is present, set `Workflow Status` to **Approved** using the [Workflow Board](#workflow-board) update procedure, including its read-back verification.
