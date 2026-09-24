@@ -88,6 +88,15 @@ See [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board) fo
 - **Do not block on it.** Carry on with `gh` for the current task after raising the issue; the request is for future runs.
 - **Once `cfwf` covers a use, use `cfwf`.** Never keep composing the `gh` form of a use that `cfwf` has a command for.
 
+## GitHub State Lags Behind Writes (MANDATORY)
+
+GitHub's API is asynchronous: a change can take seconds, sometimes longer, to show up in a read. This applies to anything that lags, including Workflow board fields, labels, closing-issue references and check status. It is GitHub's behaviour, not a fault in `gh`, `cfwf`, the orchestrator or the API proxy.
+
+- **A write whose call succeeded is done.** Do not re-read it to confirm.
+- **Never spam GitHub while waiting for a change to show.** Do not repeat a write, or poll or loop on a read, because a read straight after a write has not caught up yet.
+- **A read that disagrees with a write you just made is lag, not a failure.** Carry on with other work and check again later, for example at the next phase or step. Repeat the write only if the value is still wrong after that. There is no fixed wait.
+- **Do not raise issues for lag** on `credfeto/credfeto-orchestrator` or `credfeto/github-api-proxy`; there is nothing either can do about it.
+
 ### Available JSON Fields: `gh issue view`/`gh issue list`
 
 ```text
