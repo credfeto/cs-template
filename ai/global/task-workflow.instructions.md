@@ -148,14 +148,11 @@ On every agent run, for every PR being interacted with:
 - **P3.** Sync labels from all linked closing issues to the PR:
 
   ```bash
-  cfwf closing-issue-labels --repo <owner/repo> --pr <pr> \
-  | while IFS= read -r label; do
-      gh pr edit <pr> --repo <owner/repo> --add-label "$label" \
-        || echo "Warning: could not add label '$label' to PR" >&2
-    done
+  cfwf closing-issue-labels --repo <owner/repo> --pr <pr>
+  gh pr edit <pr> --repo <owner/repo> --add-label "<label-1>,<label-2>"
   ```
 
-  Always use `cfwf closing-issue-labels`; never hand-compose the lookup. It prints the sorted, de-duplicated labels of every issue the PR closes, one per line, reading each issue from its own repository. It leaves out `Blocked` and `On-Hold`: workflow-control labels must never be synced from an issue to its PR.
+  Always use `cfwf closing-issue-labels`; never hand-compose the lookup. It prints the sorted, de-duplicated labels of every issue the PR closes, one per line, reading each issue from its own repository. It leaves out `Blocked` and `On-Hold`: workflow-control labels must never be synced from an issue to its PR. Pass the printed labels to one `gh pr edit --add-label` as a comma-separated list; do not wrap them in a shell loop, because the agent sandbox rejects `IFS=` assignments. If it prints nothing, there is nothing to add.
 
 - **P4.** Never remove any label from a PR or issue; GitHub workflows add labels automatically and they must not be removed. Sole exception: `Blocked` on live-chat plan approval, see [Waiting for Approval in an Interactive Session](agent-roles.instructions.md#waiting-for-approval-in-an-interactive-session) P5.
 
