@@ -114,7 +114,7 @@ This is stricter than an unresolved `Qn.` alone: an Open Question already blocks
 
 - Only one active branch or open PR **per user** per repository at a time; do not create another until the current one is merged and closed.
 - **Before blocking new work** because of an existing PR: always verify its current state with `gh pr view <number> --repo <owner/repo> --json state,mergedAt`; never rely on conversation memory. A PR that was open earlier in the session may have since been merged.
-- The `gh ... --json` queries in this and the following sections, and any other `--json` or `gh api graphql` use that `cfwf` does not yet cover, fall under [Standardising Repeated `gh` Queries in `cfwf`](github-cli.instructions.md#standardising-repeated-gh-queries-in-cfwf-mandatory): raise an issue on `credfeto/credfeto-orchestrator` for each distinct use, then carry on.
+- The `gh ... --json` queries in this and the following sections, and any other `gh api` or `--json` use that `cfwf` does not yet cover, fall under [Choosing Between `cfwf` and `gh`](github-cli.instructions.md#choosing-between-cfwf-and-gh-mandatory): raise an issue on `credfeto/credfeto-orchestrator` for each distinct use, then carry on.
 - When adding work to an open PR (review comments, missing coverage, CI fixes), convert to draft first: `gh pr ready <number> --undo`. Keep it in draft until Code Tester and Code Reviewer are both satisfied; only PR Submitter converts it back.
 
 ## Bot-Created PRs (MANDATORY, treat as your own)

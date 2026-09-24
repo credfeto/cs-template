@@ -79,9 +79,15 @@ cfwf workflow-status --set --repo <owner>/<repo> --issue <number> --status "Not 
 
 See [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board) for the full `cfwf` Workflow-board commands and why `cfwf` does not read a write back.
 
-## Standardising Repeated `gh` Queries in `cfwf` (MANDATORY)
+## Choosing Between `cfwf` and `gh` (MANDATORY)
 
-`cfwf` (in the `credfeto/credfeto-orchestrator` agent image) is where routine `gh` operations are meant to end up as standardised, pre-canned commands, so that agents stop composing long `gh` scripts by hand. Whenever you run `gh` with `--json <fields>` (with or without `--jq`), or `gh api graphql`, for a read or a write, and no `cfwf` command covers that use, raise an issue on `credfeto/credfeto-orchestrator` asking for it to be added to `cfwf`. This applies to routine uses such as `gh issue view --json` and `gh pr list --json` as much as to unusual ones.
+Reach for these in this order:
+
+1. **`cfwf`** for anything it supports, for reads and writes. Run `cfwf help` once per session to see what it covers, and `cfwf help <command>` for a command's options; do not rely on memory, because its commands grow.
+2. **A native `gh <noun> <verb>` subcommand** when `cfwf` has no command for the operation.
+3. **`gh api` or `gh api graphql`** only when neither of the above covers it.
+
+`cfwf` (in the `credfeto/credfeto-orchestrator` agent image) is where routine `gh` operations are meant to end up as standardised, pre-canned commands, so that agents stop composing long `gh` scripts by hand. Whenever you use `gh api` (REST or GraphQL) or `gh ... --json <fields>` (with or without `--jq`), for a read or a write, and no `cfwf` command covers that use, raise an issue on `credfeto/credfeto-orchestrator` asking for it to be added to `cfwf`. This applies to routine uses such as `gh issue view --json` and `gh pr list --json` as much as to unusual ones. Plain native subcommands without `--json`, such as `gh pr create`, `gh issue comment` and `gh pr edit --add-label`, are exempt.
 
 - **One issue per distinct use.** Search `credfeto/credfeto-orchestrator` first, using plain output so the search does not itself need `--json`: `gh issue list --repo credfeto/credfeto-orchestrator --state all --search "cfwf <keywords>"`. If an open or closed issue already covers the use, do not raise another; if a closed one was declined, follow its outcome.
 - **Say what is needed.** Give the exact `gh` command (with placeholders for the values), what it is for, and where in these instructions or the current task it is used. Add the new issue to the "Workflow" project as for any issue ([above](#adding-an-issue-to-the-workflow-project)).
@@ -206,7 +212,7 @@ gh run rerun <run-id> --repo <owner>/<repo>
 
 ## REST and GraphQL API (`gh api`)
 
-**Prefer a native `gh <noun> <verb>` subcommand over `gh api`/`gh api graphql` whenever one covers the operation.** Raw GraphQL query strings are more likely to be misread as obfuscated/spam-shaped input by the agent sandbox's bash content filter than an equivalent flat `gh` invocation, and `gh api graphql` mutations are separately denied outright by the sandbox (see [agent-roles.instructions.md](agent-roles.instructions.md#updating-and-reading-the-board-with-cfwf)). Only reach for `gh api`/`gh api graphql` when no dedicated subcommand exists for the operation at all (e.g. review-comment threads, collaborator management, releases lookups). Workflow-board lookups and updates are covered by `cfwf`, never by hand-composed `gh` commands. Any `gh api graphql` (or `--json`) use that `cfwf` does not yet cover needs an issue raised: see [Standardising Repeated `gh` Queries in `cfwf`](#standardising-repeated-gh-queries-in-cfwf-mandatory).
+**`gh api`/`gh api graphql` is the last resort:** use it only when neither `cfwf` nor a native `gh <noun> <verb>` subcommand covers the operation (e.g. review-comment threads, collaborator management, releases lookups), and raise an issue for the use as in [Choosing Between `cfwf` and `gh`](#choosing-between-cfwf-and-gh-mandatory). Raw GraphQL query strings are more likely to be misread as obfuscated/spam-shaped input by the agent sandbox's bash content filter than an equivalent flat `gh` invocation, and `gh api graphql` mutations are denied outright by the sandbox.
 
 ```bash
 # REST: simple GET
