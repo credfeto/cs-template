@@ -71,13 +71,13 @@ gh issue reopen <number> --repo <owner>/<repo>
 
 ### Adding an Issue to the Workflow Project
 
-Every issue raised must be added to the "Workflow" project linked to the repository it was raised in (see [task-workflow.instructions.md](task-workflow.instructions.md#workflow-project-board-mandatory)). Always use `cfwf`: it finds the project linked to the repository itself (project titles are not unique across the owner, so never resolve it by title with `--add-project`), adds the item and confirms the status persisted.
+Every issue raised must be added to the "Workflow" project linked to the repository it was raised in (see [task-workflow.instructions.md](task-workflow.instructions.md#workflow-project-board-mandatory)). Always use `cfwf`: it finds the project linked to the repository itself (project titles are not unique across the owner, so never resolve it by title with `--add-project`), adds the item and sets the status.
 
 ```bash
 cfwf workflow-status --set --repo <owner>/<repo> --issue <number> --status "Not Started"
 ```
 
-See [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board) for the full `cfwf` Workflow-board commands and why the read-back exists.
+See [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board) for the full `cfwf` Workflow-board commands and why `cfwf` does not read a write back.
 
 ## Standardising Repeated `gh` Queries in `cfwf` (MANDATORY)
 
@@ -220,7 +220,7 @@ gh api graphql \
   --jq '.data.user.id'
 ```
 
-For the Workflow-board update (add the item, set the status, verify), use `cfwf`: see [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board); that is workflow-specific and lives there, not duplicated here.
+For the Workflow-board update (add the item, set the status), use `cfwf`: see [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board); that is workflow-specific and lives there, not duplicated here.
 
 ### Inline PR Review Comments via `gh api`
 
