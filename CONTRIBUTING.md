@@ -44,7 +44,7 @@ A good bug report should not leave others needing to chase you for more informat
 - Search the repository's Issues tab, including closed issues, to see whether another user has already reported the same bug or error.
 - Search the internet (including Stack Overflow) to see whether users outside the GitHub community have discussed the issue.
 - Collect information about the bug:
-  - Stack trace (traceback)
+  - Stack trace or error output, if there is any
   - Operating system, platform and version (Windows, Linux, macOS, x86, ARM)
   - Version of the interpreter, compiler, SDK, runtime environment or package manager, depending on what seems relevant
   - Possibly your input and the output
