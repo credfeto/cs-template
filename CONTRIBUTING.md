@@ -14,6 +14,7 @@ Thank you for taking the time to contribute. All types of contributions are enco
 - [I Want To Contribute](#i-want-to-contribute)
 - [Reporting Bugs](#reporting-bugs)
 - [Suggesting Enhancements](#suggesting-enhancements)
+- [Submitting Changes](#submitting-changes)
 
 ## I Have a Question
 
@@ -87,3 +88,16 @@ Enhancement suggestions are tracked as GitHub issues.
 - **Describe the current behaviour** and **explain which behaviour you expected to see instead**, and why. At this point you can also say which alternatives do not work for you.
 - You may want to **include screenshots or screen recordings** that help you demonstrate the steps or point out the part the suggestion relates to.
 - **Explain why this enhancement would be useful** to most users of the project. You may also want to point out other projects that solved it better and could serve as inspiration.
+
+### Submitting Changes
+
+Code and documentation changes are welcome, and documentation-only changes follow the same process.
+
+- Work against an issue. If there is not one for your change, open one first so the change can be discussed before you spend time on it.
+- Branch from `main`, and keep each pull request to one logical change.
+- Write commit messages in Conventional Commits format and reference the issue number.
+- Run the repository's pre-commit hooks and linters before you push. They must pass.
+- Add or update tests for any change in behaviour.
+- If the repository keeps a changelog, add an entry using the repository's own tooling.
+- Open the pull request as a draft, and mark it ready for review once the automated checks pass.
+- Write prose, such as documentation, comments and commit messages, in UK English.
