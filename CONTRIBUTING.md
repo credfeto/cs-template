@@ -17,7 +17,7 @@ Thank you for taking the time to contribute. All types of contributions are enco
 
 ## I Have a Question
 
-Before you ask a question, read the [README](README.md), which describes how to build, test and work with the project, and search the repository's Issues tab for existing issues that might help. If you find a suitable issue and still need clarification, ask your question there. It is also worth searching the internet for answers first.
+Before you ask a question, read the [README](README.md) and search the repository's Issues tab for existing issues that might help. If you find a suitable issue and still need clarification, ask your question there. It is also worth searching the internet for answers first.
 
 If you still need clarification:
 
@@ -52,7 +52,7 @@ A good bug report should not leave others needing to chase you for more informat
 
 #### How Do I Submit a Good Bug Report?
 
-> You must never report security-related issues, vulnerabilities or bugs that include sensitive information to the issue tracker, or anywhere else in public. Instead, send sensitive bugs by following the instructions in the [security policy](SECURITY.md).
+> Do not report security vulnerabilities in public, including in the issue tracker. Follow the [security policy](SECURITY.md) instead.
 
 We use GitHub issues to track bugs and errors. If you run into an issue with the project:
 
@@ -76,7 +76,7 @@ This section guides you through submitting an enhancement suggestion for this pr
 - Make sure that you are using the latest version.
 - Read the [README](README.md) carefully and find out whether the functionality is already covered, perhaps by configuration.
 - Search the repository's Issues tab to see whether the enhancement has already been suggested. If it has, add a comment to the existing issue instead of opening a new one.
-- Find out whether your idea fits the scope and aims of the project. It is up to you to make a strong case for the merits of the feature. Keep in mind that we want features that will be useful to the majority of our users and not just a small subset. If you are targeting a minority of users, consider writing an add-on or plugin library.
+- Find out whether your idea fits the scope and aims of the project. It is up to you to make a strong case for the merits of the feature. Keep in mind that we want features that will be useful to the majority of our users and not just a small subset.
 
 #### How Do I Submit a Good Enhancement Suggestion?
 
