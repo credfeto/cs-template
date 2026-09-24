@@ -211,11 +211,11 @@ Workflow board (see agent-roles.instructions.md for update commands):
   WF_COMPLETE=<option-id>
 ```
 
-The ids in this block are not needed by anything that uses `cfwf`: do not build `gh project` commands from them. Its presence is still the signal that the repo has a Workflow board. If it is **absent**, still update the board with `cfwf` as below rather than skipping updates, because `cfwf` finds the board itself. Only if the repo genuinely has no project titled "Workflow" linked to it (`cfwf` cannot find one) skip all board updates silently.
+The ids in this block are not needed by anything that uses `cfwf`: do not build `gh project` commands from them. Its presence is still the signal that the repo has a Workflow board. If it is **absent**, still update the board with `cfwf` as below rather than skipping updates. Only if the repo genuinely has no project titled "Workflow" linked to it (`cfwf` cannot find one) skip all board updates silently.
 
 #### Updating and Reading the Board with `cfwf`
 
-**Always use `cfwf` for the Workflow board; never hand-compose `gh project`, `gh repo view --json projectsV2` or `gh api graphql` commands for it.** Every command names the item as `--repo <owner/repo>` plus `--pr <n>` or `--issue <n>`. No project, field or option ids are needed: `cfwf` looks up the project titled "Workflow" linked to the repo and its `Workflow Status` field itself.
+**Always use `cfwf` for the Workflow board; never hand-compose `gh project`, `gh repo view --json projectsV2` or `gh api graphql` commands for it.** Every command names the item as `--repo <owner/repo>` plus `--pr <n>` or `--issue <n>`.
 
 ```bash
 # Move an issue or PR to a status (the option's display name, matched without regard to case)
@@ -225,13 +225,11 @@ cfwf workflow-status --set --repo <owner/repo> (--pr <n> | --issue <n>) --status
 cfwf workflow-status --check --repo <owner/repo> (--pr <n> | --issue <n>)
 ```
 
-- `--set` adds the item to the board if it is not already there and sets the `Workflow Status`, then prints `Set <url> to <status>`. It trusts the exit status of `gh project item-edit` and does **not** read the value back, and there is no `--verify` option. Exit 0 means GitHub accepted the write; a non-zero exit means the write failed.
+- `--set` adds the item to the board if it is not already there and sets the `Workflow Status`, then prints `Set <url> to <status>`. It does **not** read the value back and has no `--verify` option. Exit 0 means GitHub accepted the write; a non-zero exit means the write failed.
 - `--check` prints the current `Workflow Status` and exits non-zero if the item is not on the board. Read only the first word of its output (`Development (In Progress)` and `Development` both mean `Development`); do not parse anything after it.
 - `cfwf help` and `cfwf help <command>` print usage.
 
-**`cfwf` does not verify a write, deliberately.** The GitHub API can lag behind a write by seconds, so a read straight afterwards cannot tell a lost write from lag. Anyone who wants to confirm a status uses `cfwf workflow-status --check`, after allowing for the lag (see [GitHub State Lags Behind Writes](github-cli.instructions.md#github-state-lags-behind-writes-mandatory)): do not re-check straight away or repeat the write. `--check` reads the board with a read-only GraphQL query rather than `gh project item-list`, because `gh project item-list` lags behind writes and is capped. That query is a documented, narrow exception to [the preference for native `gh` subcommands](github-cli.instructions.md#rest-and-graphql-api-gh-api).
-
-The field is `Workflow Status`, never GitHub's built-in `Status` field, which every "Workflow" project also carries alongside it (default options Todo/In Progress/Done). `cfwf` already targets the right one; the distinction matters only if you are ever reading raw board data, where querying the built-in `Status` returns real option ids that map to none of the `Workflow Status` options and is easily misread as "no Approved option".
+**`cfwf` does not verify a write, deliberately.** The GitHub API can lag behind a write by seconds, so a read straight afterwards cannot tell a lost write from lag. To confirm a status, use `cfwf workflow-status --check` after allowing for the lag (see [GitHub State Lags Behind Writes](github-cli.instructions.md#github-state-lags-behind-writes-mandatory)): do not re-check straight away or repeat the write.
 
 ### On-Hold Label
 
