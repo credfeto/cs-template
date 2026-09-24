@@ -46,7 +46,7 @@ Reach for these in this order:
 2. **A native `gh <noun> <verb>` subcommand** when `cfwf` has no command for the operation.
 3. **`gh api` or `gh api graphql`** only when neither of the above covers it.
 
-`cfwf` (in the `credfeto/credfeto-orchestrator` agent image) is where routine `gh` operations are meant to end up as standardised, pre-canned commands rather than long `gh` scripts composed by hand. When you use `gh api` (REST or GraphQL) or `gh ... --json <fields>` (with or without `--jq`), for a read or a write, and no `cfwf` command covers that use, raise an issue on `credfeto/credfeto-orchestrator` asking for it to be added to `cfwf`, then carry on with `gh` for the current task. This applies to routine uses such as `gh issue view --json` and `gh pr list --json` as much as to unusual ones, except the uses these instructions themselves prescribe, which are already requested. Plain native subcommands without `--json`, such as `gh pr create`, `gh issue comment` and `gh pr edit --add-label`, are exempt.
+`cfwf` (in the `credfeto/credfeto-orchestrator` agent image) is where routine `gh` operations are meant to end up as standardised, pre-canned commands rather than long `gh` scripts composed by hand. When you use `gh api` (REST or GraphQL) or `gh ... --json <fields>` (with or without `--jq`), for a read or a write, and no `cfwf` command covers that use, raise an issue on `credfeto/credfeto-orchestrator` asking for it to be added to `cfwf`, then carry on with `gh` for the current task. This applies to routine uses such as `gh issue view --json` and `gh pr list --json` as much as to unusual ones. If `cfwf` is not installed or a command fails, follow [Missing CLI Tools](task-workflow.instructions.md#missing-cli-tools-mandatory) and report it; do not fall back to hand-composed `gh` for a use `cfwf` covers. Plain native subcommands without `--json`, such as `gh pr create`, `gh issue comment` and `gh pr edit --add-label`, are exempt.
 
 - **One issue per distinct use.** Search `credfeto/credfeto-orchestrator` first, using plain output so the search does not itself need `--json`: `gh issue list --repo credfeto/credfeto-orchestrator --state all --search "cfwf <keywords>"`. If an open or closed issue already covers the use, do not raise another; if a closed one was declined, follow its outcome.
 - **Say what is needed.** Give the exact `gh` command (with placeholders for the values), what it is for, and where in these instructions or the current task it is used. Add the new issue to the "Workflow" project as for any issue ([Adding an Issue to the Workflow Project](#adding-an-issue-to-the-workflow-project)).
@@ -84,7 +84,7 @@ gh issue reopen <number> --repo <owner>/<repo>
 
 ### Adding an Issue to the Workflow Project
 
-Every issue raised must be added to the "Workflow" project linked to the repository it was raised in, immediately after creation (see [task-workflow.instructions.md](task-workflow.instructions.md#workflow-project-board-mandatory)):
+Every issue raised must be added to the "Workflow" project linked to the repository it was raised in, immediately after creation (see [task-workflow.instructions.md](task-workflow.instructions.md#workflow-project-board-mandatory)). Run it only for an issue you have just created: `--set` overwrites the status of an item already on the board, so never re-run it on an existing issue to "make sure":
 
 ```bash
 cfwf workflow-status --set --repo <owner>/<repo> --issue <number> --status "Not Started"
@@ -249,7 +249,7 @@ gh api repos/<owner>/<repo>/pulls/<number>/comments \
 
 ## GitHub State Lags Behind Writes (MANDATORY)
 
-GitHub's API is asynchronous: a change can take seconds, sometimes longer, to show up in a read. This applies to anything that lags, including Workflow board fields, labels, closing-issue references and check status. It is GitHub's behaviour, not a fault in `gh`, `cfwf`, the orchestrator or the API proxy, so do not raise issues on `credfeto/credfeto-orchestrator` or `credfeto/github-api-proxy` for it.
+GitHub's API is asynchronous: a change can take seconds, sometimes longer, to show up in a read. This applies to anything that lags, including Workflow board fields, labels and closing-issue references. It is GitHub's behaviour, not a fault in `gh`, `cfwf`, the orchestrator or the API proxy, so do not raise issues on `credfeto/credfeto-orchestrator` or `credfeto/github-api-proxy` for it.
 
 - **A write whose call succeeded is done.** Do not re-read it to confirm.
 - **Never spam GitHub while waiting for a change to show.** Do not repeat a write, or poll or loop on a read, because a read straight after a write has not caught up yet. (Waiting for a human to act, as in [Waiting for Approval in an Interactive Session](agent-roles.instructions.md#waiting-for-approval-in-an-interactive-session), is a different, sanctioned wait.)

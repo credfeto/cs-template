@@ -26,7 +26,7 @@ When picking up an **Issue** that has no existing PR:
   ```
 
   - `false` → Plan mode (P3–P4 below).
-  - `true` → Plan exists. How approval is signalled depends on whether a Workflow board is configured (the orchestrator passes this context in your CLAUDE.md):
+  - `true` → Plan exists. How approval is signalled depends on whether a Workflow board is configured (the orchestrator passes this context in your CLAUDE.md; if it does not, `cfwf workflow-status --check --repo <owner/repo> --issue <number>` shows whether the repo has one):
     - **Board configured**: check whether a human (an `OWNER`, `MEMBER` or `COLLABORATOR`; the board only lets people with project write access move a card) has set the board status to **Approved**. If yes → skip to implementation. If not yet → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
     - **No board**: check for a human approval comment from an `OWNER`, `MEMBER` or `COLLABORATOR` (by `authorAssociation`) posted **after** the plan comment (keywords: `approved` / `lgtm`, case-insensitive, whole word). If found → skip to implementation. If not → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
 
@@ -226,7 +226,7 @@ cfwf workflow-status --check --repo <owner/repo> (--pr <n> | --issue <n>)
 ```
 
 - `--set` adds the item to the board if it is not already there and sets the `Workflow Status`, then prints `Set <url> to <status>`. Exit 0 means GitHub accepted the write; a non-zero exit means the write failed. It deliberately does not read the value back, because GitHub lags behind writes: see [GitHub State Lags Behind Writes](github-cli.instructions.md#github-state-lags-behind-writes-mandatory).
-- `--check` prints the current `Workflow Status` and exits non-zero if the item is not on the board. The output is the status name (`Approved`, `AI Review`) and may be followed by a parenthetical such as `(In Progress)`: compare only the status name and do not parse anything after it.
+- `--check` prints the current `Workflow Status` and exits non-zero if the item is not on the board. The output starts with the status name (`Approved`, `AI Review`) and may be followed by a parenthetical such as `(In Progress)`: match the name exactly and ignore anything after it.
 
 ### On-Hold Label
 
