@@ -231,7 +231,7 @@ cfwf workflow-status --check --repo <owner/repo> (--pr <n> | --issue <n>)
 
 **`cfwf` does not verify a write, deliberately.** The GitHub API can lag behind a write by seconds, so a read straight afterwards cannot tell a lost write from lag. Anyone who wants to confirm a status uses `cfwf workflow-status --check`, after allowing for the lag (see [GitHub State Lags Behind Writes](github-cli.instructions.md#github-state-lags-behind-writes-mandatory)): do not re-check straight away or repeat the write. `--check` reads the board with a read-only GraphQL query rather than `gh project item-list`, because `gh project item-list` lags behind writes and is capped. That query is a documented, narrow exception to [the preference for native `gh` subcommands](github-cli.instructions.md#rest-and-graphql-api-gh-api).
 
-The field is `Workflow Status`, never GitHub's built-in `Status` field, which every "Workflow" project also carries alongside it (default options Todo/In Progress/Done). `cfwf` already targets the right one; the distinction matters only if you are ever reading raw board data (confirmed live: `credfeto/credfeto-orchestrator#1400`, where querying the built-in `Status` returned real option ids that mapped to nothing and was misread as "no Approved option").
+The field is `Workflow Status`, never GitHub's built-in `Status` field, which every "Workflow" project also carries alongside it (default options Todo/In Progress/Done). `cfwf` already targets the right one; the distinction matters only if you are ever reading raw board data, where querying the built-in `Status` returns real option ids that map to none of the `Workflow Status` options and is easily misread as "no Approved option".
 
 ### On-Hold Label
 
