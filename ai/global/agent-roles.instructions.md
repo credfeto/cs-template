@@ -26,7 +26,7 @@ When picking up an **Issue** that has no existing PR:
   ```
 
   - `false` → Plan mode (P3–P4 below).
-  - `true` → Plan exists. How approval is signalled depends on whether a Workflow board is configured (the orchestrator passes this context in your CLAUDE.md; if it does not, `cfwf workflow-status --check --repo <owner/repo> --issue <number>` shows whether the repo has one):
+  - `true` → Plan exists. How approval is signalled depends on whether a Workflow board is configured (the orchestrator passes this context in your CLAUDE.md):
     - **Board configured**: check whether a human (an `OWNER`, `MEMBER` or `COLLABORATOR`; the board only lets people with project write access move a card) has set the board status to **Approved**. If yes → skip to implementation. If not yet → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
     - **No board**: check for a human approval comment from an `OWNER`, `MEMBER` or `COLLABORATOR` (by `authorAssociation`) posted **after** the plan comment (keywords: `approved` / `lgtm`, case-insensitive, whole word). If found → skip to implementation. If not → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
 
