@@ -48,7 +48,7 @@ A good bug report should not leave others needing to chase you for more informat
   - Stack trace or error output, if there is any
   - Operating system, platform and version (Windows, Linux, macOS, x86, ARM)
   - Version of the interpreter, compiler, SDK, runtime environment or package manager, depending on what seems relevant
-  - Possibly your input and the output
+  - Your input and the output, where relevant
   - Whether you can reliably reproduce the issue, and whether you can also reproduce it with older versions
 
 #### How Do I Submit a Good Bug Report?
@@ -66,7 +66,7 @@ Once it is filed:
 
 - The project team will label the issue accordingly.
 - A team member will try to reproduce the issue with your reproduction steps. If there are no reproduction steps, or no obvious way to reproduce the issue, the team will ask you for them. An issue that cannot be reproduced may not be addressed until it can be.
-- If the team can reproduce the issue, it will be left for someone to implement.
+- If the team can reproduce the issue, it will be left for someone to implement, and you are welcome to contribute the fix yourself: see [Submitting Changes](#submitting-changes).
 
 ### Suggesting Enhancements
 
@@ -93,11 +93,11 @@ Enhancement suggestions are tracked as GitHub issues.
 
 Code and documentation changes are welcome, and documentation-only changes follow the same process.
 
-- Work against an issue. If there is not one for your change, open one first so the change can be discussed before you spend time on it.
+- Work against an issue. For anything beyond a trivial fix, if there is not one for your change, open one first so the change can be discussed before you spend time on it.
 - Branch from `main`, and keep each pull request to one logical change.
 - Write commit messages in Conventional Commits format and reference the issue number.
-- Run the repository's pre-commit hooks and linters before you push. They must pass.
+- Run the repository's pre-commit hooks and linters before you push (see the [README](README.md)). They must pass.
 - Add or update tests for any change in behaviour.
 - If the repository keeps a changelog, add an entry using the repository's own tooling.
-- Open the pull request as a draft, and mark it ready for review once the automated checks pass.
+- Open the pull request as a draft while it is in progress, and mark it ready for review once the automated checks pass.
 - Write prose, such as documentation, comments and commit messages, in UK English.
