@@ -39,8 +39,7 @@ and a must-be-backgrounded hook at once: `git -C <dir> commit -m "..."` invoked 
 
 Different denials on similar-looking commands usually come from **different** hooks with
 **different** fixes; do not average them into one general theory (e.g. "backgrounding is broken").
-Read the exact hook name and message each time. Confirmed in practice
-(`credfeto/credfeto-notification-bot#280`): a plain `dotnet test` without `run_in_background: true`
+Read the exact hook name and message each time. For example, a plain `dotnet test` without `run_in_background: true`
 was blocked by `enforce-background-for-long-running-commands` ("must run with `run_in_background:
 true`"), while a later attempt that added both `run_in_background: true` *and* a `timeout N` shell
 wrapper around the same command was blocked by `reject-obfuscated-commands` instead (`timeout` is
@@ -80,7 +79,7 @@ working an unrelated issue in another repository hit both denial shapes on the s
 command (`pre-commit-check`), a genuine hook denial in the foreground (named hook, stated fix) and a
 permission denial in the background (naming neither), read the two as one broken session rather
 than two different denial shapes, and escalated to a human on the first occurrence. This is a
-different failure from `credfeto/credfeto-notification-bot#280` above, where two genuine hook
+different failure from the one above, where two genuine hook
 denials were wrongly averaged into one theory; here, one denial was a hook and the other wasn't.
 Identify which part of the command is being modelled as a broad read, narrow or exclude it, and
 retry before escalating to a human.

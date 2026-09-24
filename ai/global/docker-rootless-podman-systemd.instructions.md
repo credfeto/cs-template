@@ -129,6 +129,4 @@ Use `podman compose down` instead (stop + remove in one step) rather than a `sto
 
 ## Source
 
-Findings captured from real-host debugging during the `credfeto-notification-bot-docker` docker-to-rootless-podman migration; see [credfeto/cs-template#978](https://github.com/credfeto/cs-template/issues/978) and credfeto/credfeto-notification-bot-docker#12 / credfeto/credfeto-notification-bot-docker#14 / credfeto/credfeto-notification-bot-docker#17 for the full narrative and exact commands used to reproduce/diagnose each one.
-
-The `PrivateTmp=yes` section was added 2026-08-06 after a real-host outage on `notifications.lan`: see credfeto/credfeto-notification-bot-docker#19.
+Findings captured from real-host debugging of a docker-to-rootless-podman migration.
