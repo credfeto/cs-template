@@ -126,7 +126,3 @@ podman-compose: error: argument command: invalid choice: 'rm'
 ```
 
 Use `podman compose down` instead (stop + remove in one step) rather than a `stop` + `rm -f` pair.
-
-## Source
-
-Findings captured from real-host debugging of a docker-to-rootless-podman migration.

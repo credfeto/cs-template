@@ -64,7 +64,7 @@ When a project is a test support library (provides mocks, helpers, or base types
 <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
 ```
 
-It must also import `UnitTests.props` (required by `FunFair.BuildCheck`):
+It must also import `UnitTests.props` (a temporary workaround required by `FunFair.BuildCheck`; drop it once `FunFair.BuildCheck` no longer requires the import):
 
 ```xml
 <Import Project="$(SolutionDir)UnitTests.props" Condition="Exists('$(SolutionDir)UnitTests.props')" />
