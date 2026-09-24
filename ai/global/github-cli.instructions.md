@@ -201,7 +201,7 @@ gh run rerun <run-id> --repo <owner>/<repo>
 
 ## REST and GraphQL API (`gh api`)
 
-**`gh api`/`gh api graphql` is the last resort:** use it only when neither `cfwf` nor a native `gh <noun> <verb>` subcommand covers the operation (e.g. review-comment threads, collaborator management, releases lookups), and raise an issue for the use as in [Choosing Between `cfwf` and `gh`](#choosing-between-cfwf-and-gh-mandatory). Raw GraphQL query strings are more likely to be misread as obfuscated/spam-shaped input by the agent sandbox's bash content filter than an equivalent flat `gh` invocation, and `gh api graphql` mutations are denied outright by the sandbox.
+**`gh api`/`gh api graphql` is the last resort:** see [Choosing Between `cfwf` and `gh`](#choosing-between-cfwf-and-gh-mandatory) for when it applies and the issue to raise (e.g. review-comment threads, collaborator management, releases lookups). Raw GraphQL query strings are more likely to be misread as obfuscated/spam-shaped input by the agent sandbox's bash content filter than an equivalent flat `gh` invocation, and `gh api graphql` mutations are denied outright by the sandbox.
 
 ```bash
 # REST: simple GET
@@ -223,8 +223,6 @@ gh api graphql \
   -f l="<login>" \
   --jq '.data.user.id'
 ```
-
-For the Workflow-board update (add the item, set the status), use `cfwf`: see [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board); that is workflow-specific and lives there, not duplicated here.
 
 ### Inline PR Review Comments via `gh api`
 
@@ -254,7 +252,7 @@ gh api repos/<owner>/<repo>/pulls/<number>/comments \
 GitHub's API is asynchronous: a change can take seconds, sometimes longer, to show up in a read. This applies to anything that lags, including Workflow board fields, labels, closing-issue references and check status. It is GitHub's behaviour, not a fault in `gh`, `cfwf`, the orchestrator or the API proxy, so do not raise issues on `credfeto/credfeto-orchestrator` or `credfeto/github-api-proxy` for it.
 
 - **A write whose call succeeded is done.** Do not re-read it to confirm.
-- **Never spam GitHub while waiting for a change to show.** Do not repeat a write, or poll or loop on a read, because a read straight after a write has not caught up yet.
+- **Never spam GitHub while waiting for a change to show.** Do not repeat a write, or poll or loop on a read, because a read straight after a write has not caught up yet. (Waiting for a human to act, as in [Waiting for Approval in an Interactive Session](agent-roles.instructions.md#waiting-for-approval-in-an-interactive-session), is a different, sanctioned wait.)
 - **A read that disagrees with a write you just made is lag, not a failure.** If a later step reads it anyway, carry on and check again at a later step; repeat the write only if the value is still wrong then. There is no fixed wait.
 
 ## Comment and Body Text (MANDATORY: HEREDOC, never `\n`)

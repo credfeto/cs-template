@@ -57,7 +57,7 @@ When selecting the next issue to work on, prefer issues with higher-priority lab
 
 Every issue raised, in any repository and via any flow (deliverable issues, ad-hoc intake tracking issues, AI-initiated issues, sub-issues), must be added to the "Workflow" GitHub project linked to that repository, immediately after creation.
 
-Each repository has its own linked project titled "Workflow", and many projects share that title across the owner, so never resolve the project by title alone (never `--add-project`). Add the issue with the `cfwf` command in [github-cli.instructions.md](github-cli.instructions.md#adding-an-issue-to-the-workflow-project).
+Add the issue with the `cfwf` command in [github-cli.instructions.md](github-cli.instructions.md#adding-an-issue-to-the-workflow-project).
 
 ## GitHub Issue Creation (MANDATORY)
 
