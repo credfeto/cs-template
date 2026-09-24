@@ -98,11 +98,10 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
      ```
 
      Read `afterPlan` and judge it as Plan First P2 does: a comment approves only if it uses one of the Plan First P4 keywords as an unconditional approval, not a question, a negation or a qualified approval ("approved, but ..."). The agent's own mirror comments (P5) are harmless: they are only posted once the wait is over.
-  2. **Board configured only**: the card's `Workflow Status`, as in [Looking Up the Board](#looking-up-the-board-when-claudemd-has-no-workflow-board-section). No output means the card is not listed yet (`gh project item-list` can lag), so treat it as not approved:
+  2. **Board configured only**: the card's `Workflow Status`, read with `cfwf` as in [Updating and Reading the Board with `cfwf`](#updating-and-reading-the-board-with-cfwf). A non-zero exit means the card is not on the board yet, so treat it as not approved; otherwise read only the first word of the output:
 
      ```bash
-     gh project item-list "${WF_PROJECT_NUMBER}" --owner <owner> --format json -L 1000 \
-       --jq '.items[] | select(.content.number==<number> and .content.repository=="<owner>/<repo>") | .["workflow Status"]'
+     cfwf workflow-status --check --repo <owner/repo> --issue <number>
      ```
 
   Decide as follows, using the same rules as Plan First P2 and P4:
@@ -120,7 +119,7 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
   1. Re-run the P2 read and confirm the message refers to this issue, `plan` still equals the baseline, `Blocked` is only the plan-approval block and the plan has no unresolved Open questions; if any check fails, ask instead of acting. `Blocked` counts as only the plan-approval block when no comment posted after the latest plan comment asks a question, reports a failed baseline or a timeout, or carries an environment-block marker (`<!-- orchestrator:env-block`): read the comments after the plan and judge them, as in P2.
   2. Post the mirror comment on the issue as in [Blocked Label](#blocked-label) P4.
   3. Remove the label: `gh issue edit <number> --repo <owner/repo> --remove-label Blocked`.
-  4. If board data is present, set `Workflow Status` to **Approved** using the [Workflow Board](#workflow-board) update procedure, including its read-back verification.
+  4. If board data is present, set `Workflow Status` to **Approved** with `cfwf workflow-status --set ... --status Approved` (see [Workflow Board](#workflow-board)), which includes the read-back verification.
   5. Stop the loop and continue as in P4.
 
   This is the one documented exception to the rules that only a human clears `Blocked` ([Plan First](#issue-workflow-plan-first-new-issues-only) P4, [Blocked Label](#blocked-label) P2 and P4) and to the never-remove-labels rules in [task-workflow.instructions.md](task-workflow.instructions.md#label-management-mandatory): the human's chat instruction is the explicit action and the agent carries out the label and board changes on their behalf. It covers only the plan-approval `Blocked` of an issue in an interactive session; any other `Blocked` (a question, a failed baseline, an environment block) still waits for the human to clear it.
@@ -193,7 +192,7 @@ Only once all four phases have completed without a `Blocked` outcome (each phase
 
 ### Workflow Board
 
-Each generated `CLAUDE.md` may contain Workflow board data in this format, as a cache of the lookup below so most sessions can skip the API round-trip:
+Each generated `CLAUDE.md` may contain Workflow board data in this format:
 
 ```text
 Workflow board (see agent-roles.instructions.md for update commands):
@@ -212,58 +211,27 @@ Workflow board (see agent-roles.instructions.md for update commands):
   WF_COMPLETE=<option-id>
 ```
 
-If this section is **absent** from your CLAUDE.md, look up the repo's Workflow board instead of skipping updates:
+The ids in this block are not needed by anything that uses `cfwf`: do not build `gh project` commands from them. Its presence is still the signal that the repo has a Workflow board. If it is **absent**, still update the board with `cfwf` as below rather than skipping updates, because `cfwf` finds the board itself. Only if the repo genuinely has no project titled "Workflow" linked to it (`cfwf` cannot find one) skip all board updates silently.
 
-#### Looking Up the Board (when CLAUDE.md has no Workflow Board section)
+#### Updating and Reading the Board with `cfwf`
 
-Every repo with a board names its GitHub Projects (v2) board **"Workflow"**, linked directly to that repo.
-
-```bash
-# Step 1: find the "Workflow" project linked to this repo (gives WF_PROJECT_ID and WF_PROJECT_NUMBER)
-IFS=$'\t' read -r WF_PROJECT_ID WF_PROJECT_NUMBER <<<"$(gh repo view <owner>/<repo> \
-  --json projectsV2 \
-  --jq '.projectsV2.Nodes[] | select(.title=="Workflow") | [.id,(.number|tostring)] | @tsv')"
-
-# Step 2: resolve the Workflow Status field and its option IDs (gives WF_STATUS_FIELD_ID and each WF_* option id)
-gh project field-list "${WF_PROJECT_NUMBER}" --owner <owner> --format json \
-  --jq '.fields[] | select(.name=="Workflow Status")'
-```
-
-**Field name is `"Workflow Status"`, never the bare `"Status"`.** Every "Workflow" project also carries GitHub's own built-in `Status` field (default options: Todo/In Progress/Done) alongside the custom `Workflow Status` field the orchestrator creates (see `_wf_create_project` in `credfeto-orchestrator`'s `lib/workflow-board`) — the two coexist on the same project. Querying `field(name:"Status")` silently resolves to the wrong, built-in field: it returns real option IDs (so nothing errors), but none of them map to any `WF_*` value, which was previously misread as "this board has no Approved option" / "no board configured" instead of "wrong field name" (confirmed live: `credfeto/credfeto-orchestrator#1400`, where this caused an issue to sit with no board card and no way to mark it Approved). Always query by the exact string `"Workflow Status"`.
-
-Match each returned option's `name` to its `WF_*` variable: `Not Started`→`WF_NOT_STARTED`, `Planning`→`WF_PLANNING`, `Approved`→`WF_APPROVED`, `Development`→`WF_DEVELOPMENT`, `AI Simplify`→`WF_AI_SIMPLIFY`, `AI Review`→`WF_AI_REVIEW`, `AI Security Review`→`WF_AI_SECURITY_REVIEW`, `AI Coverage`→`WF_AI_COVERAGE`, `Human Review`→`WF_HUMAN_REVIEW`, `Complete`→`WF_COMPLETE`. The field's own `id` is `WF_STATUS_FIELD_ID`. Use these looked-up values for the rest of the session exactly as if they had come from CLAUDE.md.
-
-**Only if Step 1 finds no project titled "Workflow" linked to the repo** — there genuinely is no board — skip all board updates silently.
-
-**Use the structured `gh project` subcommands below, never raw `gh api graphql` mutations.** A `gh api graphql` call whose query string contains the literal word `mutation` is deterministically denied by the agent sandbox's permission system, even though the equivalent `query`-shaped call succeeds (confirmed live: `credfeto/cs-template#1046`). The `gh project item-add`/`item-edit` subcommands below are pre-approved as ordinary `gh` invocations and cover the add-item/set-status steps without ever constructing a raw mutation string.
-
-**Prefer a native `gh <noun> <verb>` subcommand over `gh api graphql` everywhere, not just for mutations.** Raw GraphQL query strings are also more likely to be misread as obfuscated/spam-shaped input by the agent sandbox's bash content filter than an equivalent flat `gh` invocation. All three lookup/verify steps in this section (find the project, resolve the field, read back the write) use native `gh` subcommands for exactly this reason: `gh repo view --json projectsV2`, `gh project field-list`, and `gh project item-list` (confirmed live: its default JSON output already includes each custom field's current value under the field's own name, e.g. `.items[]["workflow Status"]`, no `--field`/`--field-id` flag needed). None of the Workflow-board flow needs `gh api graphql` any more. Only fall back to `gh api graphql`/`gh api` when no native subcommand covers the operation at all (see [github-cli.instructions.md](github-cli.instructions.md#rest-and-graphql-api-gh-api) for examples).
-
-To update the board status, replace `<STATUS_OPTION_ID>` with the appropriate `WF_*` value, `<STATUS_OPTION_NAME>` with that same option's display name (e.g. `Approved`), `<owner>` with the repo owner, and `<ISSUE_OR_PR_URL>` with the issue or PR's full URL:
+**Always use `cfwf` for the Workflow board; never hand-compose `gh project`, `gh repo view --json projectsV2` or `gh api graphql` commands for it.** Every command names the item as `--repo <owner/repo>` plus `--pr <n>` or `--issue <n>`. No project, field or option ids are needed: `cfwf` looks up the project titled "Workflow" linked to the repo and its `Workflow Status` field itself.
 
 ```bash
-# Step 1: add the item to the project and capture its project item ID
-# (idempotent - if the item is already in the project, this just returns the existing ID)
-ITEM_ID=$(gh project item-add "${WF_PROJECT_NUMBER}" --owner <owner> --url "<ISSUE_OR_PR_URL>" \
-  --format json --jq '.id')
+# Move an issue or PR to a status (the option's display name, matched without regard to case)
+cfwf workflow-status --set --repo <owner/repo> (--pr <n> | --issue <n>) --status "AI Review"
 
-# Step 2: set the Status field
-gh project item-edit --project-id "${WF_PROJECT_ID}" --id "${ITEM_ID}" \
-  --field-id "${WF_STATUS_FIELD_ID}" --single-select-option-id "<STATUS_OPTION_ID>"
-
-# Step 3: verify the write actually persisted (querying only the target field's value by name,
-# via the item's own id, not the whole board); retry up to 3 times with backoff if not.
-# -L is set well above the board's known item count so the newly-added item is never paged out.
-for attempt in 1 2 3; do
-  ACTUAL=$(gh project item-list "${WF_PROJECT_NUMBER}" --owner <owner> --format json -L 1000 \
-    --jq ".items[] | select(.id==\"${ITEM_ID}\") | .[\"workflow Status\"]")
-  [ "$ACTUAL" = "<STATUS_OPTION_NAME>" ] && break
-  sleep "$attempt"
-done
-[ "$ACTUAL" = "<STATUS_OPTION_NAME>" ] || echo "::warning::Workflow board write did not persist after 3 attempts"
+# Read the current status
+cfwf workflow-status --check --repo <owner/repo> (--pr <n> | --issue <n>)
 ```
 
-**Step 3 is MANDATORY, not optional.** `gh project item-edit` can return success on an item that was just added by `gh project item-add` in Step 1, without the field write actually persisting: a known eventual-consistency race in the underlying Projects v2 API on freshly-added items. Reporting success (a log line, a `core.notice`, a status comment) without this read-back verification is a real bug that shipped and went unnoticed because nothing threw (see `funfair-tech/funfair-server-template` issue #918, fixed in PR #920, for the incident this rule is drawn from). Never skip the verification step to save a round-trip.
+- `--set` adds the item to the board if it is not already there, sets the `Workflow Status`, then reads the value back and retries. It exits 0 only once the new value is confirmed. Treat a non-zero exit as a failed write: never report success (a log line, a status comment) without exit 0.
+- `--check` prints the current `Workflow Status` and exits non-zero if the item is not on the board. Read only the first word of its output (`Development (In Progress)` and `Development` both mean `Development`); do not parse anything after it.
+- `cfwf help` and `cfwf help <command>` print usage.
+
+**The read-back inside `--set` is MANDATORY, and is why `cfwf` is used rather than a bare `gh project item-edit`.** `gh project item-edit` can return success on an item that was just added by `gh project item-add`, without the field write actually persisting: a known eventual-consistency race in the underlying Projects v2 API on freshly-added items. Reporting success without a read-back verification is a real bug that shipped and went unnoticed because nothing threw (see `funfair-tech/funfair-server-template` issue #918, fixed in PR #920, for the incident this rule is drawn from). `cfwf` reads the board with a read-only GraphQL query rather than `gh project item-list`, because `gh project item-list` lags behind writes and is capped, which is the same weakness. This is a documented, narrow exception to [the preference for native `gh` subcommands](github-cli.instructions.md#rest-and-graphql-api-gh-api).
+
+The field is `Workflow Status`, never GitHub's built-in `Status` field, which every "Workflow" project also carries alongside it (default options Todo/In Progress/Done). `cfwf` already targets the right one; the distinction matters only if you are ever reading raw board data (confirmed live: `credfeto/credfeto-orchestrator#1400`, where querying the built-in `Status` returned real option ids that mapped to nothing and was misread as "no Approved option").
 
 ### On-Hold Label
 

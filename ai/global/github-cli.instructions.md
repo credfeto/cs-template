@@ -71,18 +71,22 @@ gh issue reopen <number> --repo <owner>/<repo>
 
 ### Adding an Issue to the Workflow Project
 
-Every issue raised must be added to the "Workflow" project linked to the repository it was raised in (see [task-workflow.instructions.md](task-workflow.instructions.md#workflow-project-board-mandatory)). Project titles are not unique across the owner, so find the project linked to the repository first; never resolve it by title with `--add-project`.
+Every issue raised must be added to the "Workflow" project linked to the repository it was raised in (see [task-workflow.instructions.md](task-workflow.instructions.md#workflow-project-board-mandatory)). Always use `cfwf`: it finds the project linked to the repository itself (project titles are not unique across the owner, so never resolve it by title with `--add-project`), adds the item and confirms the status persisted.
 
 ```bash
-# Find the repo's linked Workflow project number
-gh repo view <owner>/<repo> --json projectsV2 \
-  --jq '.projectsV2.Nodes[] | select(.title=="Workflow") | .number'
-
-# Add the issue to it
-gh project item-add <project-number> --owner <owner> --url <issue-url>
+cfwf workflow-status --set --repo <owner>/<repo> --issue <number> --status "Not Started"
 ```
 
-Prefer a native `gh <noun> <verb>` subcommand over `gh api graphql` wherever one exists: see [agent-roles.instructions.md](agent-roles.instructions.md#looking-up-the-board-when-claudemd-has-no-workflow-board-section) for the reasoning and the full Workflow-board lookup/verify sequence, none of which needs `gh api graphql` any more.
+See [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board) for the full `cfwf` Workflow-board commands and why the read-back exists.
+
+## Standardising Repeated `gh` Queries in `cfwf` (MANDATORY)
+
+`cfwf` (in the `credfeto/credfeto-orchestrator` agent image) is where routine `gh` operations are meant to end up as standardised, pre-canned commands, so that agents stop composing long `gh` scripts by hand. Whenever you run `gh` with `--json <fields>` (with or without `--jq`), or `gh api graphql`, for a read or a write, and no `cfwf` command covers that use, raise an issue on `credfeto/credfeto-orchestrator` asking for it to be added to `cfwf`. This applies to routine uses such as `gh issue view --json` and `gh pr list --json` as much as to unusual ones.
+
+- **One issue per distinct use.** Search `credfeto/credfeto-orchestrator` first, using plain output so the search does not itself need `--json`: `gh issue list --repo credfeto/credfeto-orchestrator --state all --search "cfwf <keywords>"`. If an open or closed issue already covers the use, do not raise another; if a closed one was declined, follow its outcome.
+- **Say what is needed.** Give the exact `gh` command (with placeholders for the values), what it is for, and where in these instructions or the current task it is used. Add the new issue to the "Workflow" project as for any issue ([above](#adding-an-issue-to-the-workflow-project)).
+- **Do not block on it.** Carry on with `gh` for the current task after raising the issue; the request is for future runs.
+- **Once `cfwf` covers a use, use `cfwf`.** Never keep composing the `gh` form of a use that `cfwf` has a command for.
 
 ### Available JSON Fields: `gh issue view`/`gh issue list`
 
@@ -193,7 +197,7 @@ gh run rerun <run-id> --repo <owner>/<repo>
 
 ## REST and GraphQL API (`gh api`)
 
-**Prefer a native `gh <noun> <verb>` subcommand over `gh api`/`gh api graphql` whenever one covers the operation.** Raw GraphQL query strings are more likely to be misread as obfuscated/spam-shaped input by the agent sandbox's bash content filter than an equivalent flat `gh` invocation, and `gh api graphql` mutations are separately denied outright by the sandbox (see [agent-roles.instructions.md](agent-roles.instructions.md#looking-up-the-board-when-claudemd-has-no-workflow-board-section)). Only reach for `gh api`/`gh api graphql` when no dedicated subcommand exists for the operation at all (e.g. review-comment threads, collaborator management, releases lookups); project-board lookups and field read-backs are all covered by native `gh project`/`gh repo view` subcommands, see the section linked above.
+**Prefer a native `gh <noun> <verb>` subcommand over `gh api`/`gh api graphql` whenever one covers the operation.** Raw GraphQL query strings are more likely to be misread as obfuscated/spam-shaped input by the agent sandbox's bash content filter than an equivalent flat `gh` invocation, and `gh api graphql` mutations are separately denied outright by the sandbox (see [agent-roles.instructions.md](agent-roles.instructions.md#updating-and-reading-the-board-with-cfwf)). Only reach for `gh api`/`gh api graphql` when no dedicated subcommand exists for the operation at all (e.g. review-comment threads, collaborator management, releases lookups). Workflow-board lookups and read-backs are covered by `cfwf`, never by hand-composed `gh` commands; the one narrow exception to this preference is `cfwf`'s own read-only GraphQL board query, because `gh project item-list` lags behind writes and is capped. Any `gh api graphql` (or `--json`) use that `cfwf` does not yet cover needs an issue raised: see [Standardising Repeated `gh` Queries in `cfwf`](#standardising-repeated-gh-queries-in-cfwf-mandatory).
 
 ```bash
 # REST: simple GET
@@ -216,7 +220,7 @@ gh api graphql \
   --jq '.data.user.id'
 ```
 
-For the ProjectV2 Workflow-board update pattern (add item to project by URL → set status field → verify), see [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board); that sequence is workflow-specific and lives there, not duplicated here.
+For the Workflow-board update (add the item, set the status, verify), use `cfwf`: see [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board); that is workflow-specific and lives there, not duplicated here.
 
 ### Inline PR Review Comments via `gh api`
 

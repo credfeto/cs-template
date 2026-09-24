@@ -57,7 +57,7 @@ When selecting the next issue to work on, prefer issues with higher-priority lab
 
 Every issue raised, in any repository and via any flow (deliverable issues, ad-hoc intake tracking issues, AI-initiated issues, sub-issues), must be added to the "Workflow" GitHub project linked to that repository, immediately after creation.
 
-Each repository has its own linked project titled "Workflow", and many projects share that title across the owner, so never resolve the project by title alone. Discover the repository's linked project and add the issue using the commands in [github-cli.instructions.md](github-cli.instructions.md#adding-an-issue-to-the-workflow-project).
+Each repository has its own linked project titled "Workflow", and many projects share that title across the owner, so never resolve the project by title alone. Always use `cfwf` to add the issue, which finds the repository's linked project itself: see [github-cli.instructions.md](github-cli.instructions.md#adding-an-issue-to-the-workflow-project).
 
 ## GitHub Issue Creation (MANDATORY)
 
@@ -114,6 +114,7 @@ This is stricter than an unresolved `Qn.` alone: an Open Question already blocks
 
 - Only one active branch or open PR **per user** per repository at a time; do not create another until the current one is merged and closed.
 - **Before blocking new work** because of an existing PR: always verify its current state with `gh pr view <number> --repo <owner/repo> --json state,mergedAt`; never rely on conversation memory. A PR that was open earlier in the session may have since been merged.
+- The `gh ... --json` queries in this and the following sections, and any other `--json` or `gh api graphql` use that `cfwf` does not yet cover, fall under [Standardising Repeated `gh` Queries in `cfwf`](github-cli.instructions.md#standardising-repeated-gh-queries-in-cfwf-mandatory): raise an issue on `credfeto/credfeto-orchestrator` for each distinct use, then carry on.
 - When adding work to an open PR (review comments, missing coverage, CI fixes), convert to draft first: `gh pr ready <number> --undo`. Keep it in draft until Code Tester and Code Reviewer are both satisfied; only PR Submitter converts it back.
 
 ## Bot-Created PRs (MANDATORY, treat as your own)
@@ -147,21 +148,14 @@ On every agent run, for every PR being interacted with:
 - **P3.** Sync labels from all linked closing issues to the PR:
 
   ```bash
-  gh pr view <pr> --repo <owner/repo> --json closingIssuesReferences \
-    --jq '.closingIssuesReferences[].number' \
-  | while IFS= read -r n; do
-      gh issue view "$n" --repo <owner/repo> --json labels --jq '.labels[].name' \
-        || echo "Warning: could not fetch labels for issue $n" >&2
-    done \
-  | sort -u \
-  | grep -vE '^(Blocked|On-Hold)$' \
+  cfwf closing-issue-labels --repo <owner/repo> --pr <pr> \
   | while IFS= read -r label; do
       gh pr edit <pr> --repo <owner/repo> --add-label "$label" \
         || echo "Warning: could not add label '$label' to PR" >&2
     done
   ```
 
-  The `Blocked` and `On-Hold` labels are explicitly excluded; workflow-control labels must never be synced from an issue to its PR.
+  Always use `cfwf closing-issue-labels`; never hand-compose the lookup. It prints the sorted, de-duplicated labels of every issue the PR closes, one per line, reading each issue from its own repository. It leaves out `Blocked` and `On-Hold`: workflow-control labels must never be synced from an issue to its PR.
 
 - **P4.** Never remove any label from a PR or issue; GitHub workflows add labels automatically and they must not be removed. Sole exception: `Blocked` on live-chat plan approval, see [Waiting for Approval in an Interactive Session](agent-roles.instructions.md#waiting-for-approval-in-an-interactive-session) P5.
 
