@@ -59,7 +59,7 @@ For the HEREDOC rule for any `gh` `--body` argument that contains or may contain
 
 - If `gh` is available, use it to manage issues for every piece of work.
 - Before starting, either find a **100% matching** existing issue (confirm with user before linking) or create a new one with the original prompt and a clear description.
-- The search itself is a normal, automatic part of this workflow: do not ask permission before running it. Only raise a question if a plausible-but-not-certain match is found and needs a human judgement call before linking.
+- The search itself is a normal, automatic part of this workflow: do not ask permission before running it. Any question comes after the search, about what it found (e.g. a plausible-but-not-certain match needing a human judgement call before linking), never about whether to run the search itself.
 - For complex or multi-component tasks, see [task-workflow.instructions.md](task-workflow.instructions.md).
 - Reference issue numbers in commit messages and branch names.
 - If work on an issue is abandoned, comment with findings before closing; do not abandon silently.
