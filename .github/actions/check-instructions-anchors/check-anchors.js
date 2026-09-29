@@ -7,8 +7,10 @@ const { execFileSync } = require('node:child_process');
 const { readFileSync } = require('node:fs');
 const path = require('node:path');
 
-const FENCE = /^[ \t\r\n\v\f]*(```|~~~)/;
+const FENCE = /^[ \t\r\n\v\f]*(`{3,}|~{3,})/;
 const HEADING_MARKER = /^#+[ \t\r\n\v\f]+/;
+const HEADING_CLOSING_SEQUENCE = /(^|[ \t]+)#+[ \t\r\n\v\f]*$/;
+const MARKDOWN_LINK = /\[([^\]]*)\]\([^)]*\)/g;
 const INLINE_CODE = /`[^`]*`/g;
 const EXPLICIT_ANCHOR = /<a id="([^"]*)"/g;
 const INLINE_LINK = /\]\(([^) ]*#[^) ]+)\)/g;
@@ -17,6 +19,10 @@ const URL_SCHEME = /^[a-zA-Z][a-zA-Z0-9+.-]*:/;
 
 function slug(heading) {
     return heading
+        .replace(HEADING_CLOSING_SEQUENCE, '')
+        .trim()
+        .replace(MARKDOWN_LINK, '$1')
+        .replace(/`/g, '')
         .toLowerCase()
         .replace(/<[^>]*>/g, '')
         .replace(/[^a-z0-9_ -]/g, '')
@@ -27,8 +33,22 @@ function isChecked(file) {
     return file.startsWith('ai/') || file === '.ai-instructions';
 }
 
+function isMarkdown(file) {
+    return file.endsWith('.md') || file === '.ai-instructions';
+}
+
 function resolveTarget(file, target) {
-    return target === '' ? file : path.posix.join(path.posix.dirname(file), target);
+    if (target === '') {
+        return file;
+    }
+
+    return target.startsWith('/') ? path.posix.normalize(target.slice(1)) : path.posix.join(path.posix.dirname(file), target);
+}
+
+function closesFence(fence, text) {
+    const match = text.match(FENCE);
+
+    return match !== null && match[1][0] === fence[0] && match[1].length >= fence.length && text.slice(match[0].length).trim() === '';
 }
 
 function anchorKey(file, id) {
@@ -45,17 +65,23 @@ function linkTargetsOnLine(line) {
 function scanFile(file, content, state) {
     state.knownFiles.add(file);
     const seenSlugs = new Map();
-    let inFence = false;
+    let fence = null;
 
     content.split('\n').forEach((text, index) => {
         const lineNumber = index + 1;
 
-        if (FENCE.test(text)) {
-            inFence = !inFence;
+        if (fence !== null) {
+            if (closesFence(fence, text)) {
+                fence = null;
+            }
+
             return;
         }
 
-        if (inFence) {
+        const opening = text.match(FENCE);
+
+        if (opening !== null) {
+            fence = opening[1];
             return;
         }
 
@@ -82,10 +108,17 @@ function scanFile(file, content, state) {
                 continue;
             }
 
+            const resolved = resolveTarget(file, target);
+
+            // GitHub uses fragments on non-Markdown files for line numbers (foo.sh#L10), which this check cannot validate.
+            if (!isMarkdown(resolved)) {
+                continue;
+            }
+
             state.references.push({
                 file,
                 line: lineNumber,
-                target: resolveTarget(file, target),
+                target: resolved,
                 fragment: link.slice(hash + 1),
             });
         }
