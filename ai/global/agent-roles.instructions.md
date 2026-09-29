@@ -563,6 +563,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - CHANGELOG conflicts: keep entries from both sides.
 - Version conflicts in dependency manifests, action pins, or runtime versions: take the latest secure candidate per [git-rebasing.instructions.md](git-rebasing.instructions.md#resolving-version-conflicts-when-merging-or-rebasing). If the chosen version breaks the build, report to Orchestrator; fixing build breakage is not the Rebase Agent's job.
 - Any other conflict: report verbatim to Orchestrator; do not resolve.
+- If the branch has an open PR, turn auto-merge off and convert the PR to draft exactly as [Code Fixer](#code-fixer) does before force-pushing, because a rebase changes the head, so the rebased commit is unreviewed and GitHub could otherwise merge it as soon as its checks pass, before the AI Review Loop reviews it.
 - Force-push with `--force-with-lease` only after all conflicts are resolved.
 
 ## CI Debugger
