@@ -11,17 +11,8 @@ runs:
       run: |
         set -euo pipefail
 
-        files=()
-        while IFS= read -r -d '' file; do
-          files+=("${file}")
-        done < <(git ls-files -z -- 'ai/global/*.instructions.md' '.ai-instructions')
-
-        if [ "${#files[@]}" -eq 0 ]; then
-          echo "ℹ️ No instruction files to check."
-          exit 0
-        fi
-
-        if ! awk -f "${ACTION_PATH}/check-numbering.awk" "${files[@]}"; then
+        if ! git ls-files -z -- 'ai/global/*.instructions.md' '.ai-instructions' \
+          | xargs -0 -r awk -f "${ACTION_PATH}/check-numbering.awk"; then
           echo "❌ Found numbered list markers; write steps as '- **P1.** text' bullets instead."
           exit 1
         fi

@@ -27,31 +27,8 @@ function isChecked(file) {
     return file.startsWith('ai/') || file === '.ai-instructions';
 }
 
-function normalise(relativePath) {
-    const stack = [];
-
-    for (const part of relativePath.split('/')) {
-        if (part === '' || part === '.') {
-            continue;
-        }
-
-        if (part === '..') {
-            stack.pop();
-            continue;
-        }
-
-        stack.push(part);
-    }
-
-    return stack.join('/');
-}
-
-function directoryOf(file) {
-    return file.slice(0, file.lastIndexOf('/') + 1);
-}
-
 function resolveTarget(file, target) {
-    return target === '' ? file : normalise(directoryOf(file) + target);
+    return target === '' ? file : path.posix.join(path.posix.dirname(file), target);
 }
 
 function anchorKey(file, id) {
@@ -66,10 +43,6 @@ function linkTargetsOnLine(line) {
 }
 
 function scanFile(file, content, state) {
-    if (content === '') {
-        return;
-    }
-
     state.knownFiles.add(file);
     const seenSlugs = new Map();
     let inFence = false;
@@ -169,14 +142,7 @@ function findProblems(root, files) {
 
 module.exports = async ({ core }) => {
     const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
-    const files = trackedMarkdownFiles(root);
-
-    if (files.length === 0) {
-        core.info('ℹ️ No Markdown files to check.');
-        return;
-    }
-
-    const problems = findProblems(root, files);
+    const problems = findProblems(root, trackedMarkdownFiles(root));
 
     if (problems.length > 0) {
         for (const problem of problems) {
