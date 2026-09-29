@@ -11,7 +11,7 @@ Load when acting as a named agent. Routing table and model selection: [task-work
 - Skip issues labelled `On Hold` or `Blocked`; if all remaining issues carry these labels, report this to the user and wait.
 - Determine work type and route via the routing table. Never implement directly.
 - If a delegated role escalates a task as infeasible (Coding Researcher **Not possible** result), do not re-route it unchanged. Record the finding on the issue/PR and surface it to the user for a decision: re-scope, accept the suggested alternative, or drop.
-- When a delegated role reports a pre-existing bug outside the current change's scope, handle it as in [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
+- When a delegated role reports a pre-existing bug outside the current change's scope (in Code Reviewer's `preExistingBugs`, or listed in a Code Writer or Code Fixer hand-off report), handle it as in [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
 
 ### Issue Workflow: Plan First (new issues only)
 
@@ -326,8 +326,8 @@ gh pr checks <number> --repo <owner/repo>
 Then act immediately; do **not** busy-loop, sleep, or use `--watch`, in any mode, because a blocking wait holds the session for the whole CI run:
 
 - All required checks passed → proceed with the next step.
-- Any check failed → investigate, fix, push, post a status comment, and stop, even while other checks are still pending, because waiting for the slowest check would delay the fix by the whole CI run. Do not wait for the new run to complete. In an interactive session, CI Monitor watches the new run.
-- Any check pending or in_progress, and none failed:
+- Any required check failed → investigate, fix, push, post a status comment, and stop, even while other checks are still pending, because waiting for the slowest check would delay the fix by the whole CI run. Do not wait for the new run to complete. In an interactive session, CI Monitor watches the new run.
+- Any required check pending or in_progress, and none failed:
   - Unattended run → stop silently; do not post a status comment. CI checks are bound by GitHub's own timeouts and will eventually pass, fail, or time out without agent intervention, and `oneshot` re-invokes the agent once they do.
   - [Interactive session](#waiting-for-approval-in-an-interactive-session) → hand the PR to [CI Monitor](#ci-monitor) instead of stopping.
 - CI consistently failing and cannot be fixed → mark the PR blocked: `gh pr edit <number> --repo <owner/repo> --add-label "Blocked"`
@@ -353,7 +353,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - After fixing a bug, run the [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) and append its sweep record to the hand-off report.
 - Apply [IDE MCP Code Analysis](code-quality.instructions.md#ide-mcp-code-analysis-mandatory) to the files written or changed.
 - Do not commit, push, or update the changelog; hand off to Code Tester when done.
-- Report a pre-existing bug found outside the current change's scope to Orchestrator rather than fixing it; see [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
+- List each pre-existing bug found outside the current change's scope in the hand-off report for Orchestrator rather than fixing it, because the report is free text with no dedicated field and an unlisted bug is lost; see [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
 
 ## Code Tester
 
@@ -364,7 +364,6 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - Loop with Code Writer until build passes, all tests pass, and all new/changed code is covered.
 - Carry any sweep record in the incoming hand-off through to the outgoing report unchanged.
 - Do not modify code or tests; report and verify only.
-- Report a pre-existing bug found outside the current change's scope to Orchestrator rather than fixing it; see [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
 
 ## Code Reviewer
 
@@ -507,7 +506,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - Convert to draft before starting (`gh pr ready <number> --undo`).
 - One fix change set per construct (comments grouped by construct), with a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) handed over as for Code Writer. Apply [IDE MCP Code Analysis](code-quality.instructions.md#ide-mcp-code-analysis-mandatory) to the fixed files. Hand off to Code Tester after each fix and its sweep.
 - Respond to **every** review comment without exception, per [Comment Replies](#comment-replies-mandatory). A reply that cites a SHA is posted once Committer has pushed, so the sweep record's file placement is final.
-- Report a pre-existing bug found outside the current change's scope to Orchestrator rather than fixing it; see [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
+- List each pre-existing bug found outside the current change's scope in the hand-off report for Orchestrator rather than fixing it, because the report is free text with no dedicated field and an unlisted bug is lost; see [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
 
 ## Rebase Agent
 
@@ -553,14 +552,15 @@ Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](
 
 Dormant in unattended runs, where the `oneshot` gate covers pending checks (see [CI Checks](#ci-checks-mandatory)). Active in an [interactive session](#waiting-for-approval-in-an-interactive-session), where nothing else would pick the PR back up once CI finishes.
 
-- **P1.** Watch the PR's checks in the background with a scheduling/loop mechanism the tool provides, so the session stays free while CI runs (see [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory)). Pace it with long idle intervals, never tight polling. The 30-minute deadline in that section governs commands, not this wait: CI checks are bound by GitHub's own timeouts.
-- **P2.** Each tick, check state once with `gh pr checks <number> --repo <owner/repo>`; never use `--watch`.
+- **P1.** Watch the PR's checks in the background with a scheduling/loop mechanism the tool provides, so the session stays free while CI runs (see [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory)). Pace it with long idle intervals, never tight polling. The 30-minute deadline in that section governs commands, not this wait: CI checks are normally bound by GitHub's own timeouts, and P6 covers a check that never reports.
+- **P2.** Each tick, check the required checks' state once with `gh pr checks <number> --repo <owner/repo> --required`; never use `--watch`. Only required checks decide the outcome, matching [CI Checks](#ci-checks-mandatory), because the PR is mergeable without the optional ones.
 - **P3.** Act on the result:
-  - Any fail → hand off to CI Debugger at once, even while other checks are still pending, then keep watching the new run, because waiting for the slowest check would delay the fix by the whole CI run.
-  - All pass → stop the loop; done.
-  - Otherwise (checks pending or in_progress, none failed) → wait for the next tick.
-- **P4.** Repeat until all checks pass or CI Debugger escalates; on escalation, stop the loop.
-- **P5.** If the tool provides no scheduling mechanism, check once as in P2 and act as in P3, except that when checks are pending and none has failed you tell the human CI is still running and stop.
+  - Any required check fails → hand off to CI Debugger at once, even while other checks are still pending, then keep watching the new run, because waiting for the slowest check would delay the fix by the whole CI run. Hand a given failing run, identified by the PR head commit SHA, to CI Debugger at most once, and do not hand off again until a new commit is pushed and its run has results, because until then each tick still shows the same failure and a second hand-off would leave two debuggers pushing to one branch.
+  - All required checks pass → stop the loop; done. Run `gh pr checks <number> --repo <owner/repo>` once without `--required` and mention any failed optional check to the human; an optional failure never blocks completion or triggers CI Debugger.
+  - Otherwise (required checks pending or in_progress, none failed) → wait for the next tick.
+- **P4.** Repeat until all required checks pass, CI Debugger escalates, or P6 applies; on escalation, stop the loop.
+- **P5.** If the tool provides no scheduling mechanism, check once as in P2 and act as in P3, except that when required checks are pending and none has failed you tell the human CI is still running and stop.
+- **P6.** If the required checks' state has not changed across several consecutive ticks while still pending (for example a check still waiting for its status to be reported, or a job with no runner to take it), tell the human which check is stuck and stop the loop, because such a check may never finish and the loop would otherwise run until the session ends.
 
 ## Dependency Updater
 
