@@ -142,6 +142,7 @@ gh pr ready <number> --repo <owner>/<repo>          # mark ready
 
 # Merge
 gh pr merge --auto --merge <number> --repo <owner>/<repo>
+gh pr merge <number> --repo <owner>/<repo> --disable-auto   # turn auto-merge off
 
 # Close / diff / checkout
 gh pr close <number> --repo <owner>/<repo>
