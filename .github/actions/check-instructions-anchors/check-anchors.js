@@ -140,7 +140,7 @@ function findProblems(root, files) {
     return [...danglingLinkProblems(state), ...orphanedAnchorProblems(state)];
 }
 
-module.exports = async ({ core }) => {
+module.exports = ({ core }) => {
     const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
     const problems = findProblems(root, trackedMarkdownFiles(root));
 

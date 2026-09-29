@@ -311,7 +311,7 @@ If `FunFair.Test.Common` or `FunFair.Test.Infrastructure` provides a helper for 
 - Custom `TimeProvider` fakes → `FakeTimeProvider` from `Microsoft.Extensions.TimeProvider.Testing`
 - Custom `IHttpClientFactory` setups → `MockCreateClientWithResponse`
 
-### Constructor-Bypassing Instantiation (MANDATORY)
+## Constructor-Bypassing Instantiation (MANDATORY)
 
 Never use `RuntimeHelpers.GetUninitializedObject` or `FormatterServices.GetUninitializedObject` to get an instance of a type you cannot construct or mock. Follow [Obtaining Instances of Types You Cannot Construct or Mock](code-quality.instructions.md#obtaining-instances-of-types-you-cannot-construct-or-mock-mandatory) instead: look for a [real way to build it](code-quality.instructions.md#unconstructable-type-existing-path), [check the org test libraries](code-quality.instructions.md#unconstructable-type-library-helpers), and otherwise [ask the human](code-quality.instructions.md#unconstructable-type-ask) and [wait for the answer](code-quality.instructions.md#unconstructable-type-wait).
 

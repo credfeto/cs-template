@@ -20,7 +20,7 @@ The `IDE0028` entry is applied as:
 [SuppressMessage(
     category: "Style",
     checkId: "IDE0028: Collection initialization can be simplified",
-    Justification = "A collection expression cannot pass an IEqualityComparer to the Dictionary constructor; simplifying would silently drop Ordinal and change lookup semantics"
+    Justification = "A collection expression cannot pass a comparer to the collection's constructor, so simplifying would silently drop it (for example Ordinal) and change lookup semantics"
 )]
 ```
 
