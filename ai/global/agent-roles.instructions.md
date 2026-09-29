@@ -31,7 +31,7 @@ When picking up an **Issue** that has no existing PR:
 
   ```bash
   gh issue view <number> --repo <owner/repo> --json comments \
-    --jq '[.comments[].body] | any(.[]; split("\n") | any(rtrimstr("\r") == "## Implementation Plan"))'
+    --jq 'any(.comments[].body; split("\n") | any(rtrimstr("\r") == "## Implementation Plan"))'
   ```
 
   - `false` → Plan mode (P3–P4 below).
