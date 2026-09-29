@@ -95,7 +95,8 @@ Before any command that can discard uncommitted work (`git reset --hard`, `git c
 
 A local branch created only to review a PR, named `pr<number>-review` or `pr-<number>-review`, may be deleted without asking once the review is done, because it is a throwaway copy of an existing PR head and holds no work of its own.
 
-- Delete it with `git branch -d`, never `-D`, so git refuses if the branch has commits that are on no other branch. If git refuses, keep the branch and report it rather than forcing the deletion, because those commits would otherwise be lost.
+- Create it tracking the PR head: `git fetch origin +refs/pull/<number>/head:refs/remotes/origin/pr/<number>`, then `git branch --track pr<number>-review origin/pr/<number>`. `git branch -d` checks a branch against its upstream, so without one it checks against HEAD and refuses while the PR is still open, even though every commit is safe on the PR head.
+- Delete it with `git branch -d`, never `-D`, because `-d` refuses unless the branch is merged into its upstream (or into HEAD when it has none). A branch still equal to the PR head is deleted (exit 0; the warning that it is not yet merged to HEAD is expected); a branch left with local commits is refused as `not fully merged` (exit 1). If git refuses, keep the branch and report it rather than forcing the deletion, because those local commits would otherwise be lost.
 - This covers local branches only. Deleting a remote branch, or any other local branch, still needs human approval.
 
 ## Avoid `git worktree`
