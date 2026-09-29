@@ -102,10 +102,10 @@ After fixing a bug, or accepting a finding from `/simplify`, `/code-review`, `/s
 A bug that already existed and sits outside the current change is not fixed silently, because an unasked-for fix widens the PR's scope without the human's say and hides the bug from the issue history. It is not dropped either, because an unrecorded bug is lost once the session ends.
 
 - **P1.** Search open **and** closed issues in the current repo for the bug (by symptom, affected component and construct).
-- **P2.** Then present the option to fix it to the human, citing the matching issue, a closed issue that looks like a regression, or "no existing issue".
+- **P2.** Present the option to fix it to the human, citing the matching issue, a closed issue that looks like a regression, or "no existing issue".
 - **P3.** If the human decides to fix it, bring the issue into the current PR's scope. If none existed, create one first, following [AI-Initiated Issues](git.instructions.md#ai-initiated-issues-mandatory) but without `Blocked`, since the human has chosen to fix it. Then assign it, add `Closes #<n>` to the PR body, set its board status to the PR's, post a [Prompt Traceability](task-workflow.instructions.md#prompt-traceability-mandatory) comment on the issue and the PR, and fix it in its own commit(s) with the normal [Pattern Sweep](#pattern-sweep-mandatory).
 - **P4.** If the human declines, make sure an issue exists: link the one found, or raise one under AI-Initiated Issues.
-- **P5.** In an unattended run, do P1, make sure an issue exists as in P4, note it on the PR, and do not fix it.
+- **P5.** In an [unattended run](agent-roles.instructions.md#waiting-for-approval-in-an-interactive-session), do P1, make sure an issue exists as in P4, note it on the PR, and do not fix it.
 
 This does not apply to [Incidental File Cleanup](#incidental-file-cleanup), to a [Pattern Sweep](#pattern-sweep-mandatory) of the construct already being fixed, to pre-existing [deprecation warnings](#deprecation-warnings-during-tests), or to [baseline check](git.instructions.md#pre-work-baseline-check-mandatory-before-starting-any-work) failures, which already have their own rules.
 

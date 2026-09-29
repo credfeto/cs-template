@@ -313,7 +313,7 @@ Every sequence below starts with the [Pre-Work Baseline Check](git.instructions.
 
 Rows starting with `Changelog (placeholder)` assume the work item takes a changelog entry at all. If it hits the skip condition in [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), the row runs unchanged — see [agent-roles.instructions.md](agent-roles.instructions.md#changelog) for what the Changelog agent commits instead.
 
-The trailing `→ CI Monitor` step is a no-op in `oneshot`-driven runs and active in an [interactive session](agent-roles.instructions.md#waiting-for-approval-in-an-interactive-session); see [CI Monitor](agent-roles.instructions.md#ci-monitor) for why.
+The trailing `→ CI Monitor` step runs only in some run modes; see [CI Monitor](agent-roles.instructions.md#ci-monitor) for which.
 
 For detailed agent role definitions, see [agent-roles.instructions.md](agent-roles.instructions.md).
 

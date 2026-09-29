@@ -315,7 +315,7 @@ Reply to every PR or issue comment that prompted an action. "Every PR or issue c
 
 ### CI Checks (MANDATORY)
 
-The `oneshot` pre-agentic gate (from `credfeto/credfeto-orchestrator`) normally blocks agent invocation while CI checks are pending, so in an unattended run the rules below are a safety net for edge cases. An interactive session has no such gate, so pending checks are routine there and go to CI Monitor.
+The `oneshot` pre-agentic gate (from `credfeto/credfeto-orchestrator`) normally blocks agent invocation while CI checks are pending, so in an unattended run the rules below are a safety net for edge cases. An interactive session has no such gate.
 
 When working on a PR, check CI state **once**:
 
@@ -551,7 +551,7 @@ Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](
 
 ## CI Monitor
 
-Dormant in unattended, `oneshot`-driven runs, where the `oneshot` gate already holds the agent back while checks are pending and re-invokes it when CI state changes. Active in an [interactive session](#waiting-for-approval-in-an-interactive-session), where nothing else would pick the PR back up once CI finishes.
+Dormant in unattended runs, where the `oneshot` gate covers pending checks (see [CI Checks](#ci-checks-mandatory)). Active in an [interactive session](#waiting-for-approval-in-an-interactive-session), where nothing else would pick the PR back up once CI finishes.
 
 - **P1.** Watch the PR's checks in the background with a scheduling/loop mechanism the tool provides, so the session stays free while CI runs (see [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory)). Pace it with long idle intervals, never tight polling. The 30-minute deadline in that section governs commands, not this wait: CI checks are bound by GitHub's own timeouts.
 - **P2.** Each tick, check state once with `gh pr checks <number> --repo <owner/repo>`; never use `--watch`.
