@@ -287,7 +287,9 @@ If a `dotnet test`/`dotnet build` run that includes a benchmark or performance-t
 
 | Use full model | Use lesser model |
 | --- | --- |
-| Orchestrator, Code Writer, Code Reviewer, Code Fixer, Coding Researcher, CI Debugger, Dependency Updater | Code Tester, Committer, Changelog, Rebase Agent, PR Submitter, CI Monitor |
+| Orchestrator, Code Writer, Code Reviewer, Code Reviewer: Reuse, Code Reviewer: Quality, Code Reviewer: Efficiency, Code Reviewer: Correctness, Code Reviewer: Security, Code Reviewer: Compliance, Repo Auditor, Code Fixer, Coding Researcher, CI Debugger, Dependency Updater | Code Tester, Committer, Changelog, Rebase Agent, PR Submitter, CI Monitor |
+
+Roles that make judgement calls use the full model, because a weaker judgement there produces wrong code or missed findings; mechanical roles use the lesser model, because they follow a fixed procedure and must not interpret results (see [Failure Handling: No Self-Repair](#failure-handling-no-self-repair)).
 
 ### Failure Handling: No Self-Repair
 
@@ -310,6 +312,8 @@ Every sequence below starts with the [Pre-Work Baseline Check](git.instructions.
 | Dependabot / dependency update | Pre-Work Baseline Check → Dependency Updater |
 
 Rows starting with `Changelog (placeholder)` assume the work item takes a changelog entry at all. If it hits the skip condition in [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), the row runs unchanged — see [agent-roles.instructions.md](agent-roles.instructions.md#changelog) for what the Changelog agent commits instead.
+
+The trailing `→ CI Monitor` step is a no-op in `oneshot`-driven runs, because the `oneshot` gate already holds the agent back until CI state changes and re-invokes it then; it is active in an [interactive session](agent-roles.instructions.md#waiting-for-approval-in-an-interactive-session), where nothing else would pick the PR back up once CI finishes. See [CI Monitor](agent-roles.instructions.md#ci-monitor).
 
 For detailed agent role definitions, see [agent-roles.instructions.md](agent-roles.instructions.md).
 
