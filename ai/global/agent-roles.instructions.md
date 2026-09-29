@@ -342,7 +342,7 @@ Then act immediately; do **not** busy-loop, sleep, or use `--watch`, in any mode
 - gh or API error → report the error rather than routing a CI failure, because no check has failed and CI Debugger would look for a failure that does not exist.
 - <a id="ci-consistently-failing"></a>CI consistently failing and cannot be fixed → mark the PR blocked: `gh pr edit <number> --repo <owner/repo> --add-label "Blocked"`. In an interactive session, [CI Monitor](#ci-monitor) reporting a required check still failing after 3 CI Debugger rounds also counts, because further rounds would only repeat the cycle.
 
-A CI-posted analyzer findings comment (`<!-- sarif-summary: ... -->`) on the PR is handled as in [Suppressed Analyzer Findings](code-quality.instructions.md#suppressed-analyzer-findings-sarif-summary-mandatory).
+An analyzer findings comment (`<!-- sarif-summary: ... -->`) on the PR is handled as in [Suppressed Analyzer Findings](code-quality.instructions.md#suppressed-analyzer-findings-sarif-summary-mandatory).
 
 ## Coding Researcher
 
