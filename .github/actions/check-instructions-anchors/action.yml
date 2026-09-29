@@ -1,0 +1,31 @@
+--- # Fail if an AI instruction file has an orphaned anchor or a dangling fragment link
+# Maintain in repo: cs-template
+name: "Check Instructions Anchors"
+description: "Fails if an anchor under ai/ has no incoming link, or a #fragment link under ai/ or in .ai-instructions has no matching heading or anchor"
+
+runs:
+  using: composite
+  steps:
+    - name: "Check anchors and fragment links"
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        files=()
+        while IFS= read -r -d '' file; do
+          files+=("${file}")
+        done < <(git ls-files -z -- '*.md' '.ai-instructions')
+
+        if [ "${#files[@]}" -eq 0 ]; then
+          echo "ℹ️ No Markdown files to check."
+          exit 0
+        fi
+
+        if ! awk -f "${ACTION_PATH}/check-anchors.awk" "${files[@]}"; then
+          echo "❌ Found orphaned anchors or dangling fragment links."
+          exit 1
+        fi
+
+        echo "✅ All anchors are linked and all fragment links resolve."
+      env:
+        ACTION_PATH: ${{github.action_path}}
