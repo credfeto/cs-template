@@ -313,7 +313,7 @@ Every sequence below starts with the [Pre-Work Baseline Check](git.instructions.
 
 Rows starting with `Changelog (placeholder)` assume the work item takes a changelog entry at all. If it hits the skip condition in [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), the row runs unchanged — see [agent-roles.instructions.md](agent-roles.instructions.md#changelog) for what the Changelog agent commits instead.
 
-The trailing `→ CI Monitor` step runs only in some run modes; see [CI Monitor](agent-roles.instructions.md#ci-monitor) for which. When all required checks pass, CI Monitor returns control to the Orchestrator to continue the [AI Review Loop](agent-roles.instructions.md#pr-workflow-ai-review-loop).
+The trailing `→ CI Monitor` step runs only in some run modes; see [CI Monitor](agent-roles.instructions.md#ci-monitor) for which. The Orchestrator states the run mode when it hands over, because CI Monitor runs as a sub-agent and cannot tell the mode itself. When all required checks pass, CI Monitor returns control to the Orchestrator to continue the [AI Review Loop](agent-roles.instructions.md#pr-workflow-ai-review-loop).
 
 For detailed agent role definitions, see [agent-roles.instructions.md](agent-roles.instructions.md).
 

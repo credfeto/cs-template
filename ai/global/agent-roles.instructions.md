@@ -76,7 +76,7 @@ When picking up an **Issue** that has no existing PR:
 
 #### Waiting for Approval in an Interactive Session
 
-Interactive sessions only; an unattended run stops at Plan First P4 and must not poll. A session counts as interactive only once a human has typed a message in it; an injected prompt or task notification does not count. If unsure, assume it is unattended, as in [Pre-Work Baseline Check](git.instructions.md#pre-work-baseline-check-mandatory-before-starting-any-work).
+Interactive sessions only; an unattended run stops at Plan First P4 and must not poll. A session counts as interactive only once a human has typed a message in it; an injected prompt or task notification does not count. If unsure, assume it is unattended, as in [Pre-Work Baseline Check](git.instructions.md#pre-work-baseline-check-mandatory-before-starting-any-work). Only the Orchestrator decides the run mode. It states the mode (interactive or unattended) in every hand-off to a role whose rules depend on it, such as CI Monitor or a role applying [CI Checks](#ci-checks-mandatory), and that role uses the stated mode rather than judging it itself, because a sub-agent only ever sees an injected prompt and would always conclude it is unattended. A hand-off that states no mode means unattended.
 
 - **P1.** After Plan First P4 has posted the plan and added `Blocked` (or, on resume, after Plan First P2 finds a plan that is not yet approved), "STOP" there means stop working on the issue, not stop watching it. Run the P2 read once now and take its `plan` as the baseline (P3), then start a dynamic-pacing loop instead of ending the turn:
 
@@ -315,7 +315,7 @@ Reply to every PR or issue comment that prompted an action. "Every PR or issue c
 
 ### CI Checks (MANDATORY)
 
-The `oneshot` pre-agentic gate (from `credfeto/credfeto-orchestrator`) normally blocks agent invocation while CI checks are pending, so in an unattended run the rules below are a safety net for edge cases. An interactive session has no such gate.
+The `oneshot` pre-agentic gate (from `credfeto/credfeto-orchestrator`) normally blocks agent invocation while CI checks are pending, so in an unattended run the rules below are a safety net for edge cases. An interactive session has no such gate. A role running as a sub-agent uses the run mode stated in its hand-off (see [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session)).
 
 When working on a PR, check CI state **once**, required checks only, because the PR is mergeable without the optional ones and the plain output does not say which checks are required:
 
@@ -323,13 +323,18 @@ When working on a PR, check CI state **once**, required checks only, because the
 gh pr checks <number> --repo <owner/repo> --required
 ```
 
+Judge the result by the exit code of this plain form, not `--json`, because with `--json` gh exits 0 even when a check has failed or is pending. It exits 0 when every reported required check passed or was skipped, 8 when one is pending, and 1 when one failed or when it prints `no required checks reported on the '<branch>' branch` or `no checks reported on the '<branch>' branch`. gh only reports checks that have already registered on the PR's head commit, so a required workflow that has not been queued yet is missing from the list rather than shown as pending.
+
+- Either `no ... checks reported` message counts as pending, never as pass or failure, because it usually means the run for the head commit has not registered yet.
+- If the repo has no required checks configured at all, drop `--required` and judge all checks instead, because otherwise gh reports `no required checks reported` for ever. It has none when neither the base branch's protection (`gh api repos/<owner>/<repo>/branches/<base> --jq '.protection.required_status_checks.contexts'`) nor its rulesets (a `required_status_checks` rule in `gh api repos/<owner>/<repo>/rules/branches/<base>`) list any. Look this up once per PR, not on every check.
+
 Then act immediately; do **not** busy-loop, sleep, or use `--watch`, in any mode, because a blocking wait holds the session for the whole CI run:
 
-- All required checks passed → proceed with the next step.
+- All required checks passed → accept it only if it is still true on the next check after it was first seen, because a fast required workflow can pass before a slower one has even been queued. In an unattended run, the `oneshot` gate's check before invoking the agent is the first sighting, so this check confirms it; proceed with the next step. In an interactive session this check is the first sighting, so hand the PR to [CI Monitor](#ci-monitor), whose first tick confirms it.
 - Any required check failed → investigate, fix, push, post a status comment, and stop, even while other checks are still pending, because waiting for the slowest check would delay the fix by the whole CI run. Do not wait for the new run to complete. In an interactive session, CI Monitor watches the new run.
-- Any required check pending or in_progress, and none failed:
+- Any required check pending or in_progress, or none reported yet, and none failed:
   - Unattended run → stop silently; do not post a status comment. CI checks are bound by GitHub's own timeouts and will eventually pass, fail, or time out without agent intervention, and `oneshot` re-invokes the agent once they do.
-  - [Interactive session](#waiting-for-approval-in-an-interactive-session) → hand the PR to [CI Monitor](#ci-monitor) instead of stopping.
+  - [Interactive session](#waiting-for-approval-in-an-interactive-session) → hand the PR to [CI Monitor](#ci-monitor) instead of stopping, stating in the hand-off that the session is interactive.
 - CI consistently failing and cannot be fixed → mark the PR blocked: `gh pr edit <number> --repo <owner/repo> --add-label "Blocked"`
 
 ## Coding Researcher
@@ -550,20 +555,21 @@ Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](
 
 ## CI Monitor
 
-Dormant in unattended runs, where the `oneshot` gate covers pending checks (see [CI Checks](#ci-checks-mandatory)). Active in an [interactive session](#waiting-for-approval-in-an-interactive-session), where nothing else would pick the PR back up once CI finishes.
+Dormant in unattended runs, where the `oneshot` gate covers pending checks (see [CI Checks](#ci-checks-mandatory)). Active in an [interactive session](#waiting-for-approval-in-an-interactive-session), where nothing else would pick the PR back up once CI finishes. The Orchestrator states the run mode in its hand-off and CI Monitor uses that mode rather than judging it itself, because as a sub-agent it only sees an injected prompt and would always conclude it is unattended; a hand-off that states no mode means unattended.
 
-- **P1.** Before starting, set one overall time limit for the whole watch, long enough for the repo's normal CI run. Then watch the PR's checks in the background with a scheduling/loop mechanism the tool provides, so the session stays free while CI runs (see [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory)). Pace it with long idle intervals, never tight polling. The 30-minute deadline in that section governs commands, not this wait; the overall time limit bounds this wait instead, because a check that never reports would otherwise keep the watch running until the session ends.
-- **P2.** Each tick, check the required checks' state once with `gh pr checks <number> --repo <owner/repo> --required`; never use `--watch`. Only required checks decide the outcome, matching [CI Checks](#ci-checks-mandatory), because the PR is mergeable without the optional ones.
+- **P1.** Before starting, look up once whether the repo has any required checks configured, as in [CI Checks](#ci-checks-mandatory), and if it has none, drop `--required` from every check below. Set one overall time limit for the whole watch, long enough for the repo's normal CI run. Then watch the PR's checks in the background with a scheduling/loop mechanism the tool provides, so the session stays free while CI runs (see [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory)). Pace it with long idle intervals, never tight polling. The 30-minute deadline in that section governs commands, not this wait; the overall time limit bounds this wait instead, because a check that never reports would otherwise keep the watch running until the session ends.
+- **P2.** Each tick, check the required checks' state once with `gh pr checks <number> --repo <owner/repo> --required`; never use `--watch`. Only required checks decide the outcome, matching [CI Checks](#ci-checks-mandatory), because the PR is mergeable without the optional ones. Read the result by exit code as that section describes, and treat either `no ... checks reported` message as pending, never as pass or failure, because the run for the head commit may not have registered yet.
 - **P3.** Act on the result:
   - Any required check fails → invoke CI Debugger at once, even while other checks are still pending, because waiting for the slowest check would delay the fix by the whole CI run. Wait for CI Debugger to finish before the next tick, so the same failure is never handed off twice. Then act on what it returned:
     - It pushed a fix → keep watching the new run.
     - It escalated → pass the escalation on to the Orchestrator and stop.
     - It did neither → tell the human which required checks failed and stop, because every later tick would show the same failure with nothing left to act on it.
     - In every case, pass any pre-existing bug report from CI Debugger on to the Orchestrator, because CI Monitor does not handle it and it would otherwise be lost.
-  - All required checks pass → run `gh pr checks <number> --repo <owner/repo>` once without `--required` and mention any failed optional check to the human; an optional failure never blocks completion or triggers CI Debugger. Then stop the watch and return control to the Orchestrator to continue the PR's [AI Review Loop](#pr-workflow-ai-review-loop), because the PR is still an unreviewed draft.
-  - Otherwise (required checks pending or in_progress, none failed) → wait for the next tick.
+  - All required checks pass for the first time since the watch started or since CI Debugger's last push → wait for the next tick, because a fast required workflow can pass before a slower one has even been queued.
+  - All required checks still pass on the tick after that first sighting → run `gh pr checks <number> --repo <owner/repo>` once without `--required` and mention any failed optional check to the human; an optional failure never blocks completion or triggers CI Debugger. Then stop the watch and return control to the Orchestrator to continue the PR's [AI Review Loop](#pr-workflow-ai-review-loop), because the PR is still an unreviewed draft.
+  - Otherwise (required checks pending or in_progress, or none reported yet, and none failed) → wait for the next tick. A later all-pass then counts as a new first sighting.
 - **P4.** If the overall time limit is reached, tell the human which required checks are still pending and stop the watch.
-- **P5.** If the tool provides no scheduling mechanism, check once as in P2 and act as in P3, except that when required checks are pending and none has failed you tell the human CI is still running and stop.
+- **P5.** If the tool provides no scheduling mechanism, check once as in P2 and act as in P3, except that when required checks are pending and none has failed, or all pass on this single check and so cannot be confirmed, you tell the human CI is still running and stop.
 
 ## Dependency Updater
 
