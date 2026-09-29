@@ -268,9 +268,9 @@ COMMENT
 )"
 ```
 
-## Common Mistakes (Learned From Real Failures)
+## Common Mistakes
 
-These are documented because each one has actually broken a live session; check here before assuming a flag or field exists.
+Check here before assuming a `gh` flag or field exists.
 
 - **`--assignee`/`--label` are create-only flags.** `gh issue create`/`gh pr create` accept `--assignee`/`--label`. `gh issue edit`/`gh pr edit` do **not**; they fail with `unknown flag: --assignee` / `unknown flag: --label`. Use `--add-assignee`/`--add-label` (and `--remove-assignee`/`--remove-label`) on `edit`. There is also no `gh issue assign` subcommand: `gh issue assign <n> --assignee @me` fails; use `gh issue edit <n> --add-assignee @me`.
 
