@@ -326,10 +326,10 @@ gh pr checks <number> --repo <owner/repo>
 Then act immediately; do **not** busy-loop, sleep, or use `--watch`, in any mode, because a blocking wait holds the session for the whole CI run:
 
 - All required checks passed → proceed with the next step.
-- Any check pending or in_progress:
+- Any check failed → investigate, fix, push, post a status comment, and stop, even while other checks are still pending, because waiting for the slowest check would delay the fix by the whole CI run. Do not wait for the new run to complete. In an interactive session, CI Monitor watches the new run.
+- Any check pending or in_progress, and none failed:
   - Unattended run → stop silently; do not post a status comment. CI checks are bound by GitHub's own timeouts and will eventually pass, fail, or time out without agent intervention, and `oneshot` re-invokes the agent once they do.
   - [Interactive session](#waiting-for-approval-in-an-interactive-session) → hand the PR to [CI Monitor](#ci-monitor) instead of stopping.
-- Any check failed → investigate, fix, push, post a status comment, and stop. Do not wait for the new run to complete. In an interactive session, CI Monitor watches the new run.
 - CI consistently failing and cannot be fixed → mark the PR blocked: `gh pr edit <number> --repo <owner/repo> --add-label "Blocked"`
 
 ## Coding Researcher
@@ -374,9 +374,9 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - Each sub-agent reports `{"clean": true}` or `{"clean": false, "findings": [{"file": "...", "line": ..., "issue": "...", "suggestion": "..."}]}`.
 - Fix each construct (real findings grouped by construct) as its own change set, with a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) handed over as for Code Writer; skip false positives. Re-run Code Tester after fixes. The outgoing report carries every sweep record, incoming and own, unchanged.
 - If fixing a finding requires knowledge outside the instruction files, invoke Coding Researcher first; do not guess or fabricate. If Coding Researcher returns **Not possible**, leave the finding unresolved and escalate to Orchestrator with the explanation.
-- Report `{"clean": true, "sweeps": [...]}` or `{"clean": false, "fixes": [...], "sweeps": [...]}`, where `sweeps` carries every sweep record. Cap at 5 iterations.
+- Report `{"clean": true, "sweeps": [...], "preExistingBugs": [...]}` or `{"clean": false, "fixes": [...], "sweeps": [...], "preExistingBugs": [...]}`, where `sweeps` carries every sweep record and `preExistingBugs` lists each pre-existing bug reported but not fixed (file, line, description), because without its own field such a bug is either dropped or misread as a fix. Cap at 5 iterations.
 - After 5 iterations, report any unresolved findings to the Orchestrator; Orchestrator adds each as a PR comment for human consideration.
-- Report a pre-existing bug found outside the current change's scope to Orchestrator rather than fixing it; see [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
+- Report a pre-existing bug found outside the current change's scope to Orchestrator in `preExistingBugs` rather than fixing it; see [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
 
 ### Code Reviewer: **Reuse**
 
@@ -522,7 +522,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 - Read full logs (`gh run view --log-failed`), identify root cause.
 - Fix if code-related, with a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) committed after the fix per [Pattern Sweep Commits](git-commits.instructions.md#pattern-sweep-commits), since no Committer follows this role; apply [IDE MCP Code Analysis](code-quality.instructions.md#ide-mcp-code-analysis-mandatory) to the fixed files; escalate to Orchestrator with a clear description if environmental or infrastructure; use the Environment/Infrastructure Block Marker convention above so the block can auto-clear once the fix ships.
 - If a code-related fix requires knowledge outside the instruction files, invoke Coding Researcher first; do not guess or fabricate. If Coding Researcher returns **Not possible**, escalate to Orchestrator with the explanation.
-- Report a pre-existing bug found outside the current change's scope to Orchestrator rather than fixing it; see [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
+- Fix a pre-existing bug that causes the CI failure as part of the current work, including one the change merely exposes, because leaving it would keep the PR's required checks failing with nothing permitted to clear them. Report any other pre-existing bug found outside the current change's scope to Orchestrator rather than fixing it; see [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory).
 
 ## Changelog
 
@@ -556,11 +556,11 @@ Dormant in unattended runs, where the `oneshot` gate covers pending checks (see 
 - **P1.** Watch the PR's checks in the background with a scheduling/loop mechanism the tool provides, so the session stays free while CI runs (see [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory)). Pace it with long idle intervals, never tight polling. The 30-minute deadline in that section governs commands, not this wait: CI checks are bound by GitHub's own timeouts.
 - **P2.** Each tick, check state once with `gh pr checks <number> --repo <owner/repo>`; never use `--watch`.
 - **P3.** Act on the result:
-  - Any check pending or in_progress → wait for the next tick.
+  - Any fail → hand off to CI Debugger at once, even while other checks are still pending, then keep watching the new run, because waiting for the slowest check would delay the fix by the whole CI run.
   - All pass → stop the loop; done.
-  - Any fail → hand off to CI Debugger, then keep watching the new run.
+  - Otherwise (checks pending or in_progress, none failed) → wait for the next tick.
 - **P4.** Repeat until all checks pass or CI Debugger escalates; on escalation, stop the loop.
-- **P5.** If the tool provides no scheduling mechanism, check once as in P2 and act as in P3, except that on pending checks you tell the human CI is still running and stop.
+- **P5.** If the tool provides no scheduling mechanism, check once as in P2 and act as in P3, except that when checks are pending and none has failed you tell the human CI is still running and stop.
 
 ## Dependency Updater
 

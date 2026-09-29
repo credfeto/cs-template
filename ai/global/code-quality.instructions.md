@@ -107,7 +107,9 @@ A bug that already existed and sits outside the current change is not fixed sile
 - **P4.** If the human declines, make sure an issue exists: link the one found, or raise one under AI-Initiated Issues.
 - **P5.** In an [unattended run](agent-roles.instructions.md#waiting-for-approval-in-an-interactive-session), do P1, make sure an issue exists as in P4, note it on the PR, and do not fix it.
 
-This does not apply to [Incidental File Cleanup](#incidental-file-cleanup), to a [Pattern Sweep](#pattern-sweep-mandatory) of the construct already being fixed, to pre-existing [deprecation warnings](#deprecation-warnings-during-tests), or to [baseline check](git.instructions.md#pre-work-baseline-check-mandatory-before-starting-any-work) failures, which already have their own rules.
+This does not apply to [Incidental File Cleanup](#incidental-file-cleanup), to a [Pattern Sweep](#pattern-sweep-mandatory) of the construct already being fixed, to pre-existing [deprecation warnings](#deprecation-warnings-during-tests), to a pre-existing failure that pre-commit or an analyser or linter reports (see [Fixing Pre-Commit Failures](#fixing-pre-commit-failures-mandatory)), or to [baseline check](git.instructions.md#pre-work-baseline-check-mandatory-before-starting-any-work) failures, which already have their own rules; a commit cannot pass the hook while a pre-commit failure stays unfixed.
+
+A pre-existing bug that causes the current CI failure, or that stops the current change passing its build or tests, is in scope and is fixed as part of the current work, including one the change's new code merely exposes. Leaving it would keep the PR's required checks failing with nothing permitted to clear them.
 
 ## Compile-Time Configuration
 
