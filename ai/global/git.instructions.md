@@ -91,6 +91,13 @@ For full `GH_HOST` proxy behaviour and the required `gh pr create` flags, see [g
 
 Before any command that can discard uncommitted work (`git reset --hard`, `git checkout`/`restore` over tracked files, `git clean`), run `git status` first. If it shows uncommitted changes you did not just create and intend to discard, stash them (`git stash -u`, `-u` to include untracked files) or commit them before proceeding. Running the destructive command directly on the assumption the tree is clean, without checking, has silently discarded real work in practice; the check costs one command and is never skippable "because it should be clean".
 
+## Scratch Review Branches
+
+A local branch created only to review a PR, named `pr<number>-review` or `pr-<number>-review`, may be deleted without asking once the review is done, because it is a throwaway copy of an existing PR head and holds no work of its own.
+
+- Delete it with `git branch -d`, never `-D`, so git refuses if the branch has commits that are on no other branch. If git refuses, keep the branch and report it rather than forcing the deletion, because those commits would otherwise be lost.
+- This covers local branches only. Deleting a remote branch, or any other local branch, still needs human approval.
+
 ## Avoid `git worktree`
 
 - Do not use `git worktree` or the native `EnterWorktree` tool to create additional working trees for a repo.

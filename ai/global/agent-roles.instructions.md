@@ -76,7 +76,7 @@ When picking up an **Issue** that has no existing PR:
 
 #### Waiting for Approval in an Interactive Session
 
-Interactive sessions only; an unattended run stops at Plan First P4 and must not poll. A session counts as interactive only once a human has typed a message in it; an injected prompt or task notification does not count. If unsure, assume it is unattended, as in [Pre-Work Baseline Check](git.instructions.md#pre-work-baseline-check-mandatory-before-starting-any-work). Only the Orchestrator decides the run mode. It states the mode (interactive or unattended) in every hand-off to a role whose rules depend on it, such as CI Monitor or a role applying [CI Checks](#ci-checks-mandatory), and that role uses the stated mode rather than judging it itself, because a sub-agent only ever sees an injected prompt and would always conclude it is unattended. A hand-off that states no mode means unattended.
+Interactive sessions only; an unattended run stops at Plan First P4 and must not poll. A session counts as interactive only once a human has typed a message in it; an injected prompt or task notification does not count. If unsure, assume it is unattended, because an unattended run treated as interactive would poll or wait for a reply that never comes. Only the Orchestrator decides the run mode. It states the mode (interactive or unattended) in every hand-off to a role whose rules depend on it, such as CI Monitor or a role applying [CI Checks](#ci-checks-mandatory), and that role uses the stated mode rather than judging it itself, because a sub-agent only ever sees an injected prompt and would always conclude it is unattended. A hand-off that states no mode means unattended.
 
 - **P1.** After Plan First P4 has posted the plan and added `Blocked` (or, on resume, after Plan First P2 finds a plan that is not yet approved), "STOP" there means stop working on the issue, not stop watching it. Run the P2 read once now and take its `plan` as the baseline (P3), then start a dynamic-pacing loop instead of ending the turn:
 
@@ -85,25 +85,25 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
   ```
 
 - **P2.** Each tick, read all of the following, then decide (do not stop early, so a half-finished approval can be flagged):
-  1. The labels, the latest plan comment's `createdAt`, and the comments a trusted commenter (`authorAssociation` of `OWNER`, `MEMBER` or `COLLABORATOR`) posted after it:
+  - The labels, the latest plan comment's `createdAt`, and the comments a trusted commenter (`authorAssociation` of `OWNER`, `MEMBER` or `COLLABORATOR`) posted after it:
 
-     ```bash
-     gh issue view <number> --repo <owner/repo> --json labels,comments \
-       --jq '([.comments[] | select(.body | test("^## Implementation Plan"; "i"))] | last | .createdAt) as $plan
-             | {blocked: ([.labels[].name] | index("Blocked") != null),
-                plan: $plan,
-                afterPlan: [.comments[]
-                  | select($plan != null and .createdAt > $plan
-                    and (.authorAssociation | IN("OWNER", "MEMBER", "COLLABORATOR")))
-                  | .body]}'
-     ```
+    ```bash
+    gh issue view <number> --repo <owner/repo> --json labels,comments \
+      --jq '([.comments[] | select(.body | test("^## Implementation Plan"; "i"))] | last | .createdAt) as $plan
+            | {blocked: ([.labels[].name] | index("Blocked") != null),
+               plan: $plan,
+               afterPlan: [.comments[]
+                 | select($plan != null and .createdAt > $plan
+                   and (.authorAssociation | IN("OWNER", "MEMBER", "COLLABORATOR")))
+                 | .body]}'
+    ```
 
-     Read `afterPlan` and judge it as Plan First P2 does: a comment approves only if it uses one of the Plan First P4 keywords as an unconditional approval, not a question, a negation or a qualified approval ("approved, but ..."). The agent's own mirror comments (P5) are harmless: they are only posted once the wait is over.
-  2. **Board configured only**: the card's workflow status, read with `cfwf` as in [Updating and Reading the Board with `cfwf`](#updating-and-reading-the-board-with-cfwf). A non-zero exit means treat it as not approved:
+    Read `afterPlan` and judge it as Plan First P2 does: a comment approves only if it uses one of the Plan First P4 keywords as an unconditional approval, not a question, a negation or a qualified approval ("approved, but ..."). The agent's own mirror comments (P5) are harmless: they are only posted once the wait is over.
+  - **Board configured only**: the card's workflow status, read with `cfwf` as in [Updating and Reading the Board with `cfwf`](#updating-and-reading-the-board-with-cfwf). A non-zero exit means treat it as not approved:
 
-     ```bash
-     cfwf workflow-status --check --repo <owner/repo> --issue <number>
-     ```
+    ```bash
+    cfwf workflow-status --check --repo <owner/repo> --issue <number>
+    ```
 
   Decide as follows, using the same rules as Plan First P2 and P4:
   - **Approved**: `blocked` is `false` and `plan` is not null, and either the card is `Approved` (board configured) or a comment in `afterPlan` approves (no board), and `plan` still equals the baseline (P3).
@@ -117,11 +117,11 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
   - On approval, whether found on a tick or given in chat (P5), stop the loop with `ScheduleWakeup` and `stop: true`, check for an existing branch as in Plan First P2, and continue to implementation.
 
 - **P5.** **Live-chat approval ends the wait immediately.** If the human's chat message opens with the literal word `approved` or `lgtm` (case-insensitive) and is otherwise an unconditional approval, do not wait for the next tick. This is the one place the agent acts on a chat message alone. A question ("is this approved yet?"), a negation ("not approved"), a qualified approval or a passing mention does not count; if in doubt, ask:
-  1. Re-run the P2 read and confirm the message refers to this issue, `plan` still equals the baseline, `Blocked` is only the plan-approval block and the plan has no unresolved Open questions; if any check fails, ask instead of acting. `Blocked` counts as only the plan-approval block when no comment posted after the latest plan comment asks a question, reports a failed baseline or a timeout, or carries an environment-block marker (`<!-- orchestrator:env-block`): read the comments after the plan and judge them, as in P2.
-  2. Post the mirror comment on the issue as in [Blocked Label](#blocked-label) P4.
-  3. Remove the label: `gh issue edit <number> --repo <owner/repo> --remove-label Blocked`.
-  4. If the repo has a Workflow board, set the workflow status to **Approved** with `cfwf workflow-status --set --repo <owner/repo> --issue <number> --status Approved` (see [Workflow Board](#workflow-board)).
-  5. Stop the loop and continue as in P4.
+  - Re-run the P2 read and confirm the message refers to this issue, `plan` still equals the baseline, `Blocked` is only the plan-approval block and the plan has no unresolved Open questions; if any check fails, ask instead of acting. `Blocked` counts as only the plan-approval block when no comment posted after the latest plan comment asks a question, reports a failed baseline or a timeout, or carries an environment-block marker (`<!-- orchestrator:env-block`): read the comments after the plan and judge them, as in P2.
+  - Post the mirror comment on the issue as in [Blocked Label](#blocked-label) P4.
+  - Remove the label: `gh issue edit <number> --repo <owner/repo> --remove-label Blocked`.
+  - If the repo has a Workflow board, set the workflow status to **Approved** with `cfwf workflow-status --set --repo <owner/repo> --issue <number> --status Approved` (see [Workflow Board](#workflow-board)).
+  - Stop the loop and continue as in P4.
 
   This is the one documented exception to the rules that only a human clears `Blocked` ([Plan First](#issue-workflow-plan-first-new-issues-only) P4, [Blocked Label](#blocked-label) P2 and P4) and to the never-remove-labels rules in [task-workflow.instructions.md](task-workflow.instructions.md#label-management-mandatory): the human's chat instruction is the explicit action and the agent carries out the label and board changes on their behalf. It covers only the plan-approval `Blocked` of an issue in an interactive session; any other `Blocked` (a question, a failed baseline, an environment block) still waits for the human to clear it.
 
@@ -341,6 +341,8 @@ Then act immediately; do **not** busy-loop, sleep, or use `--watch`, in any mode
   - [Interactive session](#waiting-for-approval-in-an-interactive-session) → hand the PR to [CI Monitor](#ci-monitor) instead of stopping, stating in the hand-off that the session is interactive.
 - gh or API error → report the error rather than routing a CI failure, because no check has failed and CI Debugger would look for a failure that does not exist.
 - <a id="ci-consistently-failing"></a>CI consistently failing and cannot be fixed → mark the PR blocked: `gh pr edit <number> --repo <owner/repo> --add-label "Blocked"`. In an interactive session, [CI Monitor](#ci-monitor) reporting a required check still failing after 3 CI Debugger rounds also counts, because further rounds would only repeat the cycle.
+
+A CI-posted analyzer findings comment (`<!-- sarif-summary: ... -->`) on the PR is handled as in [Suppressed Analyzer Findings](code-quality.instructions.md#suppressed-analyzer-findings-sarif-summary-mandatory).
 
 ## Coding Researcher
 

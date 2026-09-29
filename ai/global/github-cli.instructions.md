@@ -42,9 +42,9 @@ Only use `gh` to manage issues/PRs if this succeeds: see [task-workflow.instruct
 
 Reach for these in this order:
 
-1. **`cfwf`** for anything it supports, for reads and writes. Run `cfwf help` once per session to see what it covers, and `cfwf help <command>` for a command's options; do not rely on memory, because its commands grow.
-2. **A native `gh <noun> <verb>` subcommand** when `cfwf` has no command for the operation.
-3. **`gh api` or `gh api graphql`** only when neither of the above covers it.
+- **P1.** **`cfwf`** for anything it supports, for reads and writes. Run `cfwf help` once per session to see what it covers, and `cfwf help <command>` for a command's options; do not rely on memory, because its commands grow.
+- **P2.** **A native `gh <noun> <verb>` subcommand** when `cfwf` has no command for the operation.
+- **P3.** **`gh api` or `gh api graphql`** only when neither of the above covers it.
 
 `cfwf` (in the `credfeto/credfeto-orchestrator` agent image) is where routine `gh` operations are meant to end up as standardised, pre-canned commands rather than long `gh` scripts composed by hand. When you use `gh api` (REST or GraphQL) or `gh ... --json <fields>` (with or without `--jq`), for a read or a write, and no `cfwf` command covers that use, raise an issue on `credfeto/credfeto-orchestrator` asking for it to be added to `cfwf`, then carry on with `gh` for the current task. This applies to routine uses such as `gh issue view --json` and `gh pr list --json` as much as to unusual ones. If `cfwf` is not installed or a command fails, follow [Missing CLI Tools](task-workflow.instructions.md#missing-cli-tools-mandatory) and report it; do not fall back to hand-composed `gh` for a use `cfwf` covers. Plain native subcommands without `--json`, such as `gh pr create`, `gh issue comment` and `gh pr edit --add-label`, are exempt.
 
