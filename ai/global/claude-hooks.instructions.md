@@ -76,11 +76,10 @@ is denied this way, while the same command scoped to a subtree with no secret-be
 
 One command can get a hook denial when run in the foreground (named hook, stated fix) and a
 permission denial when run in the background (naming neither). These are two different denial
-shapes, not one broken
-session, so do not escalate to a human on the first one. This differs from averaging two hook
-denials into one theory: one denial is a hook and the other is not. Identify which part of the
-command is being modelled as a broad read, narrow or exclude it, and retry before escalating to a
-human.
+shapes, not one broken session, so do not escalate to a human on the first one. This differs
+from averaging two hook denials into one theory: one denial is a hook and the other is not.
+Identify which part of the command is being modelled as a broad read, narrow or exclude it, and
+retry before escalating to a human.
 
 ## Prefer the Tool's Own Backgrounding Parameter (MANDATORY)
 

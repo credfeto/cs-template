@@ -8,7 +8,6 @@ const { readFileSync } = require('node:fs');
 const path = require('node:path');
 
 const FENCE = /^[ \t\r\n\v\f]*(```|~~~)/;
-const HEADING = /^#+[ \t\r\n\v\f]/;
 const HEADING_MARKER = /^#+[ \t\r\n\v\f]+/;
 const INLINE_CODE = /`[^`]*`/g;
 const EXPLICIT_ANCHOR = /<a id="([^"]*)"/g;
@@ -87,7 +86,7 @@ function scanFile(file, content, state) {
             return;
         }
 
-        if (HEADING.test(text)) {
+        if (HEADING_MARKER.test(text)) {
             const headingSlug = slug(text.replace(HEADING_MARKER, ''));
             const suffix = seenSlugs.get(headingSlug);
             seenSlugs.set(headingSlug, (suffix ?? 0) + 1);
