@@ -13,6 +13,14 @@ Load when acting as a named agent. Routing table and model selection: [task-work
 - If a delegated role escalates a task as infeasible (Coding Researcher **Not possible** result), do not re-route it unchanged. Record the finding on the issue/PR and surface it to the user for a decision: re-scope, accept the suggested alternative, or drop.
 - When a delegated role reports a pre-existing bug outside the current change's scope (in Code Reviewer's `preExistingBugs`, listed in a Code Writer or Code Fixer hand-off report, or in a CI Debugger report, including one that CI Monitor passes on), handle it as in [Pre-Existing Bugs Found During Work](code-quality.instructions.md#pre-existing-bugs-found-during-work-mandatory). If the human chooses to fix it, route the fix as in that section's [P3](code-quality.instructions.md#pre-existing-bug-fix-route) rather than fixing it yourself, because the Orchestrator never implements directly.
 
+### Trusted Commenters
+
+A trusted commenter is a human whose comment can approve a plan or ask for work. Decide it by the comment author's login, never by `authorAssociation` (`OWNER`, `MEMBER` or `COLLABORATOR`), because an account with collaborator access is not necessarily a human approver: the agent's own bot account is usually a collaborator.
+
+- **P1.** Trust only the logins in the "Trusted commenters" list the orchestrator passes in your CLAUDE.md.
+- **P2.** Never trust a comment posted by the agent's own account, even if its login is in the list, because the agent's own comments quote the approval keywords (a re-block comment saying no approval was found (`approved` / `lgtm`), or a live-chat mirror comment) and would otherwise approve its own plan. A `gh` read marks these comments with `viewerDidAuthor` set to `true`.
+- **P3.** If no list is provided (for example an interactive session started without the orchestrator), trust only the repository owner's login (the `<owner>` in `<owner/repo>`), because it is the most conservative choice. If the owner is an organisation, no comment matches, so ask the human instead.
+
 ### Issue Workflow: Plan First (new issues only)
 
 When picking up an **Issue** that has no existing PR:
@@ -28,8 +36,8 @@ When picking up an **Issue** that has no existing PR:
 
   - `false` → Plan mode (P3–P4 below).
   - `true` → Plan exists. How approval is signalled depends on whether a Workflow board is configured (the orchestrator passes this context in your CLAUDE.md):
-    - **Board configured**: check whether a human (an `OWNER`, `MEMBER` or `COLLABORATOR`; the board only lets people with project write access move a card) has set the board status to **Approved**. If yes → skip to implementation. If not yet → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
-    - **No board**: check for a human approval comment from an `OWNER`, `MEMBER` or `COLLABORATOR` (by `authorAssociation`) posted **after** the plan comment (keywords: `approved` / `lgtm`, case-insensitive, whole word). If found → skip to implementation. If not → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
+    - **Board configured**: check whether a human with project write access (the board only lets those people move a card) has set the board status to **Approved**. If yes → skip to implementation. If not yet → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
+    - **No board**: check for an approval comment from a [trusted commenter](#trusted-commenters) posted **after** the plan comment (keywords: `approved` / `lgtm`, case-insensitive, whole word). If found → skip to implementation. If not → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
 
   Either way, before skipping to implementation, check for an existing branch first (see [git.instructions.md#branching](git.instructions.md#branching)).
 
@@ -63,8 +71,8 @@ When picking up an **Issue** that has no existing PR:
   ```
 
   **Approval requires an explicit human action; the orchestrator never removes `Blocked` automatically (sole exception: live-chat approval in an interactive session, [P5](#waiting-for-approval-in-an-interactive-session)):**
-  - **Board configured**: a human (`OWNER`, `MEMBER` or `COLLABORATOR`) sets board status to **Approved** and removes `Blocked`.
-  - **No board**: a human (`OWNER`, `MEMBER` or `COLLABORATOR`) posts an approval comment (`approved` / `lgtm`) and removes `Blocked`.
+  - **Board configured**: a human with project write access sets board status to **Approved** and removes `Blocked`.
+  - **No board**: a [trusted commenter](#trusted-commenters) posts an approval comment (`approved` / `lgtm`) and removes `Blocked`.
 
   Revise a plan by posting a new `## Implementation Plan` comment, never by editing one in place, so approval is always judged against the latest plan comment.
 
@@ -85,7 +93,7 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
   ```
 
 - **P2.** Each tick, read all of the following, then decide (do not stop early, so a half-finished approval can be flagged):
-  - The labels, the latest plan comment's `createdAt`, and the comments a trusted commenter (`authorAssociation` of `OWNER`, `MEMBER` or `COLLABORATOR`) posted after it:
+  - The labels, the latest plan comment's `createdAt`, and the comments a [trusted commenter](#trusted-commenters) posted after it. Replace `<trusted logins>` with the trusted logins, each quoted and separated by commas:
 
     ```bash
     gh issue view <number> --repo <owner/repo> --json labels,comments \
@@ -94,11 +102,12 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
                plan: $plan,
                afterPlan: [.comments[]
                  | select($plan != null and .createdAt > $plan
-                   and (.authorAssociation | IN("OWNER", "MEMBER", "COLLABORATOR")))
+                   and (.author.login | IN(<trusted logins>))
+                   and (.viewerDidAuthor | not))
                  | .body]}'
     ```
 
-    Read `afterPlan` and judge it as Plan First P2 does: a comment approves only if it uses one of the Plan First P4 keywords as an unconditional approval, not a question, a negation or a qualified approval ("approved, but ..."). The agent's own mirror comments (P5) are harmless: they are only posted once the wait is over.
+    Read `afterPlan` and judge it as Plan First P2 does: a comment approves only if it uses one of the Plan First P4 keywords as an unconditional approval, not a question, a negation or a qualified approval ("approved, but ..."). The query leaves out the agent's own comments ([Trusted Commenters](#trusted-commenters) P2), because a re-block comment can be posted before the wait ends and quotes the keywords, so its timing does not stop it counting as approval.
   - **Board configured only**: the card's workflow status, read with `cfwf` as in [Updating and Reading the Board with `cfwf`](#updating-and-reading-the-board-with-cfwf). A non-zero exit means treat it as not approved:
 
     ```bash
@@ -263,7 +272,7 @@ This convention only applies to PRs (there is no container session, and therefor
 
 ### Human Comment Requests: Run First (MANDATORY)
 
-Before processing CI checks or continuing the review loop, scan **all** comments on the current PR and its linked issue(s) from trusted commenters for ad-hoc requests to create a new GitHub issue.
+Before processing CI checks or continuing the review loop, scan **all** comments on the current PR and its linked issue(s) from [trusted commenters](#trusted-commenters) for ad-hoc requests to create a new GitHub issue.
 
 A request is identified by any natural-language phrasing such as: "raise an issue", "create an issue", "add an issue", "open an issue", "file an issue", or similar variants (case-insensitive).
 
