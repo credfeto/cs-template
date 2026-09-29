@@ -289,7 +289,7 @@ If a `dotnet test`/`dotnet build` run that includes a benchmark or performance-t
 | --- | --- |
 | Orchestrator, Code Writer, Code Reviewer, Code Reviewer: Reuse, Code Reviewer: Quality, Code Reviewer: Efficiency, Code Reviewer: Correctness, Code Reviewer: Security, Code Reviewer: Compliance, Repo Auditor, Code Fixer, Coding Researcher, CI Debugger, Dependency Updater | Code Tester, Committer, Changelog, Rebase Agent, PR Submitter, CI Monitor |
 
-Roles that make judgement calls use the full model, because a weaker judgement there produces wrong code or missed findings; mechanical roles use the lesser model, because they follow a fixed procedure and must not interpret results (see [Failure Handling: No Self-Repair](#failure-handling-no-self-repair)).
+Roles that make open-ended judgement calls about code or findings use the full model, because a weaker judgement there produces wrong code or missed findings; mechanical roles use the lesser model, because they follow a fixed, fully specified procedure, including fixed decision rules such as CI Monitor's, make no such judgement calls, and hand any failure on rather than diagnosing it (see [Failure Handling: No Self-Repair](#failure-handling-no-self-repair)).
 
 ### Failure Handling: No Self-Repair
 
@@ -313,7 +313,7 @@ Every sequence below starts with the [Pre-Work Baseline Check](git.instructions.
 
 Rows starting with `Changelog (placeholder)` assume the work item takes a changelog entry at all. If it hits the skip condition in [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), the row runs unchanged — see [agent-roles.instructions.md](agent-roles.instructions.md#changelog) for what the Changelog agent commits instead.
 
-The trailing `→ CI Monitor` step runs only in some run modes; see [CI Monitor](agent-roles.instructions.md#ci-monitor) for which. The Orchestrator states the run mode when it hands over, because CI Monitor runs as a sub-agent and cannot tell the mode itself. In the CI failure row it follows only a fix CI Debugger pushed or a check it re-ran, because an escalation goes to the Orchestrator and watching the unchanged failure would only hand it straight back to CI Debugger. When all required checks pass, CI Monitor returns control to the Orchestrator to continue the [AI Review Loop](agent-roles.instructions.md#pr-workflow-ai-review-loop).
+The trailing `→ CI Monitor` step runs only in some run modes; see [CI Monitor](agent-roles.instructions.md#ci-monitor) for which. The Orchestrator states the run mode when it hands over, because CI Monitor runs as a sub-agent and cannot tell the mode itself. In the CI failure row it follows only a fix CI Debugger pushed or a check it re-ran, because an escalation goes to the Orchestrator and watching the unchanged failure would only hand it straight back to CI Debugger. When all required checks pass, CI Monitor returns control to the Orchestrator, which runs the [AI Review Loop](agent-roles.instructions.md#pr-workflow-ai-review-loop) only if the PR has not yet completed it and otherwise does nothing more, because the rebase and CI failure rows can end here on a PR that has already completed it.
 
 For detailed agent role definitions, see [agent-roles.instructions.md](agent-roles.instructions.md).
 
