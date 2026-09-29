@@ -306,14 +306,14 @@ Every sequence below starts with the [Pre-Work Baseline Check](git.instructions.
 | New feature / bug fix / refactor | Pre-Work Baseline Check → Changelog (placeholder) → Committer → PR Submitter → Code Writer → Code Tester → Code Reviewer → Changelog (correction) → Committer → PR Submitter → CI Monitor |
 | `CHANGES_REQUESTED` on existing PR, or verbal/chat request for changes on an open PR | Pre-Work Baseline Check → Code Fixer (respond to every comment) → Code Tester → Code Reviewer → Changelog (correction) → Committer → PR Submitter → CI Monitor |
 | Coverage-only task | Pre-Work Baseline Check → Changelog (placeholder) → Committer → PR Submitter → Code Writer (tests only) → Code Tester → Code Reviewer → Changelog (correction) → Committer → PR Submitter → CI Monitor |
-| Documentation-only | Pre-Work Baseline Check → Changelog (placeholder) → Committer → PR Submitter → Code Writer (docs only) → Changelog (correction) → Committer → PR Submitter |
-| Rebase requested | Pre-Work Baseline Check → Rebase Agent → PR Submitter |
-| CI failure (unknown cause) | Pre-Work Baseline Check → CI Debugger |
+| Documentation-only | Pre-Work Baseline Check → Changelog (placeholder) → Committer → PR Submitter → Code Writer (docs only) → Changelog (correction) → Committer → PR Submitter → CI Monitor |
+| Rebase requested | Pre-Work Baseline Check → Rebase Agent → PR Submitter → CI Monitor |
+| CI failure (unknown cause) | Pre-Work Baseline Check → CI Debugger → CI Monitor |
 | Dependabot / dependency update | Pre-Work Baseline Check → Dependency Updater |
 
 Rows starting with `Changelog (placeholder)` assume the work item takes a changelog entry at all. If it hits the skip condition in [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), the row runs unchanged — see [agent-roles.instructions.md](agent-roles.instructions.md#changelog) for what the Changelog agent commits instead.
 
-The trailing `→ CI Monitor` step runs only in some run modes; see [CI Monitor](agent-roles.instructions.md#ci-monitor) for which. The Orchestrator states the run mode when it hands over, because CI Monitor runs as a sub-agent and cannot tell the mode itself. When all required checks pass, CI Monitor returns control to the Orchestrator to continue the [AI Review Loop](agent-roles.instructions.md#pr-workflow-ai-review-loop).
+The trailing `→ CI Monitor` step runs only in some run modes; see [CI Monitor](agent-roles.instructions.md#ci-monitor) for which. The Orchestrator states the run mode when it hands over, because CI Monitor runs as a sub-agent and cannot tell the mode itself. In the CI failure row it follows only a fix CI Debugger pushed or a check it re-ran, because an escalation goes to the Orchestrator and watching the unchanged failure would only hand it straight back to CI Debugger. When all required checks pass, CI Monitor returns control to the Orchestrator to continue the [AI Review Loop](agent-roles.instructions.md#pr-workflow-ai-review-loop).
 
 For detailed agent role definitions, see [agent-roles.instructions.md](agent-roles.instructions.md).
 
