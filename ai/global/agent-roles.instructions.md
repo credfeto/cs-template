@@ -27,11 +27,11 @@ When picking up an **Issue** that has no existing PR:
 
 - **P1.** Run the [Pre-Work Baseline Check](git.instructions.md#pre-work-baseline-check-mandatory-before-starting-any-work) before anything else in this flow, including before checking for an existing plan comment. Follow its auto-fix/failure/block rules there; only continue to P2 once the baseline is clean.
 
-- **P2.** Check whether you have already posted a plan comment:
+- **P2.** Check whether you have already posted a plan comment. A comment is a plan comment only when one of its lines is exactly `## Implementation Plan` (case-sensitive, nothing else on that line, a trailing carriage return ignored), wherever that line sits in the comment, because a plan with a short preamble should still count and an exact whole-line, case-sensitive heading avoids false matches. The query splits on lines because jq's `^` and `$` anchor to the whole string, not to each line:
 
   ```bash
   gh issue view <number> --repo <owner/repo> --json comments \
-    --jq '[.comments[].body] | any(test("^## Implementation Plan"; "i"))'
+    --jq '[.comments[].body] | any(.[]; split("\n") | any(rtrimstr("\r") == "## Implementation Plan"))'
   ```
 
   - `false` → Plan mode (P3–P4 below).
@@ -97,7 +97,7 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
 
     ```bash
     gh issue view <number> --repo <owner/repo> --json labels,comments \
-      --jq '([.comments[] | select(.body | test("^## Implementation Plan"; "i"))] | last | .createdAt) as $plan
+      --jq '([.comments[] | select(.body | split("\n") | any(rtrimstr("\r") == "## Implementation Plan"))] | last | .createdAt) as $plan
             | {blocked: ([.labels[].name] | index("Blocked") != null),
                plan: $plan,
                afterPlan: [.comments[]
