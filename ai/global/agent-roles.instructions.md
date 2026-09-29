@@ -315,7 +315,7 @@ Reply to every PR or issue comment that prompted an action. "Every PR or issue c
 
 ### CI Checks (MANDATORY)
 
-The `oneshot` pre-agentic gate (from `credfeto/credfeto-orchestrator`) normally blocks agent invocation while CI checks are pending, so an unattended run is rarely invoked with pending checks and the rules below act as a safety net for edge cases there. An interactive session has no such gate, so pending checks are routine there and are handed to CI Monitor.
+The `oneshot` pre-agentic gate (from `credfeto/credfeto-orchestrator`) normally blocks agent invocation while CI checks are pending, so in an unattended run the rules below are a safety net for edge cases. An interactive session has no such gate, so pending checks are routine there and go to CI Monitor.
 
 When working on a PR, check CI state **once**:
 
@@ -328,8 +328,8 @@ Then act immediately; do **not** busy-loop, sleep, or use `--watch`, in any mode
 - All required checks passed → proceed with the next step.
 - Any check pending or in_progress:
   - Unattended run → stop silently; do not post a status comment. CI checks are bound by GitHub's own timeouts and will eventually pass, fail, or time out without agent intervention, and `oneshot` re-invokes the agent once they do.
-  - [Interactive session](#waiting-for-approval-in-an-interactive-session) → hand the PR to [CI Monitor](#ci-monitor) instead of stopping, because no gate will re-invoke the agent when CI finishes.
-- Any check failed → investigate, fix, push, post a status comment, and stop. Do not wait for the new run to complete. In an interactive session, the new run is then CI Monitor's to watch.
+  - [Interactive session](#waiting-for-approval-in-an-interactive-session) → hand the PR to [CI Monitor](#ci-monitor) instead of stopping.
+- Any check failed → investigate, fix, push, post a status comment, and stop. Do not wait for the new run to complete. In an interactive session, CI Monitor watches the new run.
 - CI consistently failing and cannot be fixed → mark the PR blocked: `gh pr edit <number> --repo <owner/repo> --add-label "Blocked"`
 
 ## Coding Researcher
@@ -551,16 +551,16 @@ Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](
 
 ## CI Monitor
 
-Dormant in unattended, `oneshot`-driven runs, because the `oneshot` gate already holds the agent back while checks are pending and re-invokes it when CI state changes. Active in an [interactive session](#waiting-for-approval-in-an-interactive-session), where nothing else would pick the PR back up once CI finishes.
+Dormant in unattended, `oneshot`-driven runs, where the `oneshot` gate already holds the agent back while checks are pending and re-invokes it when CI state changes. Active in an [interactive session](#waiting-for-approval-in-an-interactive-session), where nothing else would pick the PR back up once CI finishes.
 
-- **P1.** Watch the PR's checks in the background with a scheduling/loop mechanism the tool provides, not a blocking wait, so the session stays free while CI runs (see [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory) for background-task guidance). Pace it with long idle intervals while checks are pending, never tight polling. The 30-minute deadline in that section governs commands, not this wait: CI checks are bound by GitHub's own timeouts.
+- **P1.** Watch the PR's checks in the background with a scheduling/loop mechanism the tool provides, so the session stays free while CI runs (see [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory)). Pace it with long idle intervals, never tight polling. The 30-minute deadline in that section governs commands, not this wait: CI checks are bound by GitHub's own timeouts.
 - **P2.** Each tick, check state once with `gh pr checks <number> --repo <owner/repo>`; never use `--watch`.
 - **P3.** Act on the result:
   - Any check pending or in_progress → wait for the next tick.
   - All pass → stop the loop; done.
   - Any fail → hand off to CI Debugger, then keep watching the new run.
 - **P4.** Repeat until all checks pass or CI Debugger escalates; on escalation, stop the loop.
-- **P5.** If the tool provides no scheduling mechanism, do not poll: check once as in P2 and act on it as in P3, except that pending checks are not waited on; tell the human CI is still running and stop.
+- **P5.** If the tool provides no scheduling mechanism, check once as in P2 and act as in P3, except that on pending checks you tell the human CI is still running and stop.
 
 ## Dependency Updater
 
