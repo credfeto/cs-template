@@ -101,7 +101,7 @@ After fixing a bug, or accepting a finding from `/simplify`, `/code-review`, `/s
 
 A bug that already existed and sits outside the current change is not fixed silently, because an unasked-for fix widens the PR's scope without the human's say and hides the bug from the issue history. It is not dropped either, because an unrecorded bug is lost once the session ends.
 
-The role that finds such a bug lists it in its hand-off report, and every intermediate role (Code Tester, Code Reviewer, Changelog) carries it on unchanged, as for the sweep record, until it reaches the Orchestrator, which runs the steps below.
+The role that finds such a bug lists it in its hand-off report. Each role that receives a pre-existing bug list in its hand-off carries it unchanged in its own report, and the Orchestrator collects every list from the reports it receives and runs the steps below, because the Orchestrator invokes each role and reads each report itself.
 
 - **P1.** Search open **and** closed issues in the current repo for the bug (by symptom, affected component and construct).
 - **P2.** Present the option to fix it to the human, citing the matching issue, a closed issue that looks like a regression, or "no existing issue".
