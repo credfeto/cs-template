@@ -18,8 +18,9 @@ Load when acting as a named agent. Routing table and model selection: [task-work
 A trusted commenter is a human whose comment can approve a plan or ask for work. Decide it by the comment author's login, never by `authorAssociation` (`OWNER`, `MEMBER` or `COLLABORATOR`), because an account with collaborator access is not necessarily a human approver: the agent's own bot account is usually a collaborator.
 
 - **P1.** Trust only the logins in the "Trusted commenters" list the orchestrator passes in your CLAUDE.md.
-- **P2.** Never trust a comment posted by the agent's own account, even if its login is in the list, because the agent's own comments quote the approval keywords `approved` / `lgtm` (a re-block comment saying no approval was found, or a live-chat mirror comment) and would otherwise approve its own plan. A `gh` read marks these comments with `viewerDidAuthor` set to `true`.
+- **P2.** Never trust a comment whose author login is the bot login the orchestrator passes in your CLAUDE.md alongside the "Trusted commenters" list, even if that login is also in the list, because a comment from the agent's own bot account is never a human approval, and its live-chat mirror comment ([Blocked Label](#blocked-label) P4) quotes the approval keywords and would otherwise approve its own plan. Match that login by name, never by whether `gh` reports `viewerDidAuthor` as `true`, because the agent can run as a trusted human's account (the repository owner, for example) and excluding every comment by that account would drop that human's real approvals. If no bot login is provided, exclude no login.
 - **P3.** If no list is provided (for example an interactive session started without the orchestrator), trust only the repository owner's login (the `<owner>` in `<owner/repo>`), because it is the most conservative choice. If the owner is an organisation, no comment matches, so ask the human instead.
+- **P4.** Never write either approval keyword (`approved` or `lgtm`, in any case) in a comment you post unless that comment mirrors a real human approval ([Blocked Label](#blocked-label) P4, [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session) P5). This covers every other comment, such as a re-block comment saying no approval was found, a status comment or a question; to refer to the words there, write "the two accepted approval keywords". This is what stops the agent's own comments being read as approval when it runs as a trusted account, because P2 can only exclude a separate bot login and cannot tell the agent's comments apart from that account's human ones.
 
 ### Issue Workflow: Plan First (new issues only)
 
@@ -93,7 +94,7 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
   ```
 
 - **P2.** Each tick, read all of the following, then decide (do not stop early, so a half-finished approval can be flagged):
-  - The labels, the latest plan comment's `createdAt`, and the comments a [trusted commenter](#trusted-commenters) posted after it. Replace `<trusted logins>` with the trusted logins, each quoted and separated by commas:
+  - The labels, the latest plan comment's `createdAt`, and the comments a [trusted commenter](#trusted-commenters) posted after it. Replace `<trusted logins>` with the trusted logins, each quoted and separated by commas, and `<bot login>` with the bot login ([Trusted Commenters](#trusted-commenters) P2), quoted; if no bot login is provided, delete the line that contains `<bot login>`:
 
     ```bash
     gh issue view <number> --repo <owner/repo> --json labels,comments \
@@ -102,12 +103,12 @@ Interactive sessions only; an unattended run stops at Plan First P4 and must not
                plan: $plan,
                afterPlan: [.comments[]
                  | select($plan != null and .createdAt > $plan
-                   and (.author.login | IN(<trusted logins>))
-                   and (.viewerDidAuthor | not))
+                   and .author.login != <bot login>
+                   and (.author.login | IN(<trusted logins>)))
                  | .body]}'
     ```
 
-    Read `afterPlan` and judge it as Plan First P2 does: a comment approves only if it uses one of the Plan First P4 keywords as an unconditional approval, not a question, a negation or a qualified approval ("approved, but ..."). The query also leaves out the agent's own comments ([Trusted Commenters](#trusted-commenters) P2), because a re-block comment that quotes the keywords can be posted after the plan and before the wait ends, so the timestamp filter alone would count it as approval.
+    Read `afterPlan` and judge it as Plan First P2 does: a comment approves only if it uses one of the Plan First P4 keywords as an unconditional approval, not a question, a negation or a qualified approval ("approved, but ..."). The query also leaves out comments by the bot login ([Trusted Commenters](#trusted-commenters) P2), because a comment from the agent's own bot account is never a human approval, and its live-chat mirror comment quotes the keywords and is posted after the plan, so the timestamp filter alone would count it as approval. It matches the bot login by name rather than by `viewerDidAuthor`, so an approval from a trusted human whose account the agent runs as still counts.
   - **Board configured only**: the card's workflow status, read with `cfwf` as in [Updating and Reading the Board with `cfwf`](#updating-and-reading-the-board-with-cfwf). A non-zero exit means treat it as not approved:
 
     ```bash
