@@ -308,7 +308,7 @@ Every sequence below starts with the [Pre-Work Baseline Check](git.instructions.
 | `CHANGES_REQUESTED` on existing PR, verbal/chat request for changes on an open PR, or a pre-existing bug the human has chosen to bring into an open PR's scope | Pre-Work Baseline Check → Code Fixer (respond to every comment) → Code Tester → Code Reviewer → Changelog (correction) → Committer → PR Submitter → CI Monitor |
 | Coverage-only task | Pre-Work Baseline Check → Changelog (placeholder) → Committer → PR Submitter → Code Writer (tests only) → Code Tester → Code Reviewer → Changelog (correction) → Committer → PR Submitter → CI Monitor |
 | Documentation-only | Pre-Work Baseline Check → Changelog (placeholder) → Committer → PR Submitter → Code Writer (docs only) → Changelog (correction) → Committer → PR Submitter → CI Monitor |
-| Rebase requested | Rebase Agent → Post-Rebase Check (`pre-commit-check`, fix until clean, per [After Every Rebase](git-rebasing.instructions.md#after-every-rebase-mandatory)) → Committer → PR Submitter → CI Monitor |
+| Rebase requested | Rebase Agent → Post-Rebase Check (`pre-commit-check`, with each reported issue fixed through the [review-fix route](#review-fix-route) until it is clean, per [After Every Rebase](git-rebasing.instructions.md#after-every-rebase-mandatory)) → Committer → PR Submitter → CI Monitor |
 | CI failure (unknown cause) | Pre-Work Baseline Check → CI Debugger → CI Monitor |
 | Dependabot / dependency update | Pre-Work Baseline Check → Dependency Updater |
 
