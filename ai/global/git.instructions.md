@@ -89,11 +89,10 @@ For full `GH_HOST` proxy behaviour and the required `gh pr create` flags, see [g
 
 ## File Names and Git File Lists (MANDATORY)
 
-- Name every file you create with ASCII characters only. Git, shells and CI tools quote, escape or mangle non-ASCII names, so they break scripts and tooling that handle them.
-- Scripts that read git file lists must still handle any name safely, because files from elsewhere are not bound by the rule above. Read the list NUL-separated and never split it on newlines:
-  - Produce it with `-z`: `git ls-files -z`, `git diff --name-only -z`.
-  - Consume it NUL-separated: `mapfile -d '' files < <(git ls-files -z)` in bash, `xargs -0`, or `split('\0')` on captured output.
-- Without `-z`, git quotes and escapes paths containing non-ASCII characters or quotes, so the names it prints no longer match the files.
+- Name every file you create with ASCII characters only, because git, shells and CI tools quote, escape or mangle non-ASCII names and break the scripts that read them.
+- Read git file lists NUL-separated and never split them on newlines, because files from elsewhere may have any name and, without `-z`, git quotes and escapes non-ASCII or quote-containing paths so the printed names no longer match the files:
+  - Produce the list with `-z`: `git ls-files -z`, `git diff --name-only -z`.
+  - Consume it NUL-separated: `split('\0')` on captured output; for shell scripts see [Git File Lists](shell-scripts.instructions.md#git-file-lists).
 
 ## Destructive Commands (MANDATORY)
 
