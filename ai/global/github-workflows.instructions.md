@@ -45,7 +45,7 @@ See [github-workflows.examples.md](github-workflows.examples.md) for the composi
 Replace these with a bash step; no `github-script` needed:
 
 - **Merge conflict markers**: `git grep -rl '^<<<<<<< ' --`; fails if any file contains conflict markers
-- **Case sensitivity conflicts**: `git ls-files -z | LC_ALL=C sort -zf | LC_ALL=C uniq -zDi | tr '\0' '\n'`; prints all names that differ only by case; see [File Names and Git File Lists](git.instructions.md#file-names-and-git-file-lists-mandatory)
+- **Case sensitivity conflicts**: `git ls-files -z | LC_ALL=C sort -zf | LC_ALL=C uniq -zDi | tr '\0' '\n'`; prints all names that differ only by the case of ASCII letters; `LC_ALL=C` folds ASCII letters only, so it misses names that differ only by the case of a non-ASCII letter (`É`/`é`), which also clash on case-insensitive file systems; when tracked names may be non-ASCII, use a `github-script` step that compares `toLowerCase()` names instead; see [File Names and Git File Lists](git.instructions.md#file-names-and-git-file-lists-mandatory)
 - **Tracked files matching `.gitignore`**: `git ls-files -z --cached -i --exclude-standard | tr '\0' '\n'`; `-i` needs `--cached` (git rejects `-i` alone)
 - **Dotnet SDK version from global.json**: `jq -r '.sdk.version' src/global.json`; set `DOTNET_VERSION`; fall back to a default if absent
 
