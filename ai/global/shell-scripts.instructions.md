@@ -29,6 +29,7 @@ Read git file lists NUL-separated per [File Names and Git File Lists](git.instru
 
 - In `#!/bin/sh` scripts, pipe to `xargs -0r`: `git ls-files -z | xargs -0r <command>`, because without `-r` an empty list still runs `<command>` once with no arguments.
 - In `#!/bin/bash` scripts, loop with `while IFS= read -r -d '' f; do ...; done < <(git ls-files -z)`, because process substitution is bash-only and fails `checkbashisms`. Use `mapfile -d '' files < <(git ls-files -z)` only where bash 4.4 or later is guaranteed, because `mapfile -d` needs bash 4.4 and macOS `/bin/bash` is 3.2.
+- Neither form surfaces a `git ls-files` failure: `#!/bin/sh` has no `pipefail`, so the pipeline returns `xargs`'s status, and bash discards a process substitution's exit status even under `set -e`, so a script that checks an empty list exits 0 having checked nothing (for example when git refuses a checkout with `detected dubious ownership`). Where an empty list would silently pass, run git on its own first and check its status, for example `git ls-files -z >"$tmp" || die "git ls-files failed"`, then read the list from `"$tmp"`.
 
 ## Argument Size Limits
 
