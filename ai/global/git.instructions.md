@@ -92,7 +92,7 @@ For full `GH_HOST` proxy behaviour and the required `gh pr create` flags, see [g
 - Name every file you create with ASCII characters only, because git, shells and CI tools quote, escape or mangle non-ASCII names and break the scripts that read them.
 - Read git file lists NUL-separated and never split them on newlines, because files from elsewhere may have any name and, without `-z`, git quotes and escapes non-ASCII or quote-containing paths so the printed names no longer match the files:
   - Produce the list with `-z`: `git ls-files -z`, `git diff --name-only -z`.
-  - Consume it NUL-separated: `split('\0')` on captured output; for shell scripts see [Git File Lists](shell-scripts.instructions.md#git-file-lists).
+  - Consume it NUL-separated and drop empty entries, because `-z` ends every entry, including the last, with NUL and a plain split leaves a trailing empty name: `split('\0').filter(Boolean)` on captured output; for shell scripts see [Git File Lists](shell-scripts.instructions.md#git-file-lists).
 
 ## Destructive Commands (MANDATORY)
 
