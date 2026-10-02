@@ -87,6 +87,14 @@ For full `GH_HOST` proxy behaviour and the required `gh pr create` flags, see [g
 - In Claude Code the `cd` form also triggers an unnecessary permission prompt for the directory change itself.
 - This applies to all git subcommands: `git -C /path status`, `git -C /path add`, `git -C /path commit`, etc.
 
+## File Names and Git File Lists (MANDATORY)
+
+- Name every file you create with ASCII characters only. Git, shells and CI tools quote, escape or mangle non-ASCII names, so they break scripts and tooling that handle them.
+- Scripts that read git file lists must still handle any name safely, because files from elsewhere are not bound by the rule above. Read the list NUL-separated and never split it on newlines:
+  - Produce it with `-z`: `git ls-files -z`, `git diff --name-only -z`.
+  - Consume it NUL-separated: `mapfile -d '' files < <(git ls-files -z)` in bash, `xargs -0`, or `split('\0')` on captured output.
+- Without `-z`, git quotes and escapes paths containing non-ASCII characters or quotes, so the names it prints no longer match the files.
+
 ## Destructive Commands (MANDATORY)
 
 Before any command that can discard uncommitted work (`git reset --hard`, `git checkout`/`restore` over tracked files, `git clean`), run `git status` first. If it shows uncommitted changes you did not just create and intend to discard, stash them (`git stash -u`, `-u` to include untracked files) or commit them before proceeding. Running the destructive command directly on the assumption the tree is clean, without checking, silently discards any uncommitted work that is there; the check costs one command and is never skippable "because it should be clean".

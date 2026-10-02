@@ -23,6 +23,10 @@ Use `die`, `success`, and `info` for all user-facing output; never bare `echo` o
 
 Scripts that behave differently when invoked by an AI agent must use the standard `is_ai_agent` helper; see [shell-scripts.examples.md](shell-scripts.examples.md).
 
+## Git File Lists
+
+Read git file lists NUL-separated; see [File Names and Git File Lists](git.instructions.md#file-names-and-git-file-lists-mandatory).
+
 ## Argument Size Limits
 
 Never pass a value of unbounded or externally-sourced size (an API response, accumulated log/comment data, file contents, etc.) as a single command-line argument to an external command. Use stdin (piping), or a temp file with a flag designed for it (e.g. `jq --slurpfile`/`--rawfile` instead of `--argjson`/`--arg`), instead.
