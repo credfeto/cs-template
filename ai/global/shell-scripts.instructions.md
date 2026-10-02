@@ -28,7 +28,7 @@ Scripts that behave differently when invoked by an AI agent must use the standar
 Read git file lists NUL-separated per [File Names and Git File Lists](git.instructions.md#file-names-and-git-file-lists-mandatory):
 
 - In `#!/bin/sh` scripts, pipe to `xargs -0r`: `git ls-files -z | xargs -0r <command>`, because without `-r` an empty list still runs `<command>` once with no arguments.
-- Use `mapfile -d '' files < <(git ls-files -z)` only in `#!/bin/bash` scripts, because `mapfile` and process substitution are bash-only and fail `checkbashisms`.
+- In `#!/bin/bash` scripts, loop with `while IFS= read -r -d '' f; do ...; done < <(git ls-files -z)`, because process substitution is bash-only and fails `checkbashisms`. Use `mapfile -d '' files < <(git ls-files -z)` only where bash 4.4 or later is guaranteed, because `mapfile -d` needs bash 4.4 and macOS `/bin/bash` is 3.2.
 
 ## Argument Size Limits
 
