@@ -35,7 +35,7 @@ When picking up an **Issue** that has no existing PR:
     --jq 'any(.comments[].body; split("\n") | any(rtrimstr("\r") == "## Implementation Plan"))'
   ```
 
-  - `false` → Plan mode (P3–P4 below).
+  - `false` → Plan mode (P3 to P4 below).
   - `true` → Plan exists. How approval is signalled depends on whether a Workflow board is configured (the orchestrator passes this context in your CLAUDE.md):
     - **Board configured**: check whether a human with project write access (the board only lets those people move a card) has set the board status to **Approved**. If yes → skip to implementation. If not yet → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
     - **No board**: check for an approval comment from a [trusted commenter](#trusted-commenters) posted **after** the plan comment (keywords: `approved` / `lgtm`, case-insensitive, whole word). If found → skip to implementation. If not → re-post any revised plan as a new comment, mark Blocked, STOP (P3); in an interactive session, then wait as in [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
