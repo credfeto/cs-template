@@ -320,8 +320,18 @@ The trailing `→ CI Monitor` step runs only in some run modes; see [CI Monitor]
 
 For detailed agent role definitions, see [agent-roles.instructions.md](agent-roles.instructions.md).
 
+## Work That Cannot Be Committed (MANDATORY)
+
+When a session cannot save its work through a commit (a file-edit, commit or push tool is denied, or the environment will not outlive the session), the work must not be lost silently, because the next run would otherwise redo it from scratch or never learn it was attempted.
+
+- **P1.** <a id="uncommitted-work-name-tool"></a>Comment on the PR (or the issue if there is no PR yet) naming the tool or action that was denied and why the work could not be committed. Never describe the work as "out of scope" instead.
+- **P2.** <a id="uncommitted-work-keep"></a>Never revert or discard your own uncommitted changes as stray churn. Discard only changes you can see are wrong.
+- **P3.** <a id="uncommitted-work-post"></a>Before the session ends, record the work in a single comment on the PR (or issue) that starts with the hidden marker `<!-- uncommitted-work -->`, editing that comment if it already exists rather than adding another. Put the `git diff` output inside a collapsed `<details>` block. If the diff is too large for a comment, list the files instead, with a precise description of the change (a `Construct:` line, as for a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory)) so it can be re-applied.
+- **P4.** <a id="uncommitted-work-apply"></a>A later run that finds this comment applies the diff (`git apply`), or re-applies the described change if the diff no longer applies, then commits it and edits the comment to read `Applied in <sha>`.
+
 ## Resuming Interrupted Work
 
+- Check the PR or issue for an `<!-- uncommitted-work -->` comment and apply it as in [Work That Cannot Be Committed](#uncommitted-work-apply) P4.
 - Check the status of existing issues and branches; skip merged branches.
 - For unmerged branches, decide whether to continue or delete and recreate.
 - Update the top-level issue with current status and next steps before resuming.
