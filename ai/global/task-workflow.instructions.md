@@ -324,14 +324,13 @@ For detailed agent role definitions, see [agent-roles.instructions.md](agent-rol
 
 When a session cannot save its work through a commit (a file-edit, commit or push tool is denied, or the environment will not outlive the session), the work must not be lost silently, because the next run would otherwise redo it from scratch or never learn it was attempted.
 
-- **P1.** Comment on the PR (or the issue if there is no PR yet) naming the tool or action that was denied and why the work could not be committed. Never describe the work as "out of scope" instead.
-- **P2.** Never revert or discard your own uncommitted changes as stray churn. Discard only changes you can see are wrong.
-- **P3.** Before the session ends, record the work in a single comment on the PR (or issue) that starts with the hidden marker `<!-- uncommitted-work -->`, editing that comment if it already exists rather than adding another. Put the `git diff` output inside a collapsed `<details>` block. If the diff is too large for a comment, list the files instead, with a precise description of the change (a `Construct:` line, as for a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory)) so it can be re-applied.
-- **P4.** <a id="uncommitted-work-apply"></a>A later run that finds this comment applies the diff (`git apply`), or re-applies the described change if the diff no longer applies, then commits it and edits the comment to read `Applied in <sha>`.
+- **P1.** Keep your own uncommitted changes, as [Destructive Commands](git.instructions.md#destructive-commands-mandatory) requires; discard only changes you can see are wrong, never as stray churn.
+- **P2.** Before the session ends, record the work in a single comment on the PR (or the issue if there is no PR yet), editing it if it already exists. Start it with the hidden marker `<!-- uncommitted-work -->`, then name the tool or action that was denied. Check the diff's size first: if it fits in a comment (under 60,000 characters), put the `git diff` output in a collapsed `<details>` block; otherwise list the files with a precise description of the change (a `Construct:` line, as for a [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory)) so it can be re-applied.
+- **P3.** <a id="uncommitted-work-apply"></a>A later run that finds this comment while reading the PR's comments applies the diff (`git apply`), or re-applies the described change if the diff no longer applies, commits it, then replaces the comment's whole body with `Applied in <sha>`, removing the marker so later runs do not find it again.
 
 ## Resuming Interrupted Work
 
-- Check the PR or issue for an `<!-- uncommitted-work -->` comment and apply it as in [Work That Cannot Be Committed](#uncommitted-work-apply) P4.
+- Check the PR or issue for an `<!-- uncommitted-work -->` comment and apply it as in [Work That Cannot Be Committed](#uncommitted-work-apply) P3.
 - Check the status of existing issues and branches; skip merged branches.
 - For unmerged branches, decide whether to continue or delete and recreate.
 - Update the top-level issue with current status and next steps before resuming.
