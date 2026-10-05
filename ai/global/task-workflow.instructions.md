@@ -216,6 +216,12 @@ for, see [claude-hooks.instructions.md](claude-hooks.instructions.md) for that c
 
 When using the Monitor tool to watch a background Bash task, the poll condition in the `until` loop **must** be provably satisfiable; a condition that can never be met loops forever and blocks the entire session.
 
+### Finishing background work before handing back
+
+- **P1.** <a id="background-command-wait"></a>A role never hands back while a background command it started (a build, a test run, `pre-commit-check`, or a commit or push that runs hooks) is still running: it waits for the command's completion marker (see [Reliable poll strings by command](#reliable-poll-strings-by-command)). It never stops such a command with `TaskStop`, because the command must finish and clean up after itself, and killing it can leave a stale `.git/index.lock`, partial build output or a push in an unknown state. If the command overruns its deadline (see [the poll deadline](#poll-loop-deadline)), the role reports the overrun as that rule describes and leaves the command running instead of killing it; this is the only case in which a role hands back before its command has finished.
+- **P2.** Once the command, or the condition a watch was waiting for, has finished, the role stops any `Monitor` watch or `ScheduleWakeup` self-paced loop it started before handing back: `TaskStop` with the watch's recorded task id for a `Monitor` watch, `ScheduleWakeup` with `stop: true` for a self-paced loop. This is because a background sub-agent's tasks outlive its run, and every tick of a watch left running re-wakes the sub-agent and forces another hand-back. [CI Monitor](agent-roles.instructions.md#ci-monitor-stop-watch) applies this to its CI watch.
+- **P3.** `TaskStop` is for watches only, never for a command doing work, because a watch only observes and can be stopped at any time without losing anything, while a command stopped part-way skips its own clean-up. The one other use is the Orchestrator's, on a sub-agent that has already delivered its final report and is only repeating it (see [Orchestrator](agent-roles.instructions.md#orchestrator)).
+
 ### Rules for poll conditions
 
 - **P1.** **Never poll for `"exit code"`**; that string is not reliably written to background task output files. Poll for a specific string the command itself writes (see table below).
@@ -226,7 +232,7 @@ When using the Monitor tool to watch a background Bash task, the poll condition 
 
 - **P4.** **Prefer foreground for quick, bounded commands** (`git status`, a single `grep`, `ls`, and similar). **Always background project build/test/commit tooling instead** (`git commit`/`pre-commit`/`pre-commit-check`, `dotnet build`, `dotnet test`, `npm test`, `bun test`), regardless of how fast a specific run is expected to be; see [Never Truncate Test/Commit Commands](#never-truncate-testcommit-commands-mandatory) below for why and how. Use `run_in_background: true` for any other command that genuinely takes many minutes (e.g. a full integration-test run) and you have independent work to do while waiting.
 
-- **P5.** **Time-box every poll loop: die after 30 minutes.** Always include a deadline so the session cannot hang forever:
+- **P5.** <a id="poll-loop-deadline"></a>**Time-box every poll loop: die after 30 minutes.** Always include a deadline so the session cannot hang forever:
 
   ```bash
   deadline=$(( $(date +%s) + 1800 ))
@@ -247,7 +253,7 @@ When using the Monitor tool to watch a background Bash task, the poll condition 
       --body "Blocked: timed out after 30 minutes waiting for <what>. Last output: $(tail -5 "${output_file}" 2>/dev/null)"
   ```
 
-  Use `gh pr edit` / `gh pr comment` instead if the work item is a PR. Then exit; do not continue work.
+  Use `gh pr edit` / `gh pr comment` instead if the work item is a PR. Then exit; do not continue work. Exiting ends the poll loop, never the command it was waiting for: leave the command running, as [waiting for a background command](#background-command-wait) requires, because killing it would skip its own clean-up.
 
 ### Reliable poll strings by command
 
