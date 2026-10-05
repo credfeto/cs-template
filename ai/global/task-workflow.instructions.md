@@ -11,7 +11,7 @@ Applies everywhere a list of this kind is produced: in instruction files, and in
 - **Assumptions**: a lower-case alpha sequence (`a.`, `b.`, `c.`, ...)
 - **Open questions**: a `Q`-prefixed numbered sequence (`Q1.`, `Q2.`, `Q3.`, ...)
 - **Plan/procedure steps**: a `P`-prefixed sequence (`P1.`, `P2.`, `P3.`, ...). **Never `P0`.** If a list would otherwise need a zero-indexed step, renumber the whole list to start at `P1` and update every reference to the shifted numbers.
-- **Encoding in committed Markdown files**: write `P`/`Q`/alpha steps as bullets with a bold label, not as literal ordered-list markers: `- **P1.** text`, not `1. text` or `P1. text`. A literal `1.`/`P1.` marker is parsed as a new list item by CommonMark, which detaches any nested bullets, fenced code blocks, or continuation paragraphs that were children of the previous item; the bullet form keeps them nested (indent nested content 2 spaces under a `-` marker, not 3). This does not apply to prose in live chat or an issue/PR comment, where plain `P1.`/`Q1.`/`a.` text is fine.
+- **Encoding in committed Markdown files**: write `P`/`Q`/alpha steps as bullets with a bold label (`- **P1.** text`), not as literal ordered-list markers (`1. text` or `P1. text`). A literal `1.`/`P1.` marker is parsed as a new list item by CommonMark, which detaches any nested bullets, fenced code blocks, or continuation paragraphs that were children of the previous item; the bullet form keeps them nested (indent nested content 2 spaces under a `-` marker, not 3). This does not apply to prose in live chat or an issue/PR comment, where plain `P1.`/`Q1.`/`a.` text is fine.
 - **CI enforcement**: the `PR: AI Instructions Lint` workflow fails a PR that starts a list item with a literal numbered marker in `ai/global/*.instructions.md` or `.ai-instructions`, and one that leaves a named anchor under `ai/` with no incoming link or a `#fragment` link with no matching heading or anchor. Fix the Markdown rather than working around the check, because both faults break silently otherwise.
 
 ### Named Anchors for Cross-Referenced Steps
@@ -165,7 +165,7 @@ If a required CLI tool is not found, **stop immediately and ask the user to inst
 - Manipulate PATH to try to find it
 - Attempt to install it without being asked
 
-**Exception: pre-commit hook tools:** Do not assume a tool is missing because `command -v` returns nothing in the current shell. Instead, follow the verification steps in [git.instructions.md](git.instructions.md); stage your changes and run the hook directly. Only block if it actually fails.
+**Exception for pre-commit hook tools:** Do not assume a tool is missing because `command -v` returns nothing in the current shell. Instead, follow the verification steps in [git.instructions.md](git.instructions.md); stage your changes and run the hook directly. Only block if it actually fails.
 
 ## Rules Compliance for In-Flight Work
 

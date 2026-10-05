@@ -71,7 +71,7 @@ When raising a GitHub issue autonomously (not directly requested by a human):
 - **P1.** Search for existing issues (both **open** and **closed**) covering the same topic before creating; do not create duplicates.
 - **P2.** Add the `Blocked` label immediately after creating the issue so it is held for human review before being acted upon.
 
-**Exceptions: do not add `Blocked`:**
+**Exceptions where `Blocked` is not added:**
 
 - A human explicitly asked you to raise the issue: ask for the priority label instead, then apply it.
 - The issue is raised by the dependency security detection rule (e.g. flagged during `npm install` or from a Dependabot advisory): use only the labels specified by that rule.

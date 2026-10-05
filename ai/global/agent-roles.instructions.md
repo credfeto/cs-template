@@ -63,7 +63,7 @@ When picking up an **Issue** that has no existing PR:
   <list, using a Q-prefixed numbered sequence (Q1., Q2., Q3., ...), or "None, ready to proceed pending approval">
   ```
 
-  **Open questions vs. embedded conditional decisions:** any conditional or deferred decision point in the Approach or Files-to-change text, a decision the plan does not itself resolve (e.g. "needs policy sign-off", "pending a decision on X", an either/or left open), must be lifted out into its own `Qn.` entry under Open questions, not left as prose in Approach/Files-to-change. Prose framing hides it from the Blocked/approval gate below, which only inspects Open questions; a `Qn.` entry is what actually forces it through that gate. See [Pre-Closure Decision Check](task-workflow.instructions.md#pre-closure-decision-check-mandatory) for the matching check when closing.
+  **Open questions vs. embedded conditional decisions:** any conditional or deferred decision point in the Approach or Files-to-change text that the plan does not itself resolve (e.g. "needs policy sign-off", "pending a decision on X", an either/or left open) must be lifted out into its own `Qn.` entry under Open questions, not left as prose in Approach/Files-to-change. Prose framing hides it from the Blocked/approval gate below, which only inspects Open questions; a `Qn.` entry is what actually forces it through that gate. See [Pre-Closure Decision Check](task-workflow.instructions.md#pre-closure-decision-check-mandatory) for the matching check when closing.
 
 - **P4.** Mark the issue as Blocked and update the Workflow board to **Planning** (if the repo has a Workflow board), then **STOP**:
 
@@ -77,7 +77,7 @@ When picking up an **Issue** that has no existing PR:
 
   Revise a plan by posting a new `## Implementation Plan` comment, never by editing one in place, so approval is always judged against the latest plan comment.
 
-  In an interactive session, keep watching the issue rather than ending the turn: see [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
+  In an interactive session, keep watching the issue rather than ending the turn; see [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
 
 **Check GitHub's live state, not just chat.** A human's approval action may land directly on the issue/PR (a comment, a label change, moving the board card) without also being repeated in chat; they already have to open the item to read the posted plan, so relaying it a second time in chat is not something to wait on. Before treating an item as approved, still blocked, or unchanged, re-check its live state (`gh issue view`/`gh pr view` for labels and comments, plus the board's workflow status via `cfwf workflow-status --check`) rather than relying on stale memory or assuming silence in chat means nothing has happened on GitHub. This cuts both ways: a literal chat-only approval (a human typing one of the keywords above directly into the chat session, rather than posting them as a GitHub comment) is still valid on its own, but must be mirrored as a GitHub comment per the live-chat rule in [Blocked Label](#blocked-label) so the record survives even if the chat session is lost; do not treat chat-only approval as a substitute for checking GitHub, and do not treat an unexplained GitHub-side state change as approval without confirming a human actually made it (an automated board rule or a stray process flipping a field is not a human decision).
 
@@ -263,7 +263,7 @@ cfwf workflow-status --set --repo <owner/repo> (--pr <n> | --issue <n>) --status
 cfwf workflow-status --check --repo <owner/repo> (--pr <n> | --issue <n>)
 ```
 
-- `--set` adds the item to the board if it is not already there and sets the workflow status, then prints `Set <url> to <status>`. Exit 0 means GitHub accepted the write; a non-zero exit means the write failed. It deliberately does not read the value back, because GitHub lags behind writes: see [GitHub State Lags Behind Writes](github-cli.instructions.md#github-state-lags-behind-writes-mandatory).
+- `--set` adds the item to the board if it is not already there and sets the workflow status, then prints `Set <url> to <status>`. Exit 0 means GitHub accepted the write; a non-zero exit means the write failed. It deliberately does not read the value back, because GitHub lags behind writes; see [GitHub State Lags Behind Writes](github-cli.instructions.md#github-state-lags-behind-writes-mandatory).
 - `--check` prints the current workflow status and exits non-zero if the item is not on the board. The output starts with the status name: match the name exactly and ignore anything after it.
 
 ### On Hold Label
@@ -399,7 +399,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 ## Code Writer
 
 - Implement the GitHub issue: read all relevant instruction files, write production code and tests.
-- If implementation requires knowledge outside the instruction files (unfamiliar API, complex library usage, etc.), invoke Coding Researcher first; do not guess or fabricate. If Coding Researcher returns **Not possible**, stop, do not partially implement, and escalate to Orchestrator with the explanation and any suggested alternative.
+- If implementation requires knowledge outside the instruction files (unfamiliar API, complex library usage, etc.), invoke Coding Researcher first; do not guess or fabricate. If Coding Researcher returns **Not possible**, stop and escalate to Orchestrator with the explanation and any suggested alternative; do not partially implement.
 - After fixing a bug, run the [Pattern Sweep](code-quality.instructions.md#pattern-sweep-mandatory) and append its sweep record to the hand-off report.
 - Apply [IDE MCP Code Analysis](code-quality.instructions.md#ide-mcp-code-analysis-mandatory) to the files written or changed.
 - Do not commit, push, or update the changelog; hand off to Code Tester when done.

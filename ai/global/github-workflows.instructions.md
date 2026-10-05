@@ -8,7 +8,7 @@ Classify every `uses:` reference before adding or reviewing:
 
 - **Always allowed**: `actions/*` and `github/*`
 - **Convert to github-script or local action**: all other third-party actions
-- **Acceptable as-is**: actions requiring specialised external tooling not expressible via the GitHub API or bash: see [Cannot Convert](#actions-that-cannot-be-converted)
+- **Acceptable as-is**: actions requiring specialised external tooling not expressible via the GitHub API or bash; see [Cannot Convert](#actions-that-cannot-be-converted)
 
 When encountering existing third-party actions (including `credfeto/*`), replace with local equivalents where practical.
 
@@ -81,7 +81,7 @@ This preference is opportunistic: switch a `uses:` line to SHA pinning when you 
 
 Resolve a tag to its commit SHA with `gh api repos/<owner>/<action>/commits/<tag> --jq '.sha'`.
 
-When a merge or rebase produces conflicting pins for the same action (or for runtime versions such as `setup-node`/`setup-dotnet` versions), take the latest secure candidate: see [git-rebasing.instructions.md](git-rebasing.instructions.md#resolving-version-conflicts-when-merging-or-rebasing).
+When a merge or rebase produces conflicting pins for the same action (or for runtime versions such as `setup-node`/`setup-dotnet` versions), take the latest secure candidate; see [git-rebasing.instructions.md](git-rebasing.instructions.md#resolving-version-conflicts-when-merging-or-rebasing).
 
 ## Keeping Actions Up to Date
 
@@ -183,7 +183,7 @@ Use this consistent field order; omit fields not needed. `name:` is always first
 
 ## Step Output Formatting
 
-> Applies to **GitHub Actions workflow steps only**. Standalone shell scripts use ANSI-coloured `✓`/`✗`: see [shell-scripts.instructions.md](shell-scripts.instructions.md#output-helpers).
+> Applies to **GitHub Actions workflow steps only**. Standalone shell scripts use ANSI-coloured `✓`/`✗`; see [shell-scripts.instructions.md](shell-scripts.instructions.md#output-helpers).
 
 | State | Character | Usage |
 | --- | --- | --- |
