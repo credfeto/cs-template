@@ -69,7 +69,7 @@ git -C <repodir> checkout --ours -- COVERAGE.md
 git -C <repodir> add COVERAGE.md
 ```
 
-(Git's rebase convention reverses the usual meaning: during a rebase, `--ours` is the branch being rebased *onto* (`origin/main`), and `--theirs` is your own commit being replayed, the opposite of a merge.) Continue the rebase as normal. Once it completes **and** the existing post-rebase build-and-test step ([After Every Rebase](git-rebasing.instructions.md#after-every-rebase-mandatory)) passes, re-run the [per-language extraction](#per-language-overall-coverage-extraction) against the rebased working tree and commit the fresh `COVERAGE.md` as part of that same rebase work; do not leave `main`'s stale copy in place, and do not measure before the build/tests are confirmed green.
+(Git's rebase convention reverses the usual meaning: during a rebase, `--ours` is the branch being rebased *onto* (`origin/main`), and `--theirs` is your own commit being replayed; this is the opposite of a merge.) Continue the rebase as normal. Once it completes **and** the existing post-rebase build-and-test step ([After Every Rebase](git-rebasing.instructions.md#after-every-rebase-mandatory)) passes, re-run the [per-language extraction](#per-language-overall-coverage-extraction) against the rebased working tree and commit the fresh `COVERAGE.md` as part of that same rebase work; do not leave `main`'s stale copy in place, and do not measure before the build/tests are confirmed green.
 
 ## Per-Language Overall Coverage Extraction
 
@@ -142,9 +142,9 @@ When every production assembly/package for a language in the repo carries this k
 Only the three orchestrated languages' own source/test code (.NET, Node, Python; see [Per-Language Overall Coverage Extraction](#per-language-overall-coverage-extraction)) can move the ratchet's numbers. If every file changed on the branch (relative to its merge-base with `main`) falls into one of the categories below, no source or test file changed, so coverage cannot have moved. Skip the extraction and comparison entirely: move the board straight to **Human Review** and post a one-line status comment (`Non-code change: coverage ratchet skipped`), without reading or writing `COVERAGE.md`.
 
 - **Dependency manifests and version pins**: `.csproj`/`Directory.Packages.props`/`packages.config`/`package.json`/`package-lock.json`/`requirements.txt`/`*.lock`, a GitHub Actions `uses:` version bump, a `Dockerfile` base-image tag/digest, `global.json`/`dotnet-tools.json`/`.nvmrc`/`.python-version`.
-- **GitHub Actions workflows and composite actions** (`.github/workflows/*.yml`, `.github/actions/*/action.yml`) beyond version pins; workflow YAML has no coverage concept.
+- **GitHub Actions workflows and composite actions** (`.github/workflows/*.yml`, `.github/actions/*/action.yml`) beyond version pins: workflow YAML has no coverage concept.
 - **SQL/T-SQL** (schema, stored procedures, views, migrations): measured, if at all, by a database-specific process outside this ratchet, never by the per-language extraction above.
-- **Shell scripts**: see [Shell](#shell-excluded); always excluded, whether touched alone or as part of a larger branch.
+- **Shell scripts**: always excluded, whether touched alone or as part of a larger branch; see [Shell](#shell-excluded).
 - **Dockerfiles and Docker Compose files**.
 - **Documentation-only changes** (README, CHANGELOG, and similar).
 

@@ -224,7 +224,7 @@ When using the Monitor tool to watch a background Bash task, the poll condition 
 
 - **P3.** **Verify the poll string exists in real output before writing the loop.** If you cannot confirm what string the command writes, run the command in the foreground first and read its output.
 
-- **P4.** **Prefer foreground for quick, bounded commands** (`git status`, a single `grep`, `ls`, and similar). **Always background project build/test/commit tooling instead**: `git commit`/`pre-commit`/`pre-commit-check`, `dotnet build`, `dotnet test`, `npm test`, `bun test`, regardless of how fast a specific run is expected to be; see [Never Truncate Test/Commit Commands](#never-truncate-testcommit-commands-mandatory) below for why and how. Use `run_in_background: true` for any other command that genuinely takes many minutes (e.g. a full integration-test run) and you have independent work to do while waiting.
+- **P4.** **Prefer foreground for quick, bounded commands** (`git status`, a single `grep`, `ls`, and similar). **Always background project build/test/commit tooling instead** (`git commit`/`pre-commit`/`pre-commit-check`, `dotnet build`, `dotnet test`, `npm test`, `bun test`), regardless of how fast a specific run is expected to be; see [Never Truncate Test/Commit Commands](#never-truncate-testcommit-commands-mandatory) below for why and how. Use `run_in_background: true` for any other command that genuinely takes many minutes (e.g. a full integration-test run) and you have independent work to do while waiting.
 
 - **P5.** **Time-box every poll loop: die after 30 minutes.** Always include a deadline so the session cannot hang forever:
 

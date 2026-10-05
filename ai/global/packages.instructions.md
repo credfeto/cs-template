@@ -12,7 +12,7 @@
 
 ## Third-Party Packages Require Human Approval (MANDATORY)
 
-Adding any package **not** published by `credfeto` or `funfair-tech` (i.e. not a `Credfeto.*`/`FunFair.*` package (see [dotnet-owned-packages.instructions.md](dotnet-owned-packages.instructions.md)) or the equivalent recognised first-party namespace in another ecosystem) is prohibited without explicit human approval. This applies regardless of how small, trivial, or transitive the package seems, and regardless of how urgently it's needed. Exception: a package change a pre-commit component tool's own output demands as the specific fix for its failure; see [Conflict Resolution](#conflict-resolution-pre-commitcomponent-tool-mandated-package-changes-mandatory) below.
+Adding any package **not** published by `credfeto` or `funfair-tech` (i.e. not a `Credfeto.*`/`FunFair.*` package or the equivalent recognised first-party namespace in another ecosystem; see [dotnet-owned-packages.instructions.md](dotnet-owned-packages.instructions.md)) is prohibited without explicit human approval. This applies regardless of how small, trivial, or transitive the package seems, and regardless of how urgently it's needed. Exception: a package change a pre-commit component tool's own output demands as the specific fix for its failure; see [Conflict Resolution](#conflict-resolution-pre-commitcomponent-tool-mandated-package-changes-mandatory) below.
 
 Before requesting approval, carry out a full security review of the candidate package and version:
 
