@@ -18,7 +18,7 @@ Run `pre-commit-check` only in these cases:
 - **P2.** When rebasing: the [After Every Rebase](git-rebasing.instructions.md#after-every-rebase-mandatory) check.
 - **P3.** When explicitly asked to, whether in an interactive session or in an issue.
 
-There are no other times to run it. `git commit` runs the same hooks automatically, so running it before a commit, after a fix, or at the end of a review pass only repeats work the commit does anyway and wastes time.
+There are no other times to run it. `git commit` runs the same hooks automatically, so running it separately before a commit only repeats work the commit does anyway and wastes time. The re-runs inside the rebase check in P2 are part of that check, not an extra trigger.
 
 ## Pre-Work Baseline Check (MANDATORY before starting any work)
 
