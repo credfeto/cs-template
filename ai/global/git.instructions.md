@@ -18,7 +18,7 @@ Run `pre-commit-check` only in these cases:
 - **P2.** When rebasing: the [After Every Rebase](git-rebasing.instructions.md#after-every-rebase-mandatory) check.
 - **P3.** When explicitly asked to, whether in an interactive session or in an issue.
 
-There are no other times to run it. `git commit` runs the same hooks automatically, so running it separately before a commit only repeats work the commit does anyway and wastes time. The re-runs inside the rebase check in P2 are part of that check, not an extra trigger.
+There are no other times to run it. `git commit` runs the same hooks automatically, so running it separately before a commit only repeats work the commit does anyway and wastes time. The re-runs inside the rebase check in P2 are part of that check, not an extra trigger. When a commit fails on a hook, fix the cause and retry the commit: the retry runs the hooks again.
 
 ## Pre-Work Baseline Check (MANDATORY before starting any work)
 
@@ -26,7 +26,7 @@ This is trigger [P1](#pre-commit-check-new-branch) of [When to Run pre-commit-ch
 
 If already on the correct, existing work branch for this task (i.e. resuming work rather than branching fresh from `main`), bring it up to date **before** running the check below; see [When to Rebase](git-rebasing.instructions.md#when-to-rebase) for the fetch/check/rebase procedure. If that procedure performed a rebase, it already ran `pre-commit-check` as its final step, and that satisfies this baseline gate too; do not run it again here.
 
-Otherwise (no rebase was needed, or you're starting a fresh branch from `main`), run this now, before starting any work on an issue or PR, to verify the repo is clean:
+If you're starting a fresh branch from `main`, run this now, before starting any work on an issue or PR, to verify the repo is clean. Resuming an existing branch that needed no rebase does not run it, because the commit hook covers it:
 
 ```bash
 pre-commit-check
