@@ -10,7 +10,19 @@ Verify all required languages and runtimes are installed. If any are missing, st
 
 If the environment is too broken to work in without first fixing infrastructure or tooling, **stop** and demand it be fixed. Do not work around broken tooling.
 
+## When to Run pre-commit-check (MANDATORY)
+
+Run `pre-commit-check` only in these cases:
+
+- **P1.** <a id="pre-commit-check-new-branch"></a>When starting work on a new branch: the [Pre-Work Baseline Check](#pre-work-baseline-check-mandatory-before-starting-any-work).
+- **P2.** <a id="pre-commit-check-rebase"></a>When rebasing: the [After Every Rebase](git-rebasing.instructions.md#after-every-rebase-mandatory) check.
+- **P3.** <a id="pre-commit-check-asked"></a>When explicitly asked to, whether in an interactive session or in an issue.
+
+There are no other times to run it. `git commit` runs the same hooks automatically, so running it before a commit, after a fix, or at the end of a review pass only repeats work the commit does anyway and wastes time.
+
 ## Pre-Work Baseline Check (MANDATORY before starting any work)
+
+This is trigger [P1](#pre-commit-check-new-branch) of [When to Run pre-commit-check](#when-to-run-pre-commit-check-mandatory).
 
 If already on the correct, existing work branch for this task (i.e. resuming work rather than branching fresh from `main`), bring it up to date **before** running the check below; see [When to Rebase](git-rebasing.instructions.md#when-to-rebase) for the fetch/check/rebase procedure. If that procedure performed a rebase, it already ran `pre-commit-check` as its final step, and that satisfies this baseline gate too; do not run it again here.
 

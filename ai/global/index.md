@@ -14,7 +14,7 @@ Read all of these before starting any task, regardless of language or context.
 
 | File | Covers |
 | --- | --- |
-| [git.instructions.md](git.instructions.md) | Prerequisites, build/test verification, git identity/GPG, destructive commands, deleting scratch PR review branches, ASCII-only file names, NUL-separated git file lists, branching, commits, GitHub issues, template rule escalation |
+| [git.instructions.md](git.instructions.md) | Prerequisites, when to run `pre-commit-check`, build/test verification, git identity/GPG, destructive commands, deleting scratch PR review branches, ASCII-only file names, NUL-separated git file lists, branching, commits, GitHub issues, template rule escalation |
 | [claude-hooks.instructions.md](claude-hooks.instructions.md) | Claude Code `PreToolUse` hook denials: a denial means the command never ran, read its stated reason literally and retry immediately, tell a hook denial apart from a permission-system denial, reference index of the installed hook set |
 | [tool-preferences.instructions.md](tool-preferences.instructions.md) | Which tool to reach for when more than one could do the job: `Glob` over `find` for simple file listing; repo searches exclude `.env`, `.database` and `.claude/`; `gh` or a local clone over fetching `github.com`/`githubusercontent.com` URLs |
 | [git-rebasing.instructions.md](git-rebasing.instructions.md) | When to rebase (fetch/check/rebase), the mandatory `pre-commit-check` after every rebase, version-conflict resolution when merging or rebasing |
