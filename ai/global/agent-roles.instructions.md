@@ -64,6 +64,8 @@ When picking up an **Issue** that has no existing PR:
   <list, using a Q-prefixed numbered sequence (Q1., Q2., Q3., ...), or "None, ready to proceed pending approval">
   ```
 
+  Continue the assumption and `Q` numbering from the highest already used in the work item (issue and PR), never restarting at `a.` or `Q1`, as [Numbers Are Never Reused](task-workflow.instructions.md#numbers-are-never-reused) requires.
+
   **Open questions vs. embedded conditional decisions:** any conditional or deferred decision point in the Approach or Files-to-change text that the plan does not itself resolve (e.g. "needs policy sign-off", "pending a decision on X", an either/or left open) must be lifted out into its own `Qn.` entry under Open questions, not left as prose in Approach/Files-to-change. Prose framing hides it from the Blocked/approval gate below, which only inspects Open questions; a `Qn.` entry is what actually forces it through that gate. See [Pre-Closure Decision Check](task-workflow.instructions.md#pre-closure-decision-check-mandatory) for the matching check when closing.
 
 - **P4.** Mark the issue as Blocked and update the Workflow board to **Planning** (if the repo has a Workflow board), then **STOP**:
@@ -76,7 +78,7 @@ When picking up an **Issue** that has no existing PR:
   - **Board configured**: a human with project write access sets board status to **Approved** and removes `Blocked`.
   - **No board**: a [trusted commenter](#trusted-commenters) posts an approval comment (`approved` / `lgtm`) and removes `Blocked`.
 
-  Revise a plan by posting a new `## Implementation Plan` comment, never by editing one in place, so approval is always judged against the latest plan comment.
+  Revise a plan by posting a new `## Implementation Plan` comment, never by editing one in place, so approval is always judged against the latest plan comment. The revised plan continues the `P`, `Q` and assumption numbering of the plan it supersedes (see [Numbers Are Never Reused](task-workflow.instructions.md#numbers-are-never-reused)).
 
   In an interactive session, keep watching the issue rather than ending the turn; see [Waiting for Approval in an Interactive Session](#waiting-for-approval-in-an-interactive-session).
 
