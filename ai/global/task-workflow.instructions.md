@@ -246,7 +246,7 @@ When using the Monitor tool to watch a background Bash task, the poll condition 
 
 - **P4.** **Prefer foreground for quick, bounded commands** (`git status`, a single `grep`, `ls`, and similar). **Always background project build/test/commit tooling instead** (`git commit`/`pre-commit`/`pre-commit-check`, `dotnet build`, `dotnet test`, `npm test`, `bun test`), regardless of how fast a specific run is expected to be; see [Never Truncate Test/Commit Commands](#never-truncate-testcommit-commands-mandatory) below for why and how. Use `run_in_background: true` for any other command that genuinely takes many minutes (e.g. a full integration-test run) and you have independent work to do while waiting.
 
-- **P5.** <a id="poll-loop-deadline"></a>**Time-box every poll loop to 30 minutes.** The deadline ends one poll loop so a command that is taking unusually long is reported instead of waited on silently; it never ends the wait, and never the command:
+- **P5.** <a id="poll-loop-deadline"></a>**Time-box every poll loop to 30 minutes.** The deadline ends one poll loop so a command that is taking unusually long is reported instead of waited on silently; it never ends the wait, and never the command. The loop below is the command passed to the `Monitor` tool, never an ad-hoc Bash call, because an ad-hoc compound command can be refused by a [`dontAsk` permission denial](claude-hooks.instructions.md#a-dontask-denial-refuses-one-command-not-bash-mandatory); the loop exiting, on the marker or on the deadline, ends only that watch, never the watched command, which runs as its own background task:
 
   ```bash
   deadline=$(( $(date +%s) + 1800 ))
@@ -259,7 +259,7 @@ When using the Monitor tool to watch a background Bash task, the poll condition 
   done
   ```
 
-  When the deadline fires, the role does not hand back and does not stop the command, as [waiting for a background command](#background-command-wait) requires; it reports the overrun and then starts a new poll loop on the same completion marker:
+  When the deadline fires, the role does not hand back and does not stop the command, as [waiting for a background command](#background-command-wait) requires; it reports the overrun and then starts a new `Monitor` watch on the same completion marker:
 
   - In an interactive session, tell the human the command is still running and which completion marker the role is waiting for.
   - In an unattended run, post the same as a comment on the work item, without the `Blocked` label, because the role is still working rather than waiting on a human:
