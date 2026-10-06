@@ -197,7 +197,7 @@ If a change proposed by `/simplify` (Phase A) or a finding raised by `/code-revi
 
 Only once all four phases have completed without a `Blocked` outcome (each phase passed outright, or exited via its own non-blocking convergence path noted in a PR comment, or there were no reviewable changes):
 
-- **P1.** Safety net (belt-and-suspenders on top of the Code Reviewer Compliance check above): confirm `.deleteme.now` is not present in `git diff origin/main...HEAD --name-only` (see [Changelog](#changelog)); if it is still present, have Code Writer remove it and send it through the [review-fix route](task-workflow.instructions.md#review-fix-route) without Changelog (correction), with Committer giving it its own commit, because a template-skip item has no changelog entry to correct, then continue.
+- **P1.** Safety net (belt-and-suspenders on top of the Code Reviewer Compliance check above): confirm `.deleteme.now` is not present in `git -C <dir> diff origin/main...HEAD --name-only` (see [Changelog](#changelog)); if it is still present, have Code Writer remove it and send it through the [review-fix route](task-workflow.instructions.md#review-fix-route) without Changelog (correction), with Committer giving it its own commit, because a template-skip item has no changelog entry to correct, then continue.
 - **P2.** Update Workflow board to **Human Review** (if the repo has a Workflow board), unless Phase D already moved it there on success.
 - **P3.** Mark the PR ready, but do not enable auto-merge yet:
 
@@ -411,7 +411,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 ## Code Tester
 
 - Run build and all tests after Code Writer or Code Fixer finishes.
-- Check coverage against `git diff origin/main...HEAD`.
+- Check coverage against `git -C <dir> diff origin/main...HEAD`.
 - Apply [IDE MCP Code Analysis](code-quality.instructions.md#ide-mcp-code-analysis-mandatory) to the changed files.
 - On build failure, test failure, or uncovered code: report file paths/line ranges to the calling agent; stop, do not proceed.
 - Loop with Code Writer until build passes, all tests pass, and all new/changed code is covered.
@@ -420,7 +420,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 
 ## Code Reviewer
 
-- Run `git diff origin/main...HEAD`.
+- Run `git -C <dir> diff origin/main...HEAD`.
 - Apply [IDE MCP Code Analysis](code-quality.instructions.md#ide-mcp-code-analysis-mandatory) to the changed files.
 - Launch all the sub-agents **in parallel**: Reuse, Quality, Efficiency, Correctness, Security, Compliance.
 - Each sub-agent reports `{"clean": true}` or `{"clean": false, "findings": [{"file": "...", "line": ..., "issue": "...", "suggestion": "..."}]}`.
@@ -594,7 +594,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](changelog.instructions.md)) and never edit `CHANGELOG.md` manually. Neither mode commits (Committer's job) or runs build/tests (Code Tester's job).
 
 - **Placeholder**: runs first, before Code Writer touches any code, so the branch/PR can exist from the start of work on the item. Add a stub entry (best-guess `Type`, message `TBD - to be finalized after review`). Hand off straight to Committer for a changelog-only commit, then PR Submitter to open the draft PR.
-- **Correction**: replaces the placeholder (or a prior correction) once there is a real diff to describe. Runs after Code Tester and Code Reviewer are satisfied in the initial development loop, never before. Also re-runs after any AI Review Loop phase (Simplify, Code Review, Security Review; see [PR Workflow: AI Review Loop](#pr-workflow-ai-review-loop)) that actually changed files, so the entry keeps matching the diff those phases produced. Read `git diff origin/main...HEAD`, remove the previous entry and add the corrected one (`dotnet changelog` has no in-place edit).
+- **Correction**: replaces the placeholder (or a prior correction) once there is a real diff to describe. Runs after Code Tester and Code Reviewer are satisfied in the initial development loop, never before. Also re-runs after any AI Review Loop phase (Simplify, Code Review, Security Review; see [PR Workflow: AI Review Loop](#pr-workflow-ai-review-loop)) that actually changed files, so the entry keeps matching the diff those phases produced. Read `git -C <dir> diff origin/main...HEAD`, remove the previous entry and add the corrected one (`dotnet changelog` has no in-place edit).
 - **Skip case**: if the work item qualifies for a skip under [changelog.instructions.md](changelog.instructions.md#when-to-skip) (template repo), commit a `.deleteme.now` placeholder file at the repo root instead of a `CHANGELOG.md` entry (a short delete-before-merge comment as its content). Hand off straight to Committer for a placeholder-only commit, then PR Submitter to open the draft PR. Code Writer removes `.deleteme.now` as part of its first real change set, for Committer to commit as usual. Correction is a no-op for these items, same as before.
 - Both modes carry any sweep record and any pre-existing bug list in the incoming hand-off through to the outgoing report unchanged, because the next role only sees what this report passes on and the Orchestrator collects each pre-existing bug list from the reports it receives.
 

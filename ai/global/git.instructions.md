@@ -22,7 +22,7 @@ pre-commit-check
 
 Always run this check in the background, because it is more likely than not to take a while to run; it is not an exception case to spot and handle specially. Backgrounding it does not mean walking away from it: you MUST then poll for its own completion and WAIT for it to actually finish, in this same turn/session, before doing anything else, including ending your turn. This is not optional and does not depend on how the check is invoked: see the mandatory [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory) rules for the poll-loop shape and the 30-minute deadline. Do **not** end your turn on the assumption that you will be automatically resumed once the check finishes. A fresh, single-phase invocation that is never resumed starts with no memory of the wait, and the backgrounded check is killed when the turn ends, so the result is never seen. If your own session genuinely is interactive and resumable, confirm that explicitly before treating "come back to this later" as safe; absent that confirmation, assume it is not.
 
-- **P1.** <a id="baseline-autofix-own-commit"></a>If the check **auto-fixes** files (e.g. trailing whitespace, end-of-file) and everything else passes: commit those fixes in **their own commit** on the work branch before any new work separate from the requested work, then proceed. If no work branch exists yet (for example a new issue still waiting for plan approval), discard the auto-fixes instead, only in files that had no uncommitted changes before the check ran (`git checkout -- <files>`, after the `git status` check [Destructive Commands](#destructive-commands-mandatory) requires; the check regenerates them) and re-run the check once the work branch is created, because committing on `main` is forbidden. Do not open a separate branch or issue for them or add `Blocked`, because only one branch/PR is open per user per repository at a time, so a separate base-fix branch could never be opened alongside the work; the dedicated commit keeps the baseline fix distinguishable from the work in CI and review.
+- **P1.** <a id="baseline-autofix-own-commit"></a>If the check **auto-fixes** files (e.g. trailing whitespace, end-of-file) and everything else passes: commit those fixes in **their own commit** on the work branch before any new work separate from the requested work, then proceed. If no work branch exists yet (for example a new issue still waiting for plan approval), discard the auto-fixes instead, only in files that had no uncommitted changes before the check ran (`git -C <dir> checkout -- <files>`, after the `git status` check [Destructive Commands](#destructive-commands-mandatory) requires; the check regenerates them) and re-run the check once the work branch is created, because committing on `main` is forbidden. Do not open a separate branch or issue for them or add `Blocked`, because only one branch/PR is open per user per repository at a time, so a separate base-fix branch could never be opened alongside the work; the dedicated commit keeps the baseline fix distinguishable from the work in CI and review.
 - **P2.** <a id="baseline-manual-fix-then-proceed"></a>If the check **fails** with errors that require manual fixes: fix and commit them first, then proceed with the original work.
 - **P3.** <a id="baseline-still-fails-escalate"></a>If the check **still fails** after all fixing attempts and it meets the [stop condition](code-quality.instructions.md#pre-commit-stop-condition) in Fixing Pre-Commit Failures (otherwise keep fixing, as P2 requires), cite that condition and:
   - For an issue: comment on the issue, label it `Blocked`, and do not start work.
@@ -47,7 +47,7 @@ Build must pass and all tests must pass before committing or pushing. If they fa
 
 ## Pre-Commit Branch Check
 
-- Run `git branch --show-current` and confirm it is the expected working branch before staging or committing.
+- Run `git -C <dir> branch --show-current` and confirm it is the expected working branch before staging or committing.
 - Never commit if the current branch is `main`.
 - If the branch has switched to `main` and the upstream no longer exists (merged and deleted), create a new branch before continuing.
 
@@ -96,7 +96,7 @@ For full `GH_HOST` proxy behaviour and the required `gh pr create` flags, see [g
 
 ## Destructive Commands (MANDATORY)
 
-Before any command that can discard uncommitted work (`git reset --hard`, `git checkout`/`restore` over tracked files, `git clean`), run `git status` first. If it shows uncommitted changes you did not just create and intend to discard, stash them (`git stash -u`, `-u` to include untracked files) or commit them before proceeding. Running the destructive command directly on the assumption the tree is clean, without checking, silently discards any uncommitted work that is there; the check costs one command and is never skippable "because it should be clean".
+Before any command that can discard uncommitted work (`git reset --hard`, `git checkout`/`restore` over tracked files, `git clean`), run `git status` first. If it shows uncommitted changes you did not just create and intend to discard, stash them (`git -C <dir> stash -u`, `-u` to include untracked files) or commit them before proceeding. Running the destructive command directly on the assumption the tree is clean, without checking, silently discards any uncommitted work that is there; the check costs one command and is never skippable "because it should be clean".
 
 ## Scratch Review Branches
 
@@ -120,15 +120,15 @@ A local branch created only to review a PR, named `pr<number>-review` or `pr-<nu
 - **Before creating a new branch for an issue, check whether one already exists for it**: a previous session may have pushed work and then been interrupted before ever opening a PR. This is the branch-only counterpart to the PR check in [task-workflow.instructions.md's "Bot-Created PRs" section](task-workflow.instructions.md#bot-created-prs-mandatory-treat-as-your-own) ("Checking for existing work before branching"). The glob matches the `<type>/<issue-number>-<name>` convention below (see [Branch Naming](#branch-naming)):
 
   ```bash
-  git ls-remote --heads origin "*/<issue-number>-*"
+  git -C <dir> ls-remote --heads origin "*/<issue-number>-*"
   ```
 
   - No match: branch fresh from `main` as normal.
   - Match found: fetch it and compare against `main`:
 
     ```bash
-    git fetch origin <branch>
-    git rev-list --count origin/main..origin/<branch>
+    git -C <dir> fetch origin <branch>
+    git -C <dir> rev-list --count origin/main..origin/<branch>
     ```
 
     - `0` (not ahead of `main`): branch fresh from `main` as normal.
