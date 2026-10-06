@@ -156,14 +156,13 @@ A local branch created only to review a PR, named `pr<number>-review` or `pr-<nu
 
 When any git command fails (push, rebase, fetch, etc.), you **must** quote the exact stdout and stderr output verbatim in any issue or PR comment before posting any explanation or diagnosis. Never substitute a narrative about why a command might have failed for the actual error output.
 
-Capture the output into a variable and embed it in the comment body:
+Run the failing command as its own call, then paste its output, unchanged, into the comment body as a separate call. Quote the heredoc delimiter (`'COMMENT'`) so the shell does not expand `$` or backticks that appear in the pasted output:
 
 ```bash
-push_output=$(git -C /path push --force-with-lease 2>&1) || true
-gh pr comment NUMBER --repo OWNER/REPO --body "$(cat <<COMMENT
+gh pr comment NUMBER --repo OWNER/REPO --body "$(cat <<'COMMENT'
 git push failed with:
 
-${push_output}
+<exact stdout and stderr of the failed command>
 COMMENT
 )"
 ```
