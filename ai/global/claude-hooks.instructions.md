@@ -8,8 +8,8 @@ tool call; a couple also match a specific non-Bash tool call (see the reference 
 file covers how to interpret a hook **denial** correctly, how to
 tell one apart from a denial coming from Claude Code's separate permission system, and what a
 permission denial does and does not stop; for how to
-background and poll long-running commands once a call has actually been accepted, see
-[Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory)
+background long-running commands and wait for them once a call has actually been accepted, see
+[Background Commands](task-workflow.instructions.md#background-commands-mandatory)
 and [Never Truncate Test/Commit Commands](task-workflow.instructions.md#never-truncate-testcommit-commands-mandatory).
 
 ## A Denial Means the Command Never Ran (MANDATORY)
@@ -135,6 +135,25 @@ Use the tool's own `run_in_background: true` parameter, never shell-level backgr
 `nohup ... &`, `disown`). Shell-level backgrounding is blocked outright by
 `enforce-background-for-long-running-commands` (see below) and produces the same
 denial-misread-as-in-flight failure described above.
+
+## Ad-Hoc Commands Never Use `xargs` or `while IFS= read` Loops (MANDATORY)
+
+Never use `xargs` or a `while IFS= read` loop in an ad-hoc Bash tool call. `reject-obfuscated-commands`
+refuses both before the command runs:
+
+- `xargs` is on `command-blocklist`, which wins over `command-allowlist`, so any command containing
+  it is rejected.
+- `IFS` is on `env-var-blocklist`, so an assignment to it is rejected, whether it is a standalone
+  statement or a per-command prefix such as `IFS= read`. Dropping the prefix does not help, because
+  `read` is not on `command-allowlist` either.
+
+Instead, write one flat command per call: name the paths directly, or pass the whole list in one
+call to a tool that accepts several paths or a combined value (for example
+`shellcheck a.sh b.sh`, or `gh issue edit <n> --add-label "a,b"`).
+
+Committed scripts and workflow steps do not pass through these hooks, so a fixed per-file command
+there may still use `xargs -0r`; see
+[Git File Lists](shell-scripts.instructions.md#git-file-lists).
 
 ## Reference: Installed Hook Set
 

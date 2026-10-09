@@ -221,79 +221,50 @@ For complex files, commit+push+update after each round; do not wait until fully 
 
 > Pre-commit hooks may make commits slow; wait for them to complete before assuming failure.
 
-## Background Tasks and Monitor Tool (MANDATORY)
+## Background Commands (MANDATORY)
 
-This section covers polling a command that was **accepted** and is running; if a command was
-instead **denied** by a `PreToolUse` hook, it never started at all and there is nothing to poll
+This section covers waiting on a command that was **accepted** and is running; if a command was
+instead **denied** by a `PreToolUse` hook, it never started at all and there is nothing to wait
 for, see [claude-hooks.instructions.md](claude-hooks.instructions.md) for that case.
 
-When using the Monitor tool to watch a background Bash task, the poll condition in the `until` loop **must** be provably satisfiable; a condition that can never be met loops forever and blocks the entire session.
+### Waiting for a background command
 
-### Finishing background work before handing back
+- **P1.** <a id="background-command-wait"></a>Run a long command with the tool's `run_in_background: true` parameter, wait for the harness's completion notification for that task, and judge pass or fail only by the exit code the notification reports: 0 is a pass, anything else a failure. A notification with status `completed` or `failed` carries that exit code; one with status `stopped` means the command was stopped with `TaskStop` and carries no exit code, so it is neither a pass nor a failure of the command. Never match text the command prints, whether to decide that it has finished or that it passed, because test runners, hooks and build tools print whatever they like (`bats` prints TAP, and a failing hook may print none of the words a guess would look for), so a guessed string may never appear and the wait never ends. Write no `Monitor` watch or polling loop for it, because each would have to match printed text. Read the output only once the exit code shows a failure, to find what failed.
+- **P2.** A role may end its turn while a background command it started (a build, a test run, `pre-commit-check`, or a commit or push that runs hooks) is still running, because the harness holds the agent and wakes it once, with the exit code, when the command finishes. It never reports or hands back while that command is still running, because a report written before the exit code is known can only guess the result, and in an unattended `-p` run the final result kills a background command about five seconds later, leaving the half-done state P3 prevents.
+- **P3.** A role never stops such a command with `TaskStop`, because the command must finish and clean up after itself, and killing it can leave a stale `.git/index.lock`, partial build output or a push in an unknown state. Nothing in the harness bounds a command's run time: a background command runs to the end however long it takes, and a foreground command that reaches the tool timeout is moved to the background rather than killed, so the role waiting on it never times it out itself.
+- **P4.** <a id="background-command-deadline"></a>The 30-minute deadline is enforced by the main session, because it is the only place that can schedule a wake-up: `ScheduleWakeup` is not available inside sub-agents. When the main session starts such a command, or hands a sub-agent work that waits on one, it schedules a `ScheduleWakeup` for 30 minutes later, or for the time limit the role's own rules set instead, as [Handing CI to CI Monitor](agent-roles.instructions.md#handing-ci-to-ci-monitor) does. If the command or the sub-agent has not finished when it fires, the main session acts on the command, never the agent:
+  - A command that only reads or waits, such as [CI Monitor](agent-roles.instructions.md#ci-monitor)'s `gh pr checks --watch` or the `sleep` pause before it, is stopped with `TaskStop` on that command's task id, because stopping it leaves nothing half-done. The agent waiting on it then wakes to a completion notification with status `stopped` and reports.
+  - Any other command (a build, a test run, `pre-commit-check`, or a commit or push that runs hooks) is never stopped, as P3 requires: the main session reports the overrun and schedules another wake-up, because the deadline only paces reporting.
+    - In an interactive session, tell the human the command is still running and what it is.
+    - In an unattended run, post the same as a comment on the work item, without the `Blocked` label, because the role is still working rather than waiting on a human:
 
-- **P1.** <a id="background-command-wait"></a>A role never hands back while a background command it started (a build, a test run, `pre-commit-check`, or a commit or push that runs hooks) is still running: it waits for the command's completion marker (see [Reliable poll strings by command](#reliable-poll-strings-by-command)). It never stops such a command with `TaskStop`, because the command must finish and clean up after itself, and killing it can leave a stale `.git/index.lock`, partial build output or a push in an unknown state. If the command overruns [the poll deadline](#poll-loop-deadline), the role still neither hands back nor stops it: it reports the overrun as that rule describes and keeps waiting for the completion marker, because in an unattended `-p` run handing back kills a background command about five seconds later (see P3), leaving the half-done state this rule prevents.
-- **P2.** <a id="record-background-watch"></a>A role that starts a `Monitor` watch records the task id `Monitor` returns, and a role that paces a wait with a `ScheduleWakeup` self-paced loop instead notes that it is using one, because [the stop step](#stop-background-watch) needs it: `TaskStop` takes the watch's task id, and a self-paced loop is stopped a different way. When a role starts a replacement watch, for example after the previous one expired, it records the new task id, because only the latest watch is still running.
-- **P3.** <a id="stop-background-watch"></a>Once the command, or the condition a watch was waiting for, has finished, the role stops any `Monitor` watch or `ScheduleWakeup` self-paced loop it started before handing back: `TaskStop` with the task id recorded in P2 for a `Monitor` watch, `ScheduleWakeup` with `stop: true` for a self-paced loop. This is because a watch left running outlives the hand-back in both run modes: in an interactive session a background sub-agent's tasks keep running until they finish, are stopped or time out, and every tick of the watch re-wakes the sub-agent and forces another hand-back; in an unattended `-p` run a background command is killed about five seconds after the final result, but a `Monitor` watch keeps the run open, up to a ten-minute cap. [CI Monitor](agent-roles.instructions.md#ci-monitor-stop-watch) applies this to its CI watch.
-- **P4.** `TaskStop` is for watches only, because a watch only observes and loses nothing when stopped. The one other use is the Orchestrator's, on a sub-agent that has already delivered its final report and is only repeating it (see [Orchestrator](agent-roles.instructions.md#orchestrator)).
+      ```bash
+      gh issue comment <number> --repo <owner/repo> \
+          --body "Still waiting after 30 minutes for <what>; the command is still running."
+      ```
 
-### Rules for poll conditions
+      Use `gh pr comment` instead if the work item is a PR.
+- **P5.** `TaskStop` is used only by the main session, and only on a command that only reads or waits, at the deadline in P4, or on a sub-agent that has already delivered its final report and is only repeating it (see [Orchestrator](agent-roles.instructions.md#orchestrator)).
 
-- **P1.** **Never poll for `"exit code"`**; that string is not reliably written to background task output files. Poll for a specific string the command itself writes (see table below).
+### Rules for running commands
+
+- **P1.** **Prefer foreground for quick, bounded commands** (`git status`, a single `grep`, `ls`, and similar). **Always background project build/test/commit tooling instead** (`git commit`/`pre-commit`/`pre-commit-check`, `dotnet build`, `dotnet test`, `npm test`, `bun test`), regardless of how fast a specific run is expected to be; see [Never Truncate Test/Commit Commands](#never-truncate-testcommit-commands-mandatory) below for why and how. Use `run_in_background: true` for any other command that genuinely takes many minutes (e.g. a full integration-test run) and you have independent work to do while waiting.
 
 - **P2.** **Do not pipe after `grep -q` in a negation check.** `! grep -q "pattern" file | tail -1` does NOT detect absence; the pipe applies to grep's (empty) stdout, so `tail -1` exits 0 regardless, and `!` inverts that to always-false. Write `! grep -q "pattern" file` with no trailing pipe.
 
-- **P3.** **Verify the poll string exists in real output before writing the loop.** If you cannot confirm what string the command writes, run the command in the foreground first and read its output.
-
-- **P4.** **Prefer foreground for quick, bounded commands** (`git status`, a single `grep`, `ls`, and similar). **Always background project build/test/commit tooling instead** (`git commit`/`pre-commit`/`pre-commit-check`, `dotnet build`, `dotnet test`, `npm test`, `bun test`), regardless of how fast a specific run is expected to be; see [Never Truncate Test/Commit Commands](#never-truncate-testcommit-commands-mandatory) below for why and how. Use `run_in_background: true` for any other command that genuinely takes many minutes (e.g. a full integration-test run) and you have independent work to do while waiting.
-
-- **P5.** <a id="poll-loop-deadline"></a>**Time-box every poll loop to 30 minutes.** The deadline ends one poll loop so a command that is taking unusually long is reported instead of waited on silently; it never ends the wait, and never the command. The loop below is the command passed to the `Monitor` tool, never an ad-hoc Bash call, because an ad-hoc compound command can be refused by a [`dontAsk` permission denial](claude-hooks.instructions.md#a-dontask-denial-refuses-one-command-not-bash-mandatory); the loop exiting, on the marker or on the deadline, ends only that watch, never the watched command, which runs as its own background task:
-
-  ```bash
-  deadline=$(( $(date +%s) + 1800 ))
-  until grep -q "Build succeeded." "${output_file}" 2>/dev/null; do
-      sleep 15
-      if [ "$(date +%s)" -ge "${deadline}" ]; then
-          echo "Still waiting after 30 minutes for build" >&2
-          exit 1
-      fi
-  done
-  ```
-
-  When the deadline fires, the role does not hand back and does not stop the command, as [waiting for a background command](#background-command-wait) requires; it reports the overrun and then starts a new `Monitor` watch on the same completion marker:
-
-  - In an interactive session, tell the human the command is still running and which completion marker the role is waiting for.
-  - In an unattended run, post the same as a comment on the work item, without the `Blocked` label, because the role is still working rather than waiting on a human:
-
-    ```bash
-    gh issue comment <number> --repo <owner/repo> \
-        --body "Still waiting after 30 minutes for <what> (completion marker: <marker>); the command is still running. Last output: $(tail -5 "${output_file}" 2>/dev/null)"
-    ```
-
-    Use `gh pr comment` instead if the work item is a PR.
-
-### Reliable poll strings by command
-
-| Command / scenario | String to poll for |
-| --- | --- |
-| `dotnet build` succeeded | `Build succeeded.` |
-| `dotnet test` all passed | `Passed!` |
-| pre-commit hooks passed | `→ All checks passed.` |
-| pre-commit hooks failed | `→` followed by `Failed` (check for both to distinguish pass/fail) |
-| `git push` completed | `branch` (branch tracking line in push output) |
-| `gh pr create` / `gh pr ready` | poll not needed: these exit immediately |
-
 ## Never Truncate Test/Commit Commands (MANDATORY)
 
-This is a distinct concern from the poll-loop timeouts above: those govern when you report while waiting for something _else_ to finish; this governs the timeout on the command _actually doing the work_ (a call rejected outright for missing `run_in_background: true` never ran; see [claude-hooks.instructions.md](claude-hooks.instructions.md) for that case, not here).
+This is a distinct concern from [the 30-minute deadline](#background-command-deadline) above: that governs when you report while waiting for something _else_ to finish; this governs the timeout on the command _actually doing the work_ (a call rejected outright for missing `run_in_background: true` never ran; see [claude-hooks.instructions.md](claude-hooks.instructions.md) for that case, not here).
 
 `git commit`/`pre-commit`/`pre-commit-check`, `dotnet build`, `dotnet test`, `npm test`, and `bun test` have no bounded, predictable duration: `pre-commit` (and `pre-commit-check`, this template's wrapper that runs it against the existing checked-out repo) can run a heavy hook chain (`dotnet buildcheck` across every project, `trivy`, `hadolint`), `dotnet build` runs through a large analyzer stack (Roslynator, SonarAnalyzer, Meziantou, Threading, Security Code Scan, and more) plus NuGet restore, and test runs scale with what changed. There is no timeout value that is both practical and safe to pick for any of these commands, so do not try to pick one.
 
 - **Always run these commands via `run_in_background`; never in the foreground, regardless of how fast the specific run is expected to be.** This is unconditional, not a per-invocation judgement call.
 - **Never wrap any of these in a shell `timeout` command as a substitute or a belt-and-braces addition** (e.g. `timeout 590 dotnet test ...`), whether or not `run_in_background: true` is also set. `timeout` is on `reject-obfuscated-commands`' categorical blocklist (see [claude-hooks.instructions.md](claude-hooks.instructions.md#reference-installed-hook-set)) and is rejected outright, independently of the backgrounding rule above; plain `run_in_background: true` on the unwrapped command is already unbounded and needs no additional wrapper. A missing `run_in_background` and a banned `timeout` wrapper are denied by different hooks and are unrelated; read which hook actually fired rather than assuming a single general conflict.
-- Poll with the Monitor tool using the strings in the [Reliable poll strings by command](#reliable-poll-strings-by-command) table above, subject to the same 30-minute deadline required by [Background Tasks and Monitor Tool](#background-tasks-and-monitor-tool-mandatory). Backgrounding these commands is not exempt from that deadline, which only paces reporting; it replaces a short, unsafe foreground cutoff with a wait that ends only at the completion marker.
-- **A long stretch with no new output is normal and is not a hang.** Do not interpret silence as a failure and manually cancel or kill the command on that basis. Never stop waiting for the completion marker: when the poll-loop deadline fires, report and keep waiting as that rule describes, and when a `Monitor` watch's own timeout expires first, start a new watch.
+- Wait for the completion notification and judge the result only by its exit code, as [Background Commands](#background-command-wait) requires, subject to the same [30-minute deadline](#background-command-deadline). Backgrounding these commands is not exempt from that deadline, which only paces reporting; it replaces a short, unsafe foreground cutoff with a wait that ends only when the command exits.
+- **A long stretch with no new output is normal and is not a hang.** Do not interpret silence as a failure and manually cancel or kill the command on that basis. Never stop waiting for the completion notification: when the deadline fires, report and keep waiting as that rule describes.
 - A killed run does not just fail; it skips the target process's own cleanup (a bash `EXIT` trap, .NET's `IDisposable` teardown, etc.), leaving orphaned temp directories, lock files, or half-applied state behind. Orphaned temp directories under a shared path can break other tools that walk the same path.
-- Other `dotnet` commands (`dotnet restore`, a standalone `dotnet buildcheck`, `dotnet format`, etc.) are not covered by this section; they may run in the foreground, but **always with an explicit maximum timeout set on the tool call**, never the tool's built-in default (e.g. Claude Code's Bash tool defaults to 2 minutes when no `timeout` is given; use the maximum available, e.g. 600000ms/10 minutes, explicitly). If even that maximum is not enough, use `run_in_background` and the Monitor tool instead of accepting a truncated run.
+- Other `dotnet` commands (`dotnet restore`, a standalone `dotnet buildcheck`, `dotnet format`, etc.) are not covered by this section; they may run in the foreground, but **always with an explicit maximum timeout set on the tool call**, never the tool's built-in default (e.g. Claude Code's Bash tool defaults to 2 minutes when no `timeout` is given; use the maximum available, e.g. 600000ms/10 minutes, explicitly). If even that maximum is not enough, use `run_in_background` and wait for the completion notification instead of accepting a truncated run.
+- A foreground command that reaches the tool's timeout is moved to the background, not killed, so it is still running: wait for its completion notification and judge it by its exit code as for any background command, rather than treating it as failed or running it again, because a second copy would run alongside the first.
 
 ### Sandbox-Caused False Timeouts in Benchmark/Perf Tests (MANDATORY)
 
