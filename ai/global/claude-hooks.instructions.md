@@ -149,7 +149,7 @@ refuses both before the command runs:
 
 Instead, write one flat command per call: name the paths directly, or pass the whole list in one
 call to a tool that accepts several paths or a combined value (for example
-`shellcheck a.sh b.sh`, or `gh issue edit <n> --add-label "a,b"`), rather than looping over items.
+`shellcheck a.sh b.sh`, or `gh issue edit <n> --add-label "a,b"`).
 
 Committed scripts and workflow steps do not pass through these hooks, so a fixed per-file command
 there may still use `xargs -0r`; see
