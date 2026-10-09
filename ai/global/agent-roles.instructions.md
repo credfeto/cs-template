@@ -401,7 +401,7 @@ An analyzer findings comment (`<!-- sarif-summary: ... -->`) on the PR is handle
 Whenever the Orchestrator hands CI to [CI Monitor](#ci-monitor), it also schedules its own `ScheduleWakeup` for a time limit long enough for one of the repo's normal CI runs, because nothing in the harness bounds CI Monitor's `gh pr checks --watch` and, as a sub-agent, CI Monitor cannot schedule a wake-up itself.
 
 - **P1.** If CI Monitor has reported by the time the wake-up fires, do nothing more for that wake-up.
-- **P2.** Otherwise, stop CI Monitor's watch command, or the pause before its next watch, with `TaskStop` on that command's task id, never on CI Monitor itself, because the command only reads or waits, so nothing is left half-done, while stopping the agent could cut short a fix it is waiting on. CI Monitor then wakes to a completion notification with status `stopped` and reports the required checks still pending (its P4). This is the one case in which the Orchestrator stops anything belonging to a sub-agent that has not reported, and it stops the command, not the agent, as [Orchestrator](#orchestrator) requires. If CI Monitor is waiting on CI Debugger rather than on a watch or pause, stop nothing and schedule another wake-up, because CI Debugger may be part-way through a commit or push.
+- **P2.** Otherwise, stop CI Monitor's watch command, or the pause before its next watch, with `TaskStop` on that command's task id, never on CI Monitor itself, because the command only reads or waits, so nothing is left half-done, while stopping the agent could cut short a fix it is waiting on. CI Monitor then wakes to a completion notification with status `stopped` and reports the required checks still pending (its P4). If CI Monitor is waiting on CI Debugger rather than on a watch or pause, stop nothing and schedule another wake-up, because CI Debugger may be part-way through a commit or push.
 - **P3.** When that report says CI Debugger pushed a fix or re-ran a check during the hand-off, hand the PR to CI Monitor again with a fresh time limit, because the limit covers one CI run and would otherwise cut short the run CI Debugger started. Otherwise tell the human which required checks are still pending.
 
 ## Coding Researcher
@@ -431,7 +431,7 @@ Invoked by: Code Writer, Code Fixer, Code Reviewer, CI Debugger.
 ## Code Tester
 
 - Run build and all tests after Code Writer or Code Fixer finishes.
-- Wait for each background build, test, `pre-commit-check` or `git commit` run as [Waiting for a background command](task-workflow.instructions.md#waiting-for-a-background-command) requires.
+- Wait for each background build, test, `pre-commit-check` or `git commit` run to finish via its completion notification and judge it only by its exit code; never report or hand back while it is still running, per [Background Commands](task-workflow.instructions.md#background-command-wait).
 - Check coverage against `git -C <dir> diff origin/main...HEAD`.
 - Apply [IDE MCP Code Analysis](code-quality.instructions.md#ide-mcp-code-analysis-mandatory) to the changed files.
 - On build failure, test failure, or uncovered code: report file paths/line ranges to the calling agent; stop, do not proceed.
@@ -626,7 +626,7 @@ Runs in two modes; both use `dotnet changelog` (see [changelog.instructions.md](
 - Otherwise: a hand-off holds exactly one change, per [One change at a time](task-workflow.instructions.md#one-change-at-a-time). Commit it as one GPG-signed commit (Conventional Commits). When the hand-off carries its sweep record, stage by whole file: everything except the sweep-only files is the fix commit, then build once, then commit the sweep-only files as the sweep commit per [Pattern Sweep Commits](git-commits.instructions.md#pattern-sweep-commits). When the hand-off is a sweep alone (a Phase A post-convergence sweep), there is only the sweep commit. Commit `CHANGELOG.md` as a separate GPG-signed commit whenever Changelog produced a correction alongside it.
 - If the working tree or the hand-off holds more than one change (for example more than one sweep record or `Construct:` line, or changes the hand-off does not describe), commit nothing: hand it back to Orchestrator to route each change again on its own. Never split a mixed tree into commits by file or by hunk.
 - Push after the commit, or after a run of consecutive commits when pushes are batched, as [One change at a time](task-workflow.instructions.md#one-change-at-a-time) allows; the branch is always pushed before handing back. Do not open the PR; that is PR Submitter's job.
-- Wait for each background build, test, `pre-commit-check` or `git commit` run as [Waiting for a background command](task-workflow.instructions.md#waiting-for-a-background-command) requires.
+- Wait for each background build, test, `pre-commit-check` or `git commit` run to finish via its completion notification and judge it only by its exit code; never report or hand back while it is still running, per [Background Commands](task-workflow.instructions.md#background-command-wait).
 - Do not use `--no-verify`. If a pre-commit hook fails: capture output, report to the producing agent, re-stage and retry. Escalate to Orchestrator after 3 failed cycles.
 
 ## PR Submitter

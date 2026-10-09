@@ -244,7 +244,7 @@ for, see [claude-hooks.instructions.md](claude-hooks.instructions.md) for that c
       ```
 
       Use `gh pr comment` instead if the work item is a PR.
-- **P5.** `TaskStop` is used only by the main session, and only on a command that only reads or waits, at the deadline in P4, or on a sub-agent that has already delivered its final report and is only repeating it (see [Orchestrator](agent-roles.instructions.md#orchestrator)). Stopping a sub-agent's command is not stopping the sub-agent: the sub-agent keeps running, wakes and reports, so it never leaves work half-done.
+- **P5.** `TaskStop` is used only by the main session, and only on a command that only reads or waits, at the deadline in P4, or on a sub-agent that has already delivered its final report and is only repeating it (see [Orchestrator](agent-roles.instructions.md#orchestrator)).
 
 ### Rules for running commands
 
