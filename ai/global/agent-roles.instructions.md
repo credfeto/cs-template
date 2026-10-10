@@ -27,10 +27,10 @@ A trusted commenter is a human whose comment can approve a plan or ask for work.
 
 Before asking the human a question, or reporting that something is waiting on them (an approval, a review, a merge, a manual step), gather the answer yourself from what a command can show, because a question a command could have answered costs the human time and a stale report misleads them:
 
-- Live GitHub state: `gh pr view` (review decision, merge state, auto-merge, labels, comments), `gh pr checks <number> --repo <owner/repo> --required`, `gh run list`, check annotations and the issue or PR timeline.
+- Live GitHub state: `gh pr view` (review decision, merge state, auto-merge, labels, comments), the required checks read as [CI Checks](#ci-checks-mandatory) describes, `gh run list`, check annotations and the issue or PR timeline.
 - The repository itself and the instruction files.
 
-Read state that can change (the review decision, the merge state, auto-merge and check states) once, immediately before reporting it, and never present an earlier read as current, because any of these can change while other work runs. This is one read before reporting, not a check on your own write, which [GitHub State Lags Behind Writes](github-cli.instructions.md#github-state-lags-behind-writes-mandatory) covers.
+Read state that can change (the review decision, the merge state, auto-merge and check states) once, immediately before reporting it, and never present an earlier read as current, because any of these can change while other work runs. This is not a check on your own write, which [GitHub State Lags Behind Writes](github-cli.instructions.md#github-state-lags-behind-writes-mandatory) covers.
 
 Ask only for what no command can show, such as a design choice, an approval, a priority or a fact about the human's own environment. When you do ask, or report that something is waiting on the human, say what you checked and what it returned (for example "open, review required, no auto-merge set"), so the human can see the claim rests on a current read.
 
