@@ -112,7 +112,7 @@ Before any command that can discard uncommitted work (`git reset --hard`, `git c
 
 ## Reviewing a PR Locally
 
-Review a PR on its own head branch, checked out with `gh pr checkout <number> --repo <owner>/<repo>`; never create a separate review branch for it. The head branch already exists and `gh pr checkout` sets its upstream, including for fork and bot PRs, so a separate copy adds nothing and only leaves a branch that later needs cleaning up. A fork PR's commits live on the fork, so no remote-tracking branch holds them and its local branch correctly fails the check in [Deleting Local Branches](#deleting-local-branches) and needs human approval to delete; for a review that will make no commits, `gh pr checkout <number> --repo <owner>/<repo> --detach` leaves no branch to delete.
+Review a PR on its own head branch, checked out with `gh pr checkout <number> --repo <owner>/<repo>`; never create a separate review branch for it. The head branch already exists and `gh pr checkout` sets its upstream, including for fork and bot PRs, so a separate copy adds nothing and only leaves a branch that later needs cleaning up. A fork PR's commits live on the fork, so no remote-tracking branch holds them and its local branch correctly fails the check in [Deleting Local Branches](#deleting-local-branches) and needs human approval to delete; for a review that will make no commits, add `--detach` so no branch is left to delete.
 
 ## Deleting Local Branches
 
