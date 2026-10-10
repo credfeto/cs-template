@@ -148,7 +148,8 @@ refuses both before the command runs:
   `read` is not on `command-allowlist` either.
 
 Instead, write one flat command per call: name the paths directly, or pass the whole list in one
-call (for example `shellcheck a.sh b.sh`, or `gh issue edit <n> --add-label "a,b"`).
+call (for example `shellcheck a.sh b.sh`, or
+`gh issue edit <n> --repo <owner/repo> --add-label "a,b"`).
 
 Committed scripts and workflow steps do not pass through these hooks, so a fixed per-file command
 there may still use `xargs -0r`; see
