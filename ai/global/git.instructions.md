@@ -112,18 +112,22 @@ Before any command that can discard uncommitted work (`git reset --hard`, `git c
 
 ## Reviewing a PR Locally
 
-Review a PR on its own head branch, checked out with `gh pr checkout <number> --repo <owner>/<repo>`; never create a separate review branch for it. The head branch already exists and `gh pr checkout` sets its upstream, including for fork and bot PRs, so a separate copy adds nothing and only leaves a branch that later needs cleaning up. A fork PR's commits live on the fork, so no remote-tracking branch holds them and its local branch correctly fails the check in [Deleting Local Branches](#deleting-local-branches) and needs human approval to delete; for a review that will make no commits, add `--detach` so no branch is left to delete.
+Check a PR out with git, never with `gh pr checkout`, because that command checks the local git remotes against `GH_HOST` and refuses when `gh` runs through the proxy, even with `--repo` (see [`GH_HOST` Proxy Behavior](github-cli.instructions.md#gh_host-proxy-behavior-mandatory-when-set)). Run each step as its own command:
+
+- For a review that makes no commits: `git -C <dir> fetch origin pull/<number>/head`, then `git -C <dir> switch --detach FETCH_HEAD`. This checks out the PR head with no local branch, so nothing is left to delete, and it works for a fork PR too.
+- To add commits to a same-repository PR: `git -C <dir> fetch origin <headRefName>`, then `git -C <dir> switch <headRefName>`, using the head branch name shown on the PR. Never create a separate review branch, because the head branch already exists and a copy only leaves a branch that later needs cleaning up.
+
+A fork PR's commits live on the fork, so it can be reviewed detached but commits cannot be pushed to it through `origin`.
 
 ## Deleting Local Branches
 
-An agent may delete a local branch without asking only when all of these hold, each checked as its own command:
+An agent may delete a local branch without asking only when all of these hold:
 
-- After `git -C <dir> fetch --prune` has succeeded, `git -C <dir> rev-list <branch> --not --remotes` prints nothing, so every commit on the branch is on some remote-tracking branch and nothing is lost by deleting it. Use `--prune` because a plain fetch keeps the remote-tracking ref of a remote branch that has since been deleted, and that stale ref would make commits that are no longer on any remote look safe. Pass it explicitly even on a machine that sets `fetch.prune`, because the rule cannot rely on local git configuration.
+- After `git -C <dir> fetch --all --prune` has succeeded, `git -C <dir> rev-list <branch> --not --remotes`, run as a separate command, prints nothing, so every commit on the branch is on some remote-tracking branch and nothing is lost by deleting it. Use `--all` because `--not --remotes` trusts the remote-tracking refs of every remote, while a fetch without it refreshes only the default remote. Use `--prune` because a fetch without it keeps the remote-tracking ref of a remote branch that has since been deleted, and that stale ref would make commits that are no longer on any remote look safe. Pass it explicitly even on a machine that sets `fetch.prune`, because the rule cannot rely on local git configuration.
 - The branch is not checked out in any worktree, including one a human created (`git -C <dir> worktree list`).
 - It is not `main`, `master`, `develop` or `release/*`.
-- `git -C <dir> branch -d <branch>` succeeds; never use `-D`.
 
-`-d` checks the branch against its upstream, or against HEAD when it has none, so it can refuse a branch that passed the `rev-list` check. If it refuses, keep the branch and report it rather than setting an upstream or forcing the deletion. Deleting a remote branch, or a local branch that fails any of these checks, still needs human approval.
+Then delete it with `git -C <dir> branch -d <branch>`; never use `-D`. `-d` checks the branch against its upstream, or against HEAD when it has none, so it can refuse a branch that passed the `rev-list` check. If it refuses, keep the branch and report it rather than setting an upstream or forcing the deletion. Deleting a remote branch, or a local branch that fails any of these checks, still needs human approval.
 
 ## Avoid `git worktree`
 
