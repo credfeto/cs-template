@@ -118,7 +118,7 @@ Review a PR on its own head branch, checked out with `gh pr checkout <number> --
 
 An agent may delete a local branch without asking only when all of these hold, each checked as its own command:
 
-- After `git -C <dir> fetch` has succeeded, `git -C <dir> rev-list <branch> --not --remotes` prints nothing, so every commit on the branch is on some remote-tracking branch and nothing is lost by deleting it.
+- After `git -C <dir> fetch --prune` has succeeded, `git -C <dir> rev-list <branch> --not --remotes` prints nothing, so every commit on the branch is on some remote-tracking branch and nothing is lost by deleting it. Use `--prune` because a plain fetch keeps the remote-tracking ref of a remote branch that has since been deleted, and that stale ref would make commits that are no longer on any remote look safe. Pass it explicitly even on a machine that sets `fetch.prune`, because the rule cannot rely on local git configuration.
 - The branch is not checked out in any worktree, including one a human created (`git -C <dir> worktree list`).
 - It is not `main`, `master`, `develop` or `release/*`.
 - `git -C <dir> branch -d <branch>` succeeds; never use `-D`.
