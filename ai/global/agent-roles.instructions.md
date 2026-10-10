@@ -30,7 +30,7 @@ Before asking the human a question, or reporting that something is waiting on th
 - Live GitHub state: `gh pr view` (review decision, merge state, auto-merge, labels, comments), `gh pr checks <number> --repo <owner/repo> --required`, `gh run list`, check annotations and the issue or PR timeline.
 - The repository itself and the instruction files.
 
-Read state that can change (the review decision, the merge state, auto-merge and check states) once, immediately before reporting it, and never present an earlier read as current, because any of these can change while other work runs. This is one read before reporting, not a check on your own write: a write whose call succeeded is done, and you never re-read it to confirm it or poll until it shows, as [GitHub State Lags Behind Writes](github-cli.instructions.md#github-state-lags-behind-writes-mandatory) requires.
+Read state that can change (the review decision, the merge state, auto-merge and check states) once, immediately before reporting it, and never present an earlier read as current, because any of these can change while other work runs. This is one read before reporting, not a check on your own write, which [GitHub State Lags Behind Writes](github-cli.instructions.md#github-state-lags-behind-writes-mandatory) covers.
 
 Ask only for what no command can show, such as a design choice, an approval, a priority or a fact about the human's own environment. When you do ask, or report that something is waiting on the human, say what you checked and what it returned (for example "open, review required, no auto-merge set"), so the human can see the claim rests on a current read.
 
