@@ -285,6 +285,6 @@ Check here before assuming a `gh` flag or field exists.
 
 - **`gh api -f`/`-F` are not interchangeable.** `-f`/`--raw-field` always sends a string; `-F`/`--field` sends a typed value (numbers, booleans, `@file`). Fields the API schema declares as a number (e.g. `in_reply_to` when replying to a PR review comment) must use `-F`. Using `-f in_reply_to=<id>` fails with `"in_reply_to" is not a permitted key" / "is not a number"`, because the string form doesn't match any of the schema's `oneOf` variants.
 
-- **The Claude Code hooks reject some shell shapes outright**, such as `env`/`unset` wrappers and the `xargs` and loop shapes covered by [Ad-Hoc Commands Never Use `xargs` or `while IFS= read` Loops](claude-hooks.instructions.md#ad-hoc-commands-never-use-xargs-or-while-ifs-read-loops-mandatory). Use flat commands, and pass lists in one call (for example `--add-label "a,b"`) instead of looping.
+- **The Claude Code hooks reject some shell shapes outright**, such as `env`/`unset` wrappers and the `xargs` and loop shapes covered by [Ad-Hoc Commands Never Use `xargs` or `while IFS= read` Loops](claude-hooks.instructions.md#ad-hoc-commands-never-use-xargs-or-while-ifs-read-loops-mandatory). Use flat commands instead.
 
 When a `gh` command's exact flags/fields are uncertain, run `gh <command> --help` (or `gh <command> <subcommand> --help`) rather than guessing from memory or from a similar-looking command.
