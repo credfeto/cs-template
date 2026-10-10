@@ -114,8 +114,8 @@ Before any command that can discard uncommitted work (`git reset --hard`, `git c
 
 Check a PR out with git, never with `gh pr checkout`, because that command checks the local git remotes against `GH_HOST` and refuses when `gh` runs through the proxy, even with `--repo` (see [`GH_HOST` Proxy Behavior](github-cli.instructions.md#gh_host-proxy-behavior-mandatory-when-set)). Run each step as its own command:
 
-- For a review that makes no commits: `git -C <dir> fetch origin pull/<number>/head`, then `git -C <dir> switch --detach FETCH_HEAD`. This checks out the PR head with no local branch, so nothing is left to delete, and it works for a fork PR too.
-- To add commits to a same-repository PR: `git -C <dir> fetch origin <headRefName>`, then `git -C <dir> switch <headRefName>`, using the head branch name shown on the PR. Never create a separate review branch, because the head branch already exists and a copy only leaves a branch that later needs cleaning up.
+- For a review that makes no commits: `git -C <dir> fetch origin pull/<number>/head`, then `git -C <dir> switch --detach FETCH_HEAD`, run back to back so that no other fetch rewrites `FETCH_HEAD` in between. This checks out the PR head with no local branch, so nothing is left to delete, and it works for a fork PR too. When the review is done, switch back to the branch being worked on (`git -C <dir> switch <branch>`), so that later commits are not made on a detached HEAD.
+- To add commits to a same-repository PR: `git -C <dir> fetch origin <headRefName>`, then `git -C <dir> switch <headRefName>`, using the head branch name shown on the PR, then `git -C <dir> merge --ff-only origin/<headRefName>`. The merge is needed because a local branch that already exists can be behind the PR's current head; if it cannot fast-forward, stop and report it. Never create a separate review branch, because the head branch already exists and a copy only leaves a branch that later needs cleaning up.
 
 A fork PR's commits live on the fork, so it can be reviewed detached but commits cannot be pushed to it through `origin`.
 
