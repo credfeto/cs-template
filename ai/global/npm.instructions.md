@@ -1,6 +1,6 @@
 # NPM Package Version Instructions
 
-> Load when: adding, updating, or reviewing npm/JavaScript/TypeScript package dependencies.
+> Load when: adding, updating, installing, or reviewing npm/JavaScript/TypeScript package dependencies.
 
 [Back to Global Instructions Index](index.md)
 
@@ -9,6 +9,11 @@
 ## Registry Lookup
 
 - Before searching for or installing a package, check which registry is actually configured: `npm config get registry`. Use that registry for lookups rather than assuming the public npm registry, since it may point at a private feed, proxy, or mirror.
+
+## Installing Dependencies (MANDATORY)
+
+- Install with exactly `npm ci --ignore-scripts`, or `npm ci` if the repo needs its install scripts, as one plain command from the working directory, and read the output from the tool result.
+- Never add `--prefix`, a `cd`, a redirect to a file (`> $TMPDIR/npm.log`), a `;`/`&&` chain, or a `| tail`, because any of those makes the permission allow list reject the call while the plain form is allowed.
 
 ## Fixed Package Versions
 
