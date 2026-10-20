@@ -12,8 +12,10 @@
 
 ## Installing Dependencies (MANDATORY)
 
-- Install with exactly `npm ci --ignore-scripts`, or `npm ci` if the repo needs its install scripts, as one plain command from the working directory, and read the output from the tool result.
-- Never add `--prefix`, a `cd`, a redirect to a file (`> $TMPDIR/npm.log`), a `;`/`&&` chain, or a `| tail`, because any of those makes the permission allow list reject the call while the plain form is allowed.
+- This covers installing from an existing lockfile; regenerating or updating `package-lock.json` follows [Fixed Package Versions](#fixed-package-versions).
+- Install with exactly `npm ci --ignore-scripts`, or `npm ci --prefix src --ignore-scripts` when the lockfile is in `src/`, as one plain command from the working directory, run with the tool's `run_in_background`, and read the output from the file the tool returns.
+- Drop `--ignore-scripts` only when the `--ignore-scripts` install leaves the build or tests failing because a package's install step did not run (for example a native module or a downloaded binary).
+- Never add a `cd`, any other `--prefix`, a redirect to a file (`> $TMPDIR/npm.log`), a `;`/`&&` chain, or a `| tail`: a `cd`, chain, redirect or pipe makes the permission allow list reject the call, and a `--prefix` outside the allowed directories is blocked by the `enforce-allowed-dirs` hook, while the plain form is allowed.
 
 ## Fixed Package Versions
 
