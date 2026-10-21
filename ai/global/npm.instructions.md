@@ -8,7 +8,7 @@
 
 ## Registry Lookup
 
-- Before searching for or adding a package, check which registry is actually configured: `npm config get registry`. Use that registry for lookups rather than assuming the public npm registry, since it may point at a private feed, proxy, or mirror.
+- Before searching for, adding or updating a package, check which registry is actually configured: `npm config get registry`. Use that registry for lookups rather than assuming the public npm registry, since it may point at a private feed, proxy, or mirror.
 
 ## Running npm Commands (MANDATORY)
 
