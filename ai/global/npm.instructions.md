@@ -13,7 +13,7 @@
 ## Running npm Commands (MANDATORY)
 
 - Run every npm command as one plain command from the working directory. When `package.json` is not at the repo root, add `--prefix <dir>`, where `<dir>` is the relative path inside the repo holding it (e.g. `src`).
-- Run `npm ci`, `npm install` and `npm rebuild` with the tool's `run_in_background`; wait for the task's completion notification rather than polling, then read the output file it names.
+- Run `npm ci` and `npm install` with the tool's `run_in_background`, then wait for them and read their output as [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory) describes.
 - Never add a `cd`, a `--prefix` outside the repo, a redirect to a file (`> $TMPDIR/npm.log`), a `;`/`&&` chain, or a `| tail`: a `cd`, chain, redirect or pipe makes the permission allow list reject the call, and a `--prefix` outside the allowed directories is blocked by the `enforce-allowed-dirs` hook, while the plain form is allowed.
 
 ## Installing Dependencies (MANDATORY)
