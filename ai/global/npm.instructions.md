@@ -8,14 +8,19 @@
 
 ## Registry Lookup
 
-- Before searching for or installing a package, check which registry is actually configured: `npm config get registry`. Use that registry for lookups rather than assuming the public npm registry, since it may point at a private feed, proxy, or mirror.
+- Before searching for or adding a package, check which registry is actually configured: `npm config get registry`. Use that registry for lookups rather than assuming the public npm registry, since it may point at a private feed, proxy, or mirror.
+
+## Running npm Commands (MANDATORY)
+
+- Run every npm command as one plain command from the working directory. When `package.json` is not at the repo root, add `--prefix <dir>`, where `<dir>` is the relative path inside the repo holding it (e.g. `src`).
+- Run `npm ci`, `npm install` and `npm rebuild` with the tool's `run_in_background`; wait for the task's completion notification rather than polling, then read the output file it names.
+- Never add a `cd`, a `--prefix` outside the repo, a redirect to a file (`> $TMPDIR/npm.log`), a `;`/`&&` chain, or a `| tail`: a `cd`, chain, redirect or pipe makes the permission allow list reject the call, and a `--prefix` outside the allowed directories is blocked by the `enforce-allowed-dirs` hook, while the plain form is allowed.
 
 ## Installing Dependencies (MANDATORY)
 
 - This covers installing from an existing lockfile; regenerating or updating `package-lock.json` follows [Fixed Package Versions](#fixed-package-versions).
-- Install with exactly `npm ci --ignore-scripts`, or `npm ci --prefix src --ignore-scripts` when the lockfile is in `src/`, as one plain command from the working directory, run with the tool's `run_in_background`, and read the output from the file the tool returns.
-- Drop `--ignore-scripts` only when the `--ignore-scripts` install leaves the build or tests failing because a package's install step did not run (for example a native module or a downloaded binary).
-- Never add a `cd`, any other `--prefix`, a redirect to a file (`> $TMPDIR/npm.log`), a `;`/`&&` chain, or a `| tail`: a `cd`, chain, redirect or pipe makes the permission allow list reject the call, and a `--prefix` outside the allowed directories is blocked by the `enforce-allowed-dirs` hook, while the plain form is allowed.
+- Install with exactly `npm ci --ignore-scripts`, following [Running npm Commands](#running-npm-commands-mandatory).
+- If the build or tests then fail because a package's install step did not run (for example a native module or a downloaded binary), run `npm rebuild <package>` for that package only; never re-run the whole install without `--ignore-scripts`.
 
 ## Fixed Package Versions
 
