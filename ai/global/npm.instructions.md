@@ -12,14 +12,14 @@
 
 ## Running npm Commands (MANDATORY)
 
-- Run every npm command as one plain command from the working directory. When `package.json` is not at the repo root, add `--prefix <dir>`, where `<dir>` is the relative path inside the repo holding it (e.g. `src`).
+- Run every npm command as one plain command from the working directory. When `package-lock.json` is not at the repo root, add `--prefix <dir>`, where `<dir>` is the relative path inside the repo holding it (e.g. `src`).
 - Run `npm ci` and `npm install` with the tool's `run_in_background`, then wait for them and read their output as [Background Tasks and Monitor Tool](task-workflow.instructions.md#background-tasks-and-monitor-tool-mandatory) describes.
 - Never add a `cd`, a `--prefix` outside the repo, a redirect to a file (`> $TMPDIR/npm.log`), a `;`/`&&` chain, or a `| tail`: a `cd`, chain, redirect or pipe makes the permission allow list reject the call, and a `--prefix` outside the allowed directories is blocked by the `enforce-allowed-dirs` hook, while the plain form is allowed.
 
 ## Installing Dependencies (MANDATORY)
 
 - This covers installing from an existing lockfile; regenerating or updating `package-lock.json` follows [Fixed Package Versions](#fixed-package-versions).
-- Install with exactly `npm ci --ignore-scripts`, following [Running npm Commands](#running-npm-commands-mandatory).
+- Install with exactly `npm ci --ignore-scripts`, plus `--prefix` where [Running npm Commands](#running-npm-commands-mandatory) requires it.
 - If the build or tests then fail because a package's install step did not run (for example a native module or a downloaded binary), run `npm rebuild <package>` for that package only; never re-run the whole install without `--ignore-scripts`.
 
 ## Fixed Package Versions
