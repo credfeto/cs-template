@@ -20,7 +20,7 @@
 
 - This covers installing from an existing lockfile; regenerating or updating `package-lock.json` follows [Fixed Package Versions](#fixed-package-versions).
 - Install with exactly `npm ci --ignore-scripts`, plus `--prefix` where [Running npm Commands](#running-npm-commands-mandatory) requires it.
-- If the build or tests then fail because a package's install step did not run (for example a native module or a downloaded binary), run `npm rebuild <package>` for that package only; never re-run the whole install without `--ignore-scripts`.
+- Never install without `--ignore-scripts`, and never run `npm rebuild`: CI installs without scripts too, so a build that needs them fails there first.
 
 ## Fixed Package Versions
 
