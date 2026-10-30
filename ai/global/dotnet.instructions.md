@@ -476,8 +476,7 @@ A project's **supported floor** is the lowest framework listed in its `<TargetFr
 Preprocessor guards (`#if`, `#elif`, `#else`):
 
 - `NETx_0_OR_GREATER` with `x` at or below the floor, `NET` when every target is .NET 5 or later, and `NETCOREAPP` when every target is .NET Core or later, are always true: remove the directive, keep the body, and delete the `#else` branch and its fallback implementation.
-- Negated forms of those symbols (`#if !NETx_0_OR_GREATER`) are always false: remove the whole block including its body.
-- Symbols for frameworks the project does not target are always false: exact `NETx_0` below the floor, `NETSTANDARD*` when no .NET Standard target is listed, and `NETFRAMEWORK`/`NET4*` when no .NET Framework target is listed. Remove the whole block.
+- Negated forms of those symbols (`#if !NETx_0_OR_GREATER`), and symbols for frameworks the project does not target (exact `NETx_0` below the floor, `NETSTANDARD*` when no .NET Standard target is listed, and `NETFRAMEWORK`/`NET4*` when no .NET Framework target is listed), are always false: remove the whole block including its body.
 - Collapse an `#if`/`#elif`/`#else` chain to the one branch that survives, without any directive around it.
 
 Fallback source files:
