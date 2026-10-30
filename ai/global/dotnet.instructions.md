@@ -495,7 +495,8 @@ Fallback source files:
 MSBuild conditions in `.csproj`, `Directory.Build.props` and `Directory.Build.targets`:
 
 - Apply the same always-true/always-false test to `Condition` attributes on `PropertyGroup`, `ItemGroup`, `PackageReference`, `Compile` and similar elements, including comparisons against `$(TargetFramework)` and `$([MSBuild]::IsTargetFrameworkCompatible(...))` calls. Unwrap an always-true condition (keep the element, drop the `Condition`); delete an element whose condition is always false.
-- A shared `Directory.Build.props`/`.targets` applies to every project beneath it, so judge its conditions against the lowest floor of all those projects, not just the one being edited.
+- A shared `Directory.Build.props`/`.targets` file, or any `.props`/`.targets` file imported explicitly, applies to every project that imports it, including projects outside its directory, so judge its conditions against the union of the target sets of all those projects, not just the one being edited.
+  A condition in that file is dead only when its outcome is identical for every framework in that union, so `'$(TargetFramework)' == 'netstandard2.0'` stays live when one importing project targets `netstandard2.0` even though every other importing project targets `net8.0`.
 
 Runtime framework-version checks:
 
