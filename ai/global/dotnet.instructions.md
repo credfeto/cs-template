@@ -471,12 +471,40 @@ Never use hardcoded literal dates (e.g. `new DateTime(2024, 1, 1)`) in tests. Us
 
 ## Conditional Compilation and Dead Code
 
-When all target frameworks listed in a project file are .NET 9 or later, framework version guards whose condition is unconditionally true become dead structure:
+A project's **supported floor** is the lowest framework listed in its `<TargetFramework>`/`<TargetFrameworks>`, judged per project rather than per repo, because each project compiles only for the frameworks it lists. Any guard, condition, file or package whose outcome is the same for every framework the project targets is dead structure: it can never take its other path, so it only adds noise and untested branches. Collapse it to the single surviving path. A guard whose outcome differs between the targeted frameworks is live and stays unchanged.
 
-- `#if NET9_0_OR_GREATER`, `#if NET8_0_OR_GREATER`, `#if NET7_0_OR_GREATER`, `#if NET6_0_OR_GREATER`, and any earlier `OR_GREATER` variants are always true; remove the directive, keep the body, and delete the `#else` branch and fallback implementation.
-- The corresponding negated guards (`#if !NET9_0_OR_GREATER`, etc.) are always false; remove the entire block including the body.
-- Delete any source files that exist solely as pre-.NET 9 fallback implementations (e.g. files named `*.net6.cs` or `*SourceGenerated.net6.cs` containing a `new Regex(...)` fallback for the `[GeneratedRegex]` source generator).
-- After removing the conditional blocks, verify the project still builds and all tests still pass; treat this as a separate commit from any feature or fix work.
+Preprocessor guards (`#if`, `#elif`, `#else`):
+
+- `NETx_0_OR_GREATER` with `x` at or below the floor, `NET` when every target is .NET 5 or later, and `NETCOREAPP` when every target is .NET Core or later, are always true: remove the directive, keep the body, and delete the `#else` branch and its fallback implementation.
+- Negated forms of those symbols (`#if !NETx_0_OR_GREATER`) are always false: remove the whole block including its body.
+- Symbols for frameworks the project does not target are always false: exact `NETx_0` below the floor, `NETSTANDARD*` when no .NET Standard target is listed, and `NETFRAMEWORK`/`NET4*` when no .NET Framework target is listed. Remove the whole block.
+- Collapse an `#if`/`#elif`/`#else` chain to the one branch that survives, without any directive around it.
+- Leave a mixed guard (true for some targeted frameworks and false for others, such as `NET8_0_OR_GREATER` in a project targeting `net6.0;net8.0`) in place.
+
+Fallback source files:
+
+- Delete source files that exist solely as fallback implementations for frameworks below the floor or not targeted (e.g. files named `*.net6.cs`, `*.netstandard2.0.cs` or `*SourceGenerated.net6.cs`, such as a hand-written `new Regex(...)` fallback for the `[GeneratedRegex]` source generator once the floor is .NET 7 or later).
+- Remove any `<Compile Remove="..."/>`/`<Compile Include="..."/>` items that existed only to switch those files in or out.
+
+MSBuild conditions in `.csproj`, `Directory.Build.props` and `Directory.Build.targets`:
+
+- Apply the same always-true/always-false test to `Condition` attributes on `PropertyGroup`, `ItemGroup`, `PackageReference`, `Compile` and similar elements, including comparisons against `$(TargetFramework)` and `$([MSBuild]::IsTargetFrameworkCompatible(...))` calls. Unwrap an always-true condition (keep the element, drop the `Condition`); delete an element whose condition is always false.
+- A shared `Directory.Build.props`/`.targets` applies to every project beneath it, so judge its conditions against the lowest floor of all those projects, not just the one being edited.
+
+Runtime framework-version checks:
+
+- Collapse a runtime check whose outcome is fixed at the floor to its surviving path: comparisons on `Environment.Version`, parsing or comparing `RuntimeInformation.FrameworkDescription`, and `RuntimeFeature.IsSupported(...)` for a feature always present at the floor.
+- Leave operating-system checks (`OperatingSystem.Is*()`, `OperatingSystem.Is*VersionAtLeast(...)`) in place: they depend on the host operating system, not the target framework, so the floor does not fix their outcome.
+
+Polyfills:
+
+- Remove a polyfill package reference (e.g. `System.Memory`, `System.Buffers`, `Microsoft.Bcl.AsyncInterfaces`, `Microsoft.Bcl.HashCode`, `PolySharp`, or `System.Text.Json` where the framework ships it) only when every targeted framework ships the API it provides in-box; a package still needed by any target stays.
+- Keep a reference that deliberately lifts an in-box assembly to a newer version than the framework ships (e.g. `System.Text.Json` for a security fix or a newer API the code uses); it is not a polyfill.
+- Delete polyfill source files and attribute definitions (e.g. hand-written `IsExternalInit`, `RequiredMemberAttribute` or nullable-analysis attributes) under the same every-target test.
+
+Verification:
+
+- After removing the dead structure, verify the project still builds and all tests still pass, and treat the removal as a separate commit from any feature or fix work; see [Dead Code](code-quality.instructions.md#dead-code).
 
 ## Nullable Reference Types (MANDATORY)
 
