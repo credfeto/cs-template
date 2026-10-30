@@ -483,8 +483,10 @@ A project that also targets .NET Standard, .NET Framework or .NET Core 3.1 or ea
 
 Preprocessor guards (`#if`, `#elif`, `#else`):
 
-- `NETx_0_OR_GREATER` with `x` at or below the floor, `NET` when every target is .NET 5 or later, and `NETCOREAPP` when every target is .NET Core or later, are always true: remove the directive, keep the body, and delete the `#else` branch and its fallback implementation.
-- Negated forms of those symbols (`#if !NETx_0_OR_GREATER`), and symbols for frameworks the project does not target (exact `NETx_0` below the floor, `NETSTANDARD*` when no .NET Standard target is listed, and `NETFRAMEWORK`/`NET4*` when no .NET Framework target is listed), are always false: remove the whole block including its body.
+- A symbol defined for every framework in the target set, or the negation of a symbol defined for none of them, is always true: remove the directive, keep the body, and delete the `#else` branch and its fallback implementation.
+  For example `NETx_0_OR_GREATER` with `x` at or below the floor, `NET` when every target is .NET 5 or later, `NETCOREAPP` when every target is .NET Core or later, and exact `NETx_0` when `netx.0` is the only framework in the target set (such as `NET8_0` in a project targeting only `net8.0`).
+- A symbol defined for none of the frameworks in the target set, or the negation of a symbol defined for every one of them, is always false: remove the whole block including its body.
+  For example `#if !NETx_0_OR_GREATER` with `x` at or below the floor, `NETx_0_OR_GREATER` with `x` above the highest framework in the target set (such as `NET10_0_OR_GREATER` in a project targeting only `net8.0`), exact `NETx_0` for any version not in the target set, whether below or above the floor (such as `NET7_0` in a project targeting `net6.0;net8.0`), `NETSTANDARD*` when the target set has no .NET Standard target, and `NETFRAMEWORK`/`NET4*` when the target set has no .NET Framework target.
 - Collapse an `#if`/`#elif`/`#else` chain to the one branch that survives, without any directive around it.
 
 Fallback source files:
