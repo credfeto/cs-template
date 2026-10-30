@@ -496,7 +496,11 @@ Fallback source files:
 
 MSBuild conditions in `.csproj`, `Directory.Build.props` and `Directory.Build.targets`:
 
-- Apply the same always-true/always-false test to `Condition` attributes on `PropertyGroup`, `ItemGroup`, `PackageReference`, `Compile` and similar elements, including comparisons against `$(TargetFramework)` and `$([MSBuild]::IsTargetFrameworkCompatible(...))` calls. Unwrap an always-true condition (keep the element, drop the `Condition`); delete an element whose condition is always false.
+- Apply the same always-true/always-false test to `Condition` attributes on `PropertyGroup`, `ItemGroup`, `PackageReference`, `Compile` and similar elements, including comparisons against `$(TargetFramework)` and `$([MSBuild]::IsTargetFrameworkCompatible(...))` calls.
+  Unwrap an always-true condition (keep the element, drop the `Condition`); delete an element whose condition is always false.
+- In a project whose target set has more than one framework, or a shared file imported by any such project, MSBuild also evaluates an outer (cross-targeting) build in which `$(TargetFramework)` is empty, and restore and pack run in that build, so judge a condition that reads `$(TargetFramework)` against that empty value as well as against every framework in the target set.
+  Such a condition is always true only when it is also true with `$(TargetFramework)` empty: `$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))` in a project targeting `net8.0;net9.0` is true for every framework in the target set but not in the outer build, so it stays, because unwrapping it would apply its items and properties to restore and pack as well and can change the package's dependency groups.
+  A condition that exists only to exclude the outer build, such as `'$(TargetFramework)' != ''`, is live for the same reason and stays unchanged.
 - A shared `Directory.Build.props`/`.targets` file, or any `.props`/`.targets` file imported explicitly, applies to every project that imports it, including projects outside its directory, so judge its conditions against the union of the target sets of all those projects, not just the one being edited.
   A condition in that file is dead only when its outcome is identical for every framework in that union, so `'$(TargetFramework)' == 'netstandard2.0'` stays live when one importing project targets `netstandard2.0` even though every other importing project targets `net8.0`.
 
