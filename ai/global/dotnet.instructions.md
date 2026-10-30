@@ -474,6 +474,7 @@ Never use hardcoded literal dates (e.g. `new DateTime(2024, 1, 1)`) in tests. Us
 A project's **target set** is every target framework it builds, judged per project rather than per repo, because each project compiles only for the frameworks it builds.
 Read the target set from the evaluated MSBuild properties (for example `dotnet msbuild <project> -getProperty:TargetFrameworks -getProperty:TargetFramework`), not only from the `<TargetFramework>`/`<TargetFrameworks>` element in the `.csproj`, so that frameworks set in `Directory.Build.props`, an imported `.props` file or under a `Condition` are included.
 Where a condition adds a framework only in some environments (such as only on Windows or only in CI), that framework is part of the target set.
+Because the evaluated properties reflect only the current host environment, also read every conditional `TargetFramework`/`TargetFrameworks` element in the project and in imported `.props`/`.targets` files, and take the union of all of them as the target set.
 Any guard, condition, file or package whose outcome is identical for every framework in the target set is dead structure: it can never take its other path, so it only adds noise and untested branches.
 Collapse it to the single surviving path.
 A guard whose outcome differs for any framework in the target set is live and stays unchanged, such as `NET8_0_OR_GREATER` in a project targeting `net6.0;net8.0`.
