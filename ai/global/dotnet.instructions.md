@@ -471,7 +471,7 @@ Never use hardcoded literal dates (e.g. `new DateTime(2024, 1, 1)`) in tests. Us
 
 ## Conditional Compilation and Dead Code
 
-A project's **supported floor** is the lowest framework listed in its `<TargetFramework>`/`<TargetFrameworks>`, judged per project rather than per repo, because each project compiles only for the frameworks it lists. Any guard, condition, file or package whose outcome is the same for every framework the project targets is dead structure: it can never take its other path, so it only adds noise and untested branches. Collapse it to the single surviving path. A guard whose outcome differs between the targeted frameworks is live and stays unchanged.
+A project's **supported floor** is the lowest framework listed in its `<TargetFramework>`/`<TargetFrameworks>`, judged per project rather than per repo, because each project compiles only for the frameworks it lists. Any guard, condition, file or package whose outcome is the same for every framework the project targets is dead structure: it can never take its other path, so it only adds noise and untested branches. Collapse it to the single surviving path. A guard whose outcome differs between the targeted frameworks (such as `NET8_0_OR_GREATER` in a project targeting `net6.0;net8.0`) is live and stays unchanged.
 
 Preprocessor guards (`#if`, `#elif`, `#else`):
 
@@ -479,7 +479,6 @@ Preprocessor guards (`#if`, `#elif`, `#else`):
 - Negated forms of those symbols (`#if !NETx_0_OR_GREATER`) are always false: remove the whole block including its body.
 - Symbols for frameworks the project does not target are always false: exact `NETx_0` below the floor, `NETSTANDARD*` when no .NET Standard target is listed, and `NETFRAMEWORK`/`NET4*` when no .NET Framework target is listed. Remove the whole block.
 - Collapse an `#if`/`#elif`/`#else` chain to the one branch that survives, without any directive around it.
-- Leave a mixed guard (true for some targeted frameworks and false for others, such as `NET8_0_OR_GREATER` in a project targeting `net6.0;net8.0`) in place.
 
 Fallback source files:
 
@@ -498,7 +497,7 @@ Runtime framework-version checks:
 
 Polyfills:
 
-- Remove a polyfill package reference (e.g. `System.Memory`, `System.Buffers`, `Microsoft.Bcl.AsyncInterfaces`, `Microsoft.Bcl.HashCode`, `PolySharp`, or `System.Text.Json` where the framework ships it) only when every targeted framework ships the API it provides in-box; a package still needed by any target stays.
+- Remove a polyfill package reference (e.g. `System.Memory`, `System.Buffers`, `Microsoft.Bcl.AsyncInterfaces`, `Microsoft.Bcl.HashCode`, `PolySharp`, or `System.Text.Json` where the framework ships it) only when every targeted framework ships the API it provides in-box.
 - Keep a reference that deliberately lifts an in-box assembly to a newer version than the framework ships (e.g. `System.Text.Json` for a security fix or a newer API the code uses); it is not a polyfill.
 - Delete polyfill source files and attribute definitions (e.g. hand-written `IsExternalInit`, `RequiredMemberAttribute` or nullable-analysis attributes) under the same every-target test.
 
