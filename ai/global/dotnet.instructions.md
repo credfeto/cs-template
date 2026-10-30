@@ -471,7 +471,15 @@ Never use hardcoded literal dates (e.g. `new DateTime(2024, 1, 1)`) in tests. Us
 
 ## Conditional Compilation and Dead Code
 
-A project's **supported floor** is the lowest framework listed in its `<TargetFramework>`/`<TargetFrameworks>`, judged per project rather than per repo, because each project compiles only for the frameworks it lists. Any guard, condition, file or package whose outcome is the same for every framework the project targets is dead structure: it can never take its other path, so it only adds noise and untested branches. Collapse it to the single surviving path. A guard whose outcome differs between the targeted frameworks (such as `NET8_0_OR_GREATER` in a project targeting `net6.0;net8.0`) is live and stays unchanged.
+A project's **target set** is every target framework it builds, judged per project rather than per repo, because each project compiles only for the frameworks it builds.
+Read the target set from the evaluated MSBuild properties (for example `dotnet msbuild <project> -getProperty:TargetFrameworks -getProperty:TargetFramework`), not only from the `<TargetFramework>`/`<TargetFrameworks>` element in the `.csproj`, so that frameworks set in `Directory.Build.props`, an imported `.props` file or under a `Condition` are included.
+Where a condition adds a framework only in some environments (such as only on Windows or only in CI), that framework is part of the target set.
+Any guard, condition, file or package whose outcome is identical for every framework in the target set is dead structure: it can never take its other path, so it only adds noise and untested branches.
+Collapse it to the single surviving path.
+A guard whose outcome differs for any framework in the target set is live and stays unchanged, such as `NET8_0_OR_GREATER` in a project targeting `net6.0;net8.0`.
+The test applies across framework families too: in a project targeting `netstandard2.0;net8.0` or `net48;net8.0`, `NET8_0_OR_GREATER` is false for the `netstandard2.0` or `net48` build, so the guard and its fallback stay.
+A project's **supported floor** is the lowest framework in its target set, and is defined only when every framework in the target set is .NET 5 or later.
+A project that also targets .NET Standard, .NET Framework or .NET Core 3.1 or earlier has no supported floor, so judge each guard against each framework in its target set individually rather than against a floor.
 
 Preprocessor guards (`#if`, `#elif`, `#else`):
 
