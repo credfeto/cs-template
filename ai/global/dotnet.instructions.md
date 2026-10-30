@@ -509,12 +509,15 @@ Runtime framework-version checks:
 
 Polyfills:
 
-- Remove a polyfill package reference (e.g. `System.Memory`, `System.Buffers`, `Microsoft.Bcl.AsyncInterfaces`, `Microsoft.Bcl.HashCode`, `PolySharp`, or `System.Text.Json` where the framework ships it) only when every targeted framework ships the API it provides in-box.
-- Keep a reference that deliberately lifts an in-box assembly to a newer version than the framework ships (e.g. `System.Text.Json` for a security fix or a newer API the code uses); it is not a polyfill.
+- Remove a pure polyfill package reference (e.g. `System.Memory`, `System.Buffers`, `Microsoft.Bcl.AsyncInterfaces`, `Microsoft.Bcl.HashCode` or `PolySharp`) only when every framework in the target set ships the API it provides in-box.
+- Treat a package that also ships in-box with the framework (e.g. `System.Text.Json`, `System.Collections.Immutable` or `System.Diagnostics.DiagnosticSource`) as removable only when its referenced version is not higher than the in-box version of every framework in the target set, and keep it otherwise, whatever the reason it was added.
+  Compare against the framework version with a zero patch (for example `8.0.0` for `net8.0`), the lowest in-box version any runtime for that framework supplies, because the installed runtime patch decides which in-box version the app loads, so a `System.Text.Json` `8.0.5` reference in a `net8.0` project stays.
+- Keep any package reference whose removal makes `dotnet restore` report a NuGet audit warning (`NU1901` to `NU1904`) it did not report before, or changes any resolved version in `dotnet list package --include-transitive` (including the removed package itself coming back transitively at a lower version), because a direct reference can pin a transitive dependency above a vulnerable or too-low version.
 - Delete polyfill source files and attribute definitions (e.g. hand-written `IsExternalInit`, `RequiredMemberAttribute` or nullable-analysis attributes) under the same every-target test.
 
 Verification:
 
+- After removing a package reference, compare the `dotnet restore` warnings and the `dotnet list package --include-transitive` output before and after, and put the reference back if any new `NU1901` to `NU1904` warning appears or any resolved version changes.
 - After removing the dead structure, verify the project still builds and all tests still pass, and treat the removal as a separate commit from any feature or fix work; see [Dead Code](code-quality.instructions.md#dead-code).
 
 ## Nullable Reference Types (MANDATORY)
