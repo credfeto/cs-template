@@ -500,7 +500,11 @@ MSBuild conditions in `.csproj`, `Directory.Build.props` and `Directory.Build.ta
 
 Runtime framework-version checks:
 
-- Collapse a runtime check whose outcome is fixed at the floor to its surviving path: comparisons on `Environment.Version`, parsing or comparing `RuntimeInformation.FrameworkDescription`, and `RuntimeFeature.IsSupported(...)` for a feature always present at the floor.
+- Collapse a runtime version check to its surviving path only when the project has a supported floor and the check is a lower bound at or below that floor, because roll-forward lets an app run on any runtime at or above its target framework, so the floor fixes only that the runtime is at least the floor: for example `Environment.Version.Major >= 8`, or a version parsed from `RuntimeInformation.FrameworkDescription` compared the same way, is always true with a floor of .NET 8 or later.
+- Leave equality and upper-bound checks (such as `Environment.Version.Major == 8` or `Environment.Version.Major < 9`), and lower bounds above the floor, in place: a newer runtime the app rolls forward to can change their outcome.
+- Collapse `RuntimeFeature.IsSupported(...)` only for a feature constant that every runtime at or above the floor always reports as supported and that no publish option or runtime configuration can switch off, such as `RuntimeFeature.IsSupported(RuntimeFeature.DefaultImplementationsOfInterfaces)` with any supported floor.
+- Leave dynamic-code, AOT and trimming checks (`RuntimeFeature.IsDynamicCodeSupported`, `RuntimeFeature.IsDynamicCodeCompiled`, and `IsSupported(...)` for any host-configurable feature) in place: they depend on how the app is published (NativeAOT, trimming or runtime configuration), not on the target framework.
+- Leave every runtime version check in place in a project with no supported floor: a .NET Standard build runs on any runtime, including .NET Framework, so its target set gives no lower bound on the runtime.
 - Leave operating-system checks (`OperatingSystem.Is*()`, `OperatingSystem.Is*VersionAtLeast(...)`) in place: they depend on the host operating system, not the target framework, so the floor does not fix their outcome.
 
 Polyfills:
