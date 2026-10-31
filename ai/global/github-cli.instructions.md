@@ -32,7 +32,8 @@ It prints the authenticated login, the host and the `gh` version, never a token.
 
 Reach for these in this order:
 
-- **P1.** **`cfwf`** for anything it supports, for reads and writes. Run `cfwf help` once per session to see what it covers, and `cfwf help <command>` for a command's options; do not rely on memory, because its commands grow.
+- **P0.** **The `cfwf` MCP server's tools** (the managed `cfwf` MCP server, whose tools appear as `mcp__cfwf__*`) when one of them covers the operation. They take the same inputs as the matching `cfwf` command and return structured results, with no shell quoting, command allowlist or output parsing. Check the server's tool list once per session; use the CLI only for an operation that has no MCP tool yet, or when the server is not connected.
+- **P1.** **The `cfwf` command line** for anything it supports, for reads and writes. Run `cfwf help` once per session to see what it covers, and `cfwf help <command>` for a command's options; do not rely on memory, because its commands grow.
 - **P2.** **A native `gh <noun> <verb>` subcommand** when `cfwf` has no command for the operation.
 - **P3.** **`gh api` or `gh api graphql`** only when neither of the above covers it.
 
