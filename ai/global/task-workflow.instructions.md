@@ -44,7 +44,7 @@ A step referring to a **sibling step within its own list** (e.g. "return to P2",
 
 - Assign yourself to the issue before starting: `cfwf issue edit --repo <owner/repo> --issue <number> --assign-self`.
 - Only work on unassigned issues or issues already assigned to you.
-- Create an issue raised for later work (one you are not starting in this session, such as a follow-up, a matching issue in another repo, or a security bug filed from a review) with no assignee, and assign it only when work on it starts. `--assign-self` assigns whichever account `cfwf` (`gh`) is logged in as, often the owner's, and the rule above then stops any other agent or person picking it up.
+- Create an issue raised for later work (one you are not starting in this session, such as a follow-up, a matching issue in another repo, or a security bug filed from a review) with no assignee, and assign it only when work on it starts. `--assign-self` assigns whichever account `cfwf` is logged in as, often the owner's, and the rule above then stops any other agent or person picking it up.
 - Assign yourself to PRs when creating or updating: `cfwf pr edit --repo <owner/repo> --pr <number> --assign-self`.
 
 ## GitHub Issue and PR Labels
@@ -160,16 +160,15 @@ On every agent run, for every PR being interacted with:
 
   ```bash
   cfwf closing-issue-labels --repo <owner/repo> --pr <pr>
-  gh pr edit <pr> --repo <owner/repo> --add-label "<label-1>,<label-2>"
   ```
 
-  `cfwf closing-issue-labels` prints the labels to sync, one per line, already leaving out `Blocked` and `On Hold` (workflow-control labels are never synced from an issue to its PR). Pass them to one `gh pr edit --add-label` as a comma-separated list; adding labels has no `cfwf` command, so this step stays native `gh`. A non-zero exit is a failure to report, not "no labels"; if it exits 0 and prints nothing, there is nothing to add. If the `gh pr edit` call fails because a label does not exist in the PR's repo, repeat it without that label.
+  `cfwf closing-issue-labels` prints the labels to sync, one per line, already leaving out `Blocked` and `On Hold` (workflow-control labels are never synced from an issue to its PR). A non-zero exit is a failure to report, not "no labels"; if it exits 0 and prints nothing, there is nothing to add. Adding them to the PR is not available yet ([Operations Not Yet Available](github-cli.instructions.md#operations-not-yet-available-mandatory)); list any the PR is missing (compare with `cfwf pr view --field labels`) in your report.
 
 - **P4.** Never remove any label from a PR or issue; GitHub workflows add labels automatically and they must not be removed. Sole exceptions: `Blocked` on live-chat plan approval, see [Waiting for Approval in an Interactive Session](agent-roles.instructions.md#waiting-for-approval-in-an-interactive-session) P5, and `Blocked` on a PR question answered in live chat, see [Blocked Label](agent-roles.instructions.md#blocked-label-live-chat-pr-answer) P6.
 
 ## Label Management (MANDATORY)
 
-- Always use `--add-label` when adding labels; **never** `--label`, which replaces all existing labels and destroys automatically-applied classification labels. See [github-cli.instructions.md](github-cli.instructions.md#labels) for command syntax.
+- Only ever add labels; never replace an item's whole label set, which destroys automatically-applied classification labels. Label changes are not available to agents yet; see [github-cli.instructions.md](github-cli.instructions.md#labels).
 - Never remove labels from issues or PRs. GitHub workflows add classification labels automatically; removing them breaks automation. Sole exceptions: `Blocked` on live-chat plan approval, see [Waiting for Approval in an Interactive Session](agent-roles.instructions.md#waiting-for-approval-in-an-interactive-session) P5, and `Blocked` on a PR question answered in live chat, see [Blocked Label](agent-roles.instructions.md#blocked-label-live-chat-pr-answer) P6.
 
 ## Missing CLI Tools (MANDATORY)
@@ -202,7 +201,7 @@ Whenever an instruction file is added or updated, re-evaluate all open branches 
 
 ## Issue Tracking
 
-- Only update issues if `cfwf` and `gh` are installed and authenticated (`cfwf auth status`); otherwise read code and git log for state.
+- Only update issues if `cfwf` is installed and authenticated (`cfwf auth status`); otherwise read code and git log for state.
 - Each sub-issue must list files with status: `❌ Not started` / `🔄 In progress` / `✅ Done`; update after each commit+push.
 - The top-level issue tracks only handler/app-level status (sub-issues open/closed, branches merged).
 - Update the sub-issue after each significant commit+push; update the top-level issue when overall status changes.
