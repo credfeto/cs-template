@@ -178,7 +178,9 @@ REPLY
 
 # Hand off to human review: title and description, Human Review, ready, review record, then auto-merge
 cfwf pr hand-off --repo <owner>/<repo> --pr <number> --title "<type>: <title>" \
-  --description-file <file> --body-file <file>
+  --description-file - <<'DESCRIPTION'
+<description; keep every Closes #N line>
+DESCRIPTION
 
 # Take back from human review: auto-merge off, draft, Development, then a comment saying why
 cfwf pr take-back --repo <owner>/<repo> --pr <number> --body-file - <<'COMMENT'
@@ -261,7 +263,7 @@ Second paragraph.
 COMMENT
 ```
 
-Only one input of a command can be `-`: for `cfwf pr hand-off`, write the description or the review record to a file.
+Only one input of a command can be `-`. For `cfwf pr hand-off`, pass the description on stdin and leave out `--body-file` unless the review record needs extra text.
 
 ## Common Mistakes
 

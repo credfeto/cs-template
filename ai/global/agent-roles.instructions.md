@@ -216,12 +216,16 @@ If a change proposed by `/simplify` (Phase A) or a finding raised by `/code-revi
 Only once all four phases have completed without a `Blocked` outcome (each phase passed outright, or exited via its own non-blocking convergence path noted in a PR comment, or there were no reviewable changes):
 
 - **P1.** Safety net (belt-and-suspenders on top of the Code Reviewer Compliance check above): confirm `.deleteme.now` is not present in `git -C <dir> diff origin/main...HEAD --name-only` (see [Changelog](#changelog)); if it is still present, have Code Writer remove it and send it through the [review-fix route](task-workflow.instructions.md#review-fix-route) without Changelog (correction), with Committer giving it its own commit, because a template-skip item has no changelog entry to correct, then continue.
-- **P2.** Hand the PR off to human review in one command. Write the PR's final title (Conventional Commits, as [PR Submitter](#pr-submitter) describes) and its final description (what the change does and why, replacing whatever the description says now, such as the placeholder it was opened with) to files, and the extra text for the review record to a third, then run:
+- **P2.** Hand the PR off to human review in one command. Give the PR's final title (Conventional Commits, as [PR Submitter](#pr-submitter) describes) and its final description (what the change does and why, replacing whatever the description says now, such as the placeholder it was opened with) in one command, with the description on stdin. Write no file first and chain nothing around it:
 
    ```bash
    cfwf pr hand-off --repo <owner/repo> --pr <number> --title "<type>(<scope>): <description>" \
-     --description-file <description file> --body-file <review record file>
+     --description-file - <<'DESCRIPTION'
+   <what the change does and why; keep every Closes #N line>
+   DESCRIPTION
    ```
+
+   `--body-file <file>` is optional, for extra review-record text. Without it, the record is `cfwf`'s own first line naming the head it reviewed, which is enough.
 
    It checks everything before it writes anything, then, always in this order: sets the title and description, moves the board to **Human Review** (whether or not Phase D already did), marks the PR ready, posts the review record, and enables auto-merge. Never run those steps separately or with a hand-written comment, because the order is what keeps unreviewed or un-checked change from merging. Judge it by its exit code, as `cfwf help pr hand-off` documents:
 
