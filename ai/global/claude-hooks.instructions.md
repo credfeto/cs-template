@@ -162,8 +162,9 @@ the session ends:
 - **P1.** Read the comments on credfeto/credfeto-orchestrator#1167
   (`gh issue view 1167 --repo credfeto/credfeto-orchestrator --comments`) and check whether the
   same command, or an allow rule that would cover it, is already listed. If it is, add nothing.
-- **P2.** Otherwise, comment on credfeto/credfeto-orchestrator#1167 with the exact denied command,
-  why the task needs it, and the repository the session is working in, building the body as
+- **P2.** Otherwise, comment on credfeto/credfeto-orchestrator#1167
+  (`cfwf comment add --repo credfeto/credfeto-orchestrator --issue 1167 --body-file <file|->`)
+  with the exact denied command, why the task needs it, and the repository the session is working in, building the body as
   [Comment and Body Text](github-cli.instructions.md#comment-and-body-text-mandatory-heredoc-never-n)
   requires.
 - **P3.** Continue with the rest of the task. The request is for the owner to act on later; it

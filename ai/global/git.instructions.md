@@ -172,12 +172,11 @@ When any git command fails (push, rebase, fetch, etc.), you **must** quote the e
 Run the failing command as its own call, then paste its output, unchanged, into the comment body as a separate call. Quote the heredoc delimiter (`'COMMENT'`) so the shell does not expand `$` or backticks that appear in the pasted output:
 
 ```bash
-gh pr comment NUMBER --repo OWNER/REPO --body "$(cat <<'COMMENT'
+cfwf comment add --repo OWNER/REPO --pr NUMBER --body-file - <<'COMMENT'
 git push failed with:
 
 <exact stdout and stderr of the failed command>
 COMMENT
-)"
 ```
 
 This rule exists because AI-generated diagnoses of command failures are frequently wrong. The verbatim output is always correct; the explanation is not.
@@ -203,7 +202,7 @@ See [git-commits.instructions.md](git-commits.instructions.md); load when about 
 
 After any push, if the remote reports vulnerabilities:
 
-- Check for open Dependabot PRs covering them (`gh pr list --label dependencies`).
+- Check for open Dependabot PRs covering them (`gh pr list --repo <owner/repo> --label dependencies`; `cfwf pr list` has no label filter), and for the advisories themselves (`cfwf repo advisories --repo <owner/repo>`).
 - If none exist, visit the repo's Dependabot page and for any manually fixable advisory create a GitHub issue labelled `Security` and `AI-Work`, naming the package, severity, and fix steps.
 
 ## Pre-Commit Hook Known Incompatibilities

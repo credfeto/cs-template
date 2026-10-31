@@ -39,9 +39,9 @@ URL (e.g. via `WebFetch`). Instead:
 
 - If the repo is already cloned locally, read the file directly (e.g. the `Read`/`Glob`/`Grep` tools)
   rather than going over the network at all.
-- Otherwise, use the appropriate `gh` subcommand (`gh api`, `gh pr view`, `gh issue view`,
-  `gh repo view`, etc.); see [github-cli.instructions.md](github-cli.instructions.md) for exact syntax
-  and `GH_HOST` proxy handling.
+- Otherwise, use the `cfwf` command that covers it (`cfwf pr view`, `cfwf pr diff`, `cfwf issue view`,
+  `cfwf repo view`, `cfwf release view`, etc.), and a `gh` subcommand only where `cfwf` has none; see
+  [github-cli.instructions.md](github-cli.instructions.md) for exact syntax and `GH_HOST` proxy handling.
 
 This keeps lookups authenticated, respects the configured `GH_HOST` proxy, and avoids relying on
 public URL access the account may not actually have.

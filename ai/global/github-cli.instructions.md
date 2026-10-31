@@ -2,7 +2,7 @@
 
 [Back to Global Instructions Index](index.md)
 
-Reference for every `gh` invocation used across this instruction set. Other files describe **when**/**why** to call `gh` (see [task-workflow.instructions.md](task-workflow.instructions.md) and [agent-roles.instructions.md](agent-roles.instructions.md)); this file is the single source of truth for **exact command syntax**. If you need to pre-approve/whitelist `gh` invocations, the commands below are the full set.
+Reference for every GitHub command used across this instruction set: the `cfwf` commands that cover routine operations, and the few raw `gh` commands still needed where `cfwf` has no command. Other files describe **when**/**why** to call them (see [task-workflow.instructions.md](task-workflow.instructions.md) and [agent-roles.instructions.md](agent-roles.instructions.md)); this file is the single source of truth for **exact command syntax**. `cfwf help <command>` is authoritative for a `cfwf` command's options and exit codes.
 
 Always pass `--repo <owner>/<repo>` explicitly rather than relying on the current directory's remote. This is required when `GH_HOST` is set (see below) and safer in general when scripting.
 
@@ -12,30 +12,19 @@ Read this section first: it constrains every command in the rest of this documen
 
 When `GH_HOST` is set to a value other than `github.com`, `gh` routes through a proxy:
 
-- **`gh pr create`:** always pass both `--repo <owner>/<repo>` and `--head <owner>:<branch>`. Without `--repo`, `gh` performs a client-side check that a git remote URL's hostname matches `GH_HOST`: since remotes use `github.com` but `GH_HOST` is the proxy host, no remote matches and `gh` refuses before any API request reaches the proxy. Without `--head`, `gh` may try to detect the branch from git remotes, leading to a blank head ref at the proxy's GraphQL layer.
-
-  ```bash
-  gh pr create \
-    --repo <owner>/<repo> \
-    --head <owner>:<branch-name> \
-    --base main \
-    --draft \
-    --title "..." \
-    --body "..."
-  ```
-
+- **Create PRs with `cfwf pr create`**, which always sends `--repo` and `--head` itself. A raw `gh pr create` without both fails behind the proxy: without `--repo`, `gh` performs a client-side check that a git remote URL's hostname matches `GH_HOST` (remotes use `github.com`, so no remote matches and `gh` refuses before any API request reaches the proxy), and without `--head` it may send a blank head ref.
 - **`gh pr checkout`:** never use it. It makes the same client-side remote check and `--repo` does not avoid it; check the PR out with git as [Reviewing a PR Locally](git.instructions.md#reviewing-a-pr-locally) describes.
 - **Commit and push operations are always rejected by the proxy; never use `gh` for these, no exceptions.** Use the `git` CLI directly, always against the real `github.com` remote. This includes never running `gh auth setup-git` (see [Authentication](#authentication) below); refuse the request outright rather than trying it and working around the failure.
 - If a `gh` command fails, raise an issue on `credfeto/github-api-proxy` with the exact subcommand and flags, the API method (if visible), and the full error message verbatim.
-- **Every command example in this document already passes `--repo` explicitly** (or, for `gh repo view`/`gh repo list`, the equivalent `[<repository>]`/`[<owner>]` positional argument, which is just as explicit and not subject to the same remote-detection check) for exactly this reason. The only commands without repo scoping are `gh search repos` (searches for repositories themselves; there is no single repo to scope to) and account-level calls (`gh auth status`, `gh api user`). If you add a new example to this doc, keep it proxy-compatible: explicit `--repo`, and `--head` on anything that creates a PR.
+- **Every command example in this document already passes `--repo` explicitly** (`cfwf` always requires it; for `gh repo list`, the `<owner>` positional argument is just as explicit) for exactly this reason. The only commands without repo scoping are `gh search repos` (searches for repositories themselves; there is no single repo to scope to), `cfwf advisory view` (a global advisory) and `cfwf auth status`. If you add a new example to this doc, keep it proxy-compatible: explicit `--repo`, and `--head` on anything that creates a PR.
 
 ## Authentication
 
 ```bash
-gh auth status
+cfwf auth status
 ```
 
-Only use `gh` to manage issues/PRs if this succeeds; see [task-workflow.instructions.md](task-workflow.instructions.md#issue-tracking). Never attempt `gh auth login` or manipulate credentials yourself; if auth is broken, stop and report it.
+It prints the authenticated login, the host and the `gh` version, never a token. Only use `cfwf` or `gh` to manage issues/PRs if this succeeds; see [task-workflow.instructions.md](task-workflow.instructions.md#issue-tracking). Never attempt `gh auth login` or manipulate credentials yourself; if auth is broken, stop and report it.
 
 **Never run `gh auth setup-git`; refuse the request outright, even if asked directly.** It wires git's HTTP credential helper to `gh`, writing `url.*.insteadOf`/`pushInsteadOf` rewrite rules into git config that reroute commit/push traffic through `gh` (and, when `GH_HOST` is set, through the proxy; see [`GH_HOST` Proxy Behavior](#gh_host-proxy-behavior-mandatory-when-set) above). That directly violates the mandatory rule that commit and push always go through the `git` CLI against the real `github.com` remote. The rewrite rules also persist in the repo's local `.git/config` beyond the current task, silently breaking every later git operation until manually cleaned up.
 
@@ -47,9 +36,9 @@ Reach for these in this order:
 - **P2.** **A native `gh <noun> <verb>` subcommand** when `cfwf` has no command for the operation.
 - **P3.** **`gh api` or `gh api graphql`** only when neither of the above covers it.
 
-`cfwf` (in the `credfeto/credfeto-orchestrator` agent image) is where routine `gh` operations are meant to end up as standardised, pre-canned commands rather than long `gh` scripts composed by hand. When you use `gh api` (REST or GraphQL) or `gh ... --json <fields>` (with or without `--jq`), for a read or a write, and no `cfwf` command covers that use, raise an issue on `credfeto/credfeto-orchestrator` asking for it to be added to `cfwf`, then carry on with `gh` for the current task. This applies to routine uses such as `gh issue view --json` and `gh pr list --json` as much as to unusual ones. If `cfwf` is not installed or a command fails, follow [Missing CLI Tools](task-workflow.instructions.md#missing-cli-tools-mandatory) and report it; do not fall back to hand-composed `gh` for a use `cfwf` covers. Plain native subcommands without `--json`, such as `gh pr create`, `gh issue comment` and `gh pr edit --add-label`, are exempt.
+`cfwf` (in the `credfeto/credfeto-orchestrator` agent image) is where routine `gh` operations are meant to end up as standardised, pre-canned commands rather than long `gh` scripts composed by hand. When you use `gh api` (REST or GraphQL) or `gh ... --json <fields>` (with or without `--jq`), for a read or a write, and no `cfwf` command covers that use, raise an issue on `credfeto/credfeto-orchestrator` asking for it to be added to `cfwf`, then carry on with `gh` for the current task. If `cfwf` is not installed or a command fails, follow [Missing CLI Tools](task-workflow.instructions.md#missing-cli-tools-mandatory) and report it; do not fall back to `gh` for a use `cfwf` covers. A plain native subcommand is used only for an operation `cfwf` has no command for, such as adding or removing a label (`gh issue edit --add-label`, `gh pr edit --add-label`), closing or reopening an issue or PR, or linking a sub-issue; those need no `tool(cfwf):` issue.
 
-- **One issue per distinct use.** Search `credfeto/credfeto-orchestrator` first, using plain output so the search does not itself need `--json`: `gh issue list --repo credfeto/credfeto-orchestrator --state all --search "cfwf <keywords>"`. If an open or closed issue already covers the use, do not raise another; if a closed one was declined, follow its outcome. The uses these instructions themselves prescribe are already covered this way, so the search finds them and nothing more is needed.
+- **One issue per distinct use.** Search `credfeto/credfeto-orchestrator` first: `cfwf issue search --repo credfeto/credfeto-orchestrator --text "cfwf <keywords>" --state all`. If an open or closed issue already covers the use, do not raise another; if a closed one was declined, follow its outcome. The uses these instructions themselves prescribe are already covered this way, so the search finds them and nothing more is needed.
 - **Say what is needed.** Title the issue `tool(cfwf): <What is needed>`: always the `tool(cfwf)` prefix, never a Conventional Commits type, with the first word after the prefix capitalised (e.g. `tool(cfwf): Command to list a PR's closing issues`), unless a local title rule takes precedence (see [Issue Titles](#issue-titles-mandatory)). Give the exact `gh` command (with placeholders for the values), what it is for, and where in these instructions or the current task it is used. Add the new issue to the "Workflow" project as for any issue ([Adding an Issue to the Workflow Project](#adding-an-issue-to-the-workflow-project)).
 
 Never hand-assemble a complex or multi-step operation from raw `gh` or `git` commands, such as a wait loop around `gh pr checks` or `cfwf pr checks`, or `gh pr checks --watch`, because each hand-built version behaves differently and fails in its own way. If `cfwf` has no command for the operation, raise a `tool(cfwf):` issue as above, and until it is added do one safe, read-only check of the current state and report it instead of building the operation yourself.
@@ -72,33 +61,39 @@ It judges the PR's required checks (every check when the base branch requires no
 ## Issues
 
 ```bash
-# Create (title per Issue Titles below)
-gh issue create --repo <owner>/<repo> \
-  --title "<prefix>: <concise title>" \
-  --body "<description>" \
-  --label "<label>"
+# Create (title per Issue Titles below); also puts it on the Workflow board as Not Started
+cfwf issue create --repo <owner>/<repo> --priority <Security|Urgent|High|Medium|Low> \
+  --title "<prefix>: <concise title>" --body-file - [--label "<label>" ...] <<'BODY'
+<description>
+BODY
 
-# View (human-readable, with comments)
-gh issue view <number> --repo <owner>/<repo> --comments
+# View: title, state, labels, assignees, then the body
+cfwf issue view --repo <owner>/<repo> --issue <number>
 
-# View (JSON: see Available JSON Fields below)
-gh issue view <number> --repo <owner>/<repo> --json title,body,state,labels,assignees
+# Whether it has a plan, whether it is Blocked, and who commented since the plan
+cfwf issue plan-status --repo <owner>/<repo> --issue <number>
 
-# List
-gh issue list --repo <owner>/<repo> --state open --json number,title,labels
+# List open issues, highest priority first / search one repository's issues
+cfwf issue list --repo <owner>/<repo>
+cfwf issue search --repo <owner>/<repo> --text "<words>" [--state open|closed|all]
 
-# Edit: assign, label, link relationships
-gh issue edit <number> --repo <owner>/<repo> --add-assignee @me
-gh issue edit <number> --repo <owner>/<repo> --add-label "Blocked"
-gh issue edit <number> --repo <owner>/<repo> --add-sub-issue <child-number>
+# Edit: title, body (replaces the whole body), assign yourself
+cfwf issue edit --repo <owner>/<repo> --issue <number> --assign-self
+cfwf issue edit --repo <owner>/<repo> --issue <number> [--title "<title>"] [--body-file <file|->]
 
 # Comment (see HEREDOC rule below for multi-line bodies)
-gh issue comment <number> --repo <owner>/<repo> --body "<text>"
+cfwf comment add --repo <owner>/<repo> --issue <number> --body-file - <<'COMMENT'
+<text>
+COMMENT
 
-# Close / reopen
+# Labels, sub-issues, close / reopen: no cfwf command, so native gh
+gh issue edit <number> --repo <owner>/<repo> --add-label "Blocked"
+gh issue edit <number> --repo <owner>/<repo> --add-sub-issue <child-number>
 gh issue close <number> --repo <owner>/<repo>
 gh issue reopen <number> --repo <owner>/<repo>
 ```
+
+Read an issue's comment bodies, which `cfwf issue view` does not print, with `gh issue view <number> --repo <owner>/<repo> --comments` (plain output); `cfwf issue plan-status` lists who commented after the plan, without the bodies.
 
 ### Issue Titles (MANDATORY)
 
@@ -111,7 +106,7 @@ Every issue title, in any repository, is `prefix: text` or `prefix(name): text`.
 
 ### Adding an Issue to the Workflow Project
 
-Every issue raised must be added to the "Workflow" project linked to the repository it was raised in, immediately after creation (see [task-workflow.instructions.md](task-workflow.instructions.md#workflow-project-board-mandatory)). Run it only for an issue you have just created: `--set` overwrites the status of an item already on the board, so never re-run it on an existing issue to "make sure":
+Every issue raised must be on the "Workflow" project linked to the repository it was raised in (see [task-workflow.instructions.md](task-workflow.instructions.md#workflow-project-board-mandatory)). `cfwf issue create` does this itself, as Not Started, so there is nothing more to run. Only for an issue created some other way, add it immediately after creation, and only then: `--set` overwrites the status of an item already on the board, so never re-run it on an existing issue to "make sure":
 
 ```bash
 cfwf workflow-status --set --repo <owner>/<repo> --issue <number> --status "Not Started"
@@ -119,75 +114,62 @@ cfwf workflow-status --set --repo <owner>/<repo> --issue <number> --status "Not 
 
 The other `cfwf` board commands are in [agent-roles.instructions.md](agent-roles.instructions.md#workflow-board).
 
-### Available JSON Fields: `gh issue view`/`gh issue list`
-
-```text
-assignees, author, blockedBy, blocking, body, closed, closedAt,
-closedByPullRequestsReferences, comments, createdAt, id, isPinned, issueType,
-labels, milestone, number, parent, projectCards, projectItems, reactionGroups,
-state, stateReason, subIssues, subIssuesSummary, title, updatedAt, url
-```
-
-Confirm with `gh issue view --help` if a field is ever in doubt; do not guess a field name.
-
 ## Pull Requests
 
 ```bash
-# Create
-gh pr create --repo <owner>/<repo> \
-  --base main \
-  --head <branch-name> \
-  --draft \
-  --title "<title>" \
-  --body "<body>"
+# Create a draft PR and put it on the Workflow board as Development (prints the existing PR's URL if the branch has one)
+cfwf pr create --repo <owner>/<repo> --head <branch-name> --title "<title>" --body-file - [--base main] <<'BODY'
+<body>
+BODY
 
-# View (human-readable)
-gh pr view <number> --repo <owner>/<repo>
+# View: state and metadata, one key and value a line; name the fields you need
+cfwf pr view --repo <owner>/<repo> --pr <number>
+cfwf pr view --repo <owner>/<repo> --pr <number> --field state --field merged-at
+cfwf pr view --repo <owner>/<repo> --pr <number> --field head-sha
 
-# View (JSON: see Available JSON Fields below)
-gh pr view <number> --repo <owner>/<repo> --json state,mergedAt
-gh pr view <number> --repo <owner>/<repo> --json closingIssuesReferences --jq '.closingIssuesReferences[].number'
+# Labels of the issues the PR closes (Blocked and On Hold left out)
+cfwf closing-issue-labels --repo <owner>/<repo> --pr <number>
 
-# List
-gh pr list --state open --repo <owner>/<repo> --json number,title,author,headRefName,url
-gh pr list --repo <owner>/<repo> --label dependencies
-gh pr list --repo <owner>/<repo> --head <branch-name>
+# List open PRs (optionally those for an issue or a head branch)
+cfwf pr list --repo <owner>/<repo> [--issue <n>] [--head <branch-name>]
 
-# Edit: assign, label (note: --add-assignee/--add-label, NOT --assignee/--label; see Common Mistakes)
-gh pr edit <number> --repo <owner>/<repo> --add-assignee @me
+# Edit: title, body (replaces the whole body), assign yourself
+cfwf pr edit --repo <owner>/<repo> --pr <number> --assign-self
+cfwf pr edit --repo <owner>/<repo> --pr <number> [--title "<title>"] [--body-file <file|->]
+
+# Checks: judge the required checks on the head once (exit 0 pass, 3 failed, 4 pending, 5 none at all)
+cfwf pr checks --repo <owner>/<repo> --pr <number> [--all]
+
+# When the PR was last marked ready
+cfwf pr ready-at --repo <owner>/<repo> --pr <number>
+
+# Comment / read every comment, review and review thread / reply to an inline review comment
+cfwf comment add --repo <owner>/<repo> --pr <number> --body-file - <<'COMMENT'
+<text>
+COMMENT
+cfwf pr comments --repo <owner>/<repo> --pr <number>
+cfwf pr reply --repo <owner>/<repo> --pr <number> --comment-id <inline id> --body-file - <<'REPLY'
+<reply text>
+REPLY
+
+# Hand off to human review: title and description, Human Review, ready, review record, then auto-merge
+cfwf pr hand-off --repo <owner>/<repo> --pr <number> --title "<type>: <title>" \
+  --description-file <file> --body-file <file>
+
+# Take back from human review: auto-merge off, draft, Development, then a comment saying why
+cfwf pr take-back --repo <owner>/<repo> --pr <number> --body-file - <<'COMMENT'
+<why>
+COMMENT
+
+# Diff, changed files or a per-file line count
+cfwf pr diff --repo <owner>/<repo> --pr <number> [--name-only | --stat]
+
+# Labels, close: no cfwf command, so native gh
 gh pr edit <number> --repo <owner>/<repo> --add-label "Blocked"
-
-# Checks
-gh pr checks <number> --repo <owner>/<repo>
-
-# Comment
-gh pr comment <number> --repo <owner>/<repo> --body "<text>"
-
-# Draft / ready
-gh pr ready <number> --repo <owner>/<repo> --undo   # convert to draft
-gh pr ready <number> --repo <owner>/<repo>          # mark ready
-
-# Merge
-gh pr merge --auto --merge <number> --repo <owner>/<repo>
-gh pr merge <number> --repo <owner>/<repo> --disable-auto   # turn auto-merge off
-
-# Close / diff
 gh pr close <number> --repo <owner>/<repo>
-gh pr diff <number> --repo <owner>/<repo>
 ```
 
-### Available JSON Fields: `gh pr view`/`gh pr list`
-
-```text
-additions, assignees, author, autoMergeRequest, baseRefName, baseRefOid, body,
-changedFiles, closed, closedAt, closingIssuesReferences, comments, commits,
-createdAt, deletions, files, fullDatabaseId, headRefName, headRefOid,
-headRepository, headRepositoryOwner, id, isCrossRepository, isDraft, labels,
-latestReviews, maintainerCanModify, mergeCommit, mergeStateStatus, mergeable,
-mergedAt, mergedBy, milestone, number, potentialMergeCommit, projectCards,
-projectItems, reactionGroups, reviewDecision, reviewRequests, reviews, state,
-statusCheckRollup, title, updatedAt, url
-```
+Never mark a PR ready, convert it to draft, or turn auto-merge on or off with raw `gh pr ready`/`gh pr merge`: `cfwf pr hand-off` and `cfwf pr take-back` do those steps, in the safe order, together with the board and the review record. Judge each `cfwf` command by its exit code, as `cfwf help <command>` documents it.
 
 ## Labels
 
@@ -207,7 +189,10 @@ gh pr edit <number> --repo <owner>/<repo> --add-label "Security" --add-label "Ur
 ## Search
 
 ```bash
-gh search issues "<query>" --repo <owner>/<repo>
+# One repository's issues: cfwf
+cfwf issue search --repo <owner>/<repo> --text "<words>" [--state open|closed|all]
+
+# PRs, code and repositories: no cfwf command, so native gh
 gh search prs "<query>" --repo <owner>/<repo>
 gh search code "<query>" --repo <owner>/<repo>
 gh search repos "<query>"
@@ -216,35 +201,40 @@ gh search repos "<query>"
 ## Repos, Workflows, Runs
 
 ```bash
-gh repo view <owner>/<repo> --json defaultBranchRef,description
+# Default branch, visibility, merge methods and description / collaborators and roles
+cfwf repo view --repo <owner>/<repo>
+cfwf repo collaborators --repo <owner>/<repo>
+
+# Security advisories: the repository's, or one global advisory by GHSA id
+cfwf repo advisories --repo <owner>/<repo>
+cfwf advisory view --ghsa <GHSA-xxxx-xxxx-xxxx>
+
+# The checks a branch requires, from its protection and rulesets
+cfwf branch required-checks --repo <owner>/<repo> --branch <name>
+
+# Releases and tags (used when auditing GitHub Actions version pins, see github-workflows.instructions.md)
+cfwf release view --repo <owner>/<action>
+cfwf release list --repo <owner>/<action>
+cfwf tag view --repo <owner>/<action> --tag <tag>
+
+# Actions runs: list for a branch or commit, a run's jobs, its failed steps' log tail, rerun its failed jobs
+cfwf run list --repo <owner>/<repo> --branch <name> [--workflow <name>] [--limit <n>]
+cfwf run list --repo <owner>/<repo> --sha <commit> [--workflow <name>] [--limit <n>]
+cfwf run view --repo <owner>/<repo> --run <run-id>
+cfwf run log --repo <owner>/<repo> --run <run-id> [--job <id>] [--lines <n>]
+cfwf run rerun --repo <owner>/<repo> --run <run-id>
+
+# Listing an owner's repositories and a repository's workflows: no cfwf command, so native gh
 gh repo list <owner> --limit 100
-
 gh workflow list --repo <owner>/<repo>
-
-gh run list --repo <owner>/<repo> --limit 10
-gh run view <run-id> --repo <owner>/<repo> --log-failed
-gh run rerun <run-id> --repo <owner>/<repo>
 ```
 
 ## REST and GraphQL API (`gh api`)
 
-**`gh api`/`gh api graphql` is the last resort:** see [Choosing Between `cfwf` and `gh`](#choosing-between-cfwf-and-gh-mandatory) for when it applies and the issue to raise (e.g. review-comment threads, collaborator management, releases lookups). Raw GraphQL query strings are more likely than an equivalent flat `gh` invocation to be refused before they run, and `gh api graphql` mutations are refused outright; tell whether a hook or the permission system refused from the denial message, as [A Permission Denial Is Not a Hook Denial](claude-hooks.instructions.md#a-permission-denial-is-not-a-hook-denial-mandatory) describes.
+**`gh api`/`gh api graphql` is the last resort:** see [Choosing Between `cfwf` and `gh`](#choosing-between-cfwf-and-gh-mandatory) for when it applies and the issue to raise. Comments, collaborators, the authenticated login, releases and tags, review threads and replies, run logs and the board all have `cfwf` commands (above), so they never need `gh api`. Raw GraphQL query strings are more likely than an equivalent flat `gh` invocation to be refused before they run, and `gh api graphql` mutations are refused outright; tell whether a hook or the permission system refused from the denial message, as [A Permission Denial Is Not a Hook Denial](claude-hooks.instructions.md#a-permission-denial-is-not-a-hook-denial-mandatory) describes.
 
 ```bash
-# REST: simple GET
-gh api repos/<owner>/<repo>/collaborators --jq '.[].login'
-gh api user --jq '.login'
-
-# REST: releases (used when auditing GitHub Actions version pins, see github-workflows.instructions.md)
-gh api repos/<owner>/<action>/releases/latest --jq '.tag_name'
-gh api --paginate repos/<owner>/<action>/releases --jq '.[].tag_name'
-
-# REST: POST with typed/raw fields
-gh api repos/<owner>/<repo>/issues/<number>/comments \
-  --method POST \
-  --field body="<text>"
-
-# GraphQL
+# GraphQL (reads only; mutations are refused)
 gh api graphql \
   -f query='query($l:String!){user(login:$l){id}}' \
   -f l="<login>" \
@@ -263,16 +253,9 @@ gh api repos/<owner>/<repo>/pulls/<number>/comments \
   --field body="<comment text>"
 ```
 
-`commit_id` must be the PR's **current head SHA** (`gh pr view <number> --json headRefOid --jq '.headRefOid'`), and `path`/`line` must fall inside that commit's actual diff; otherwise the request fails (see Common Mistakes below).
+Starting a new inline review comment has no `cfwf` command yet, so it is the one `gh api` write here. `commit_id` must be the PR's **current head SHA** (`cfwf pr view --repo <owner>/<repo> --pr <number> --field head-sha`), and `path`/`line` must fall inside that commit's actual diff (`cfwf pr diff --repo <owner>/<repo> --pr <number> --name-only`); otherwise the request fails (see Common Mistakes below).
 
-To reply to an existing review comment thread, note `-F` (typed), not `-f`, for `in_reply_to`: the API requires it as a number, and `-f` sends it as a string, failing with `"in_reply_to" is not a permitted key"` / `is not a number`:
-
-```bash
-gh api repos/<owner>/<repo>/pulls/<number>/comments \
-  -X POST \
-  -f body="<reply text>" \
-  -F in_reply_to=<comment-id>
-```
+To reply to an existing review comment thread, use `cfwf pr reply --repo <owner>/<repo> --pr <number> --comment-id <inline id> --body-file <file|->`, taking the `inline` id from `cfwf pr comments`; never hand-compose the reply with `gh api`.
 
 ## GitHub State Lags Behind Writes (MANDATORY)
 
@@ -284,33 +267,34 @@ GitHub's API is asynchronous: a change can take seconds, sometimes longer, to sh
 
 ## Comment and Body Text (MANDATORY: HEREDOC, never `\n`)
 
-When posting any `--body` (or `-f body=`) that contains, or may contain, newlines (`gh issue comment`, `gh pr comment`, `gh issue create`, `gh pr create`, `gh issue edit`, `gh pr edit`, `gh api ... -f body=`, etc.), always build it with a HEREDOC so real newline characters are embedded. **Never** use escaped `\n` sequences; GitHub renders them as literal backslash-n characters, not line breaks:
+Every `cfwf` command that posts text takes it from a file (`--body-file`, `--description-file`), with `-` reading it from stdin; there is no inline `--body`. Pass multi-line text on stdin with a HEREDOC, or write it to a file first, so real newline characters are embedded. **Never** use escaped `\n` sequences, in `cfwf` input or in a remaining `gh ... -f body=` call; GitHub renders them as literal backslash-n characters, not line breaks:
 
 ```bash
-gh issue comment <number> --repo <owner>/<repo> --body "$(cat <<'COMMENT'
+cfwf comment add --repo <owner>/<repo> --issue <number> --body-file - <<'COMMENT'
 First paragraph.
 
 Second paragraph.
 COMMENT
-)"
 ```
+
+Only one input of a command can be `-`: for `cfwf pr hand-off`, write the description or the review record to a file.
 
 ## Common Mistakes
 
 Check here before assuming a `gh` flag or field exists.
 
-- **`--assignee`/`--label` are create-only flags.** `gh issue create`/`gh pr create` accept `--assignee`/`--label`. `gh issue edit`/`gh pr edit` do **not**; they fail with `unknown flag: --assignee` / `unknown flag: --label`. Use `--add-assignee`/`--add-label` (and `--remove-assignee`/`--remove-label`) on `edit`. There is also no `gh issue assign` subcommand: `gh issue assign <n> --assignee @me` fails; use `gh issue edit <n> --add-assignee @me`.
+- **Assigning yourself is `cfwf issue edit`/`cfwf pr edit --assign-self`.** There is no `gh issue assign` subcommand, and `gh issue edit`/`gh pr edit` take `--add-assignee`/`--add-label` (and `--remove-*`), never `--assignee`/`--label`, which are create-only and fail with `unknown flag`.
 
-- **`--json` only accepts the fixed field list for that subcommand** (see the field lists above). `timelineItems` is not a valid field on `gh issue view`; it fails with `Unknown JSON field: "timelineItems"`. To find the PR(s) that closed an issue, use `closedByPullRequestsReferences` on the issue, or `closingIssuesReferences` on the PR; do not reach for GraphQL timeline scraping first.
+- **`cfwf` has no `--json`/`--jq`.** Its output has one fixed format per command, so name what you need with its own options (for example `cfwf pr view --field`), as `cfwf help <command>` lists them, rather than reaching for `gh ... --json`.
 
 - **Never merge stderr into a pipe feeding `jq`** (`gh ... 2>&1 | jq ...`). Any warning `gh` writes to stderr lands in the same stream as the JSON body and corrupts it before `jq` sees valid input, even on an otherwise-successful call, producing errors like `jq: parse error: Invalid numeric literal ...`. Let stderr go to the terminal (`gh ... | jq ...`) or redirect it to a file if you need to inspect it separately (`gh ... 2>err.log | jq ...`).
 
-- **Inline PR review comments via `gh api .../pulls/<n>/comments`** fail with `422 Validation Failed: pull_request_review_thread.path could not be resolved` if `commit_id` is stale or `path`/`line` don't fall inside that commit's diff. Fetch the current head SHA and the actual changed files first (`gh pr view <n> --json headRefOid`, `gh api repos/<owner>/<repo>/pulls/<n>/files --jq '.[].filename'`) rather than guessing.
+- **Inline PR review comments via `gh api .../pulls/<n>/comments`** fail with `422 Validation Failed: pull_request_review_thread.path could not be resolved` if `commit_id` is stale or `path`/`line` don't fall inside that commit's diff. Fetch the current head SHA and the actual changed files first (`cfwf pr view --repo <owner>/<repo> --pr <n> --field head-sha`, `cfwf pr diff --repo <owner>/<repo> --pr <n> --name-only`) rather than guessing.
 
 - **GraphQL ProjectV2 collaborator mutations**: the input type is `ProjectV2Collaborator`, not the plausible-looking `ProjectV2CollaboratorInput` (the latter errors with `isn't a defined input type`). Any connection field selected in a mutation's return payload (e.g. `collaborators { nodes { ... } }`) needs an explicit `first`/`last` pagination argument, or the whole mutation is rejected with `MISSING_PAGINATION_BOUNDARIES`, even though the mutation itself already took effect.
 
-- **`gh api -f`/`-F` are not interchangeable.** `-f`/`--raw-field` always sends a string; `-F`/`--field` sends a typed value (numbers, booleans, `@file`). Fields the API schema declares as a number (e.g. `in_reply_to` when replying to a PR review comment) must use `-F`. Using `-f in_reply_to=<id>` fails with `"in_reply_to" is not a permitted key" / "is not a number"`, because the string form doesn't match any of the schema's `oneOf` variants.
+- **`gh api -f`/`-F` are not interchangeable.** `-f`/`--raw-field` always sends a string; `-F`/`--field` sends a typed value (numbers, booleans, `@file`). Fields the API schema declares as a number (e.g. `line` on an inline review comment) must use `-F`; the string form doesn't match any of the schema's `oneOf` variants and fails.
 
-- **The Claude Code hooks reject some shell shapes outright**, such as `env`/`unset` wrappers and the `xargs` and loop shapes covered by [Ad-Hoc Commands Never Use `xargs` or `while IFS= read` Loops](claude-hooks.instructions.md#ad-hoc-commands-never-use-xargs-or-while-ifs-read-loops-mandatory). Use flat commands instead: run `gh` directly and scope it with its own flags (for example `--repo <owner>/<repo>`) rather than wrapping it to set or clear a variable, and replace the `xargs` and loop shapes as that section describes.
+- **The Claude Code hooks reject some shell shapes outright**, such as `env`/`unset` wrappers and the `xargs` and loop shapes covered by [Ad-Hoc Commands Never Use `xargs` or `while IFS= read` Loops](claude-hooks.instructions.md#ad-hoc-commands-never-use-xargs-or-while-ifs-read-loops-mandatory). Use flat commands instead: run `cfwf` (or `gh`) directly and scope it with its own flags (for example `--repo <owner>/<repo>`) rather than wrapping it to set or clear a variable, and replace the `xargs` and loop shapes as that section describes.
 
-When a `gh` command's exact flags/fields are uncertain, run `gh <command> --help` (or `gh <command> <subcommand> --help`) rather than guessing from memory or from a similar-looking command.
+When a command's exact flags are uncertain, run `cfwf help <command>` (or, for a remaining raw `gh` command, `gh <command> <subcommand> --help`) rather than guessing from memory or from a similar-looking command.
