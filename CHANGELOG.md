@@ -13,6 +13,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
+- ai/global: start each PR phase with `cfwf pr status`, which reads a PR's whole state in one call, instead of chaining several cfwf reads into one refused compound command
 ### Deprecated
 ### Removed
 ### Deployment Changes
