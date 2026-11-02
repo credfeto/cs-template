@@ -2,7 +2,7 @@
 
 [Back to Global Instructions Index](index.md)
 
-Reference for every GitHub operation used across this instruction set: the `cfwf` MCP tools and `cfwf` commands that cover them, and the one operation that is not available to agents yet. Other files describe **when**/**why** to call them (see [task-workflow.instructions.md](task-workflow.instructions.md) and [agent-roles.instructions.md](agent-roles.instructions.md)); this file is the single source of truth for **exact command syntax**. `cfwf help <command>` is authoritative for a `cfwf` command's options and exit codes.
+Reference for every GitHub operation used across this instruction set: the `cfwf` MCP tools and `cfwf` commands that cover them. Other files describe **when**/**why** to call them (see [task-workflow.instructions.md](task-workflow.instructions.md) and [agent-roles.instructions.md](agent-roles.instructions.md)); this file is the single source of truth for **exact command syntax**. `cfwf help <command>` is authoritative for a `cfwf` command's options and exit codes.
 
 Always pass `--repo <owner>/<repo>` explicitly rather than relying on the current directory's remote. `cfwf` always requires it, and it keeps every command proxy-compatible (see below).
 
@@ -36,9 +36,9 @@ Reach for these in this order:
 
 Run **one `cfwf` command per Bash call**, on its own: no `;`, `&&`, `|` or `echo exit=$?` around it. Read its exit code from the tool result. A compound command that contains `cfwf` is refused in unattended runs and stalls the session. When you need several facts about a PR at once (its metadata, board status, check verdict, when it was marked ready, recent comment activity), run `cfwf pr status` once instead of several commands: it exists so you never need to chain them.
 
-There is no other route to GitHub for agents. An operation that neither covers is not available to agents yet: follow [Operations Not Yet Available](#operations-not-yet-available-mandatory). `cfwf` (in the `credfeto/credfeto-orchestrator` agent image) is where every GitHub operation an agent needs is provided as a standardised, pre-canned command. If `cfwf` is not installed or a command fails, follow [Missing CLI Tools](task-workflow.instructions.md#missing-cli-tools-mandatory) and report it.
+There is no other route to GitHub for agents. `cfwf` (in the `credfeto/credfeto-orchestrator` agent image) is where every GitHub operation an agent needs is provided as a standardised, pre-canned command. If `cfwf` is not installed or a command fails, follow [Missing CLI Tools](task-workflow.instructions.md#missing-cli-tools-mandatory) and report it.
 
-When no `cfwf` command or MCP tool covers an operation you need, and it is not already listed in [Operations Not Yet Available](#operations-not-yet-available-mandatory), raise an issue on `credfeto/credfeto-orchestrator` asking for it:
+When no `cfwf` command or MCP tool covers an operation you need, raise an issue on `credfeto/credfeto-orchestrator` asking for it:
 
 - **One issue per distinct need.** Search `credfeto/credfeto-orchestrator` first: `cfwf issue search --repo credfeto/credfeto-orchestrator --text "cfwf <keywords>" --state all`. If an open or closed issue already covers the need, do not raise another; if a closed one was declined, follow its outcome.
 - **Say what is needed.** Title the issue `tool(cfwf): <What is needed>`: always the `tool(cfwf)` prefix, never a Conventional Commits type, with the first word after the prefix capitalised (e.g. `tool(cfwf): Command to list a PR's closing issues`), unless a local title rule takes precedence (see [Issue Titles](#issue-titles-mandatory)). Say what the operation is, what it is for, and where in these instructions or the current task it is needed. Add the new issue to the "Workflow" project as for any issue ([Adding an Issue to the Workflow Project](#adding-an-issue-to-the-workflow-project)).
@@ -59,21 +59,6 @@ It judges the PR's required checks (every check when the base branch requires no
 - **5** the time limit was reached with no checks reported at all.
 - **6** an API or network error, or the PR was not found: retry later; never treat it as a failed check.
 - **1** a required client tool is missing; **2** a usage error: fix the command or report it, as [Missing CLI Tools](task-workflow.instructions.md#missing-cli-tools-mandatory) describes.
-
-## Operations Not Yet Available (MANDATORY)
-
-This GitHub operation has no `cfwf` command or MCP tool yet, so it is not available to agents. Never perform it by any other route. It has an issue asking for it:
-
-| Operation | Issue |
-| --------- | ----- |
-| Post a new inline review comment on a PR | credfeto/credfeto-orchestrator#1631 |
-
-When a step needs it:
-
-- **P1.** Do every other part of the step, in its usual order, then stop at that operation; never build it from other commands.
-- **P2.** Put what the inline comment would have said in a PR comment instead, naming the file and line, as [Inline PR Review Comments](#inline-pr-review-comments) describes.
-
-When `cfwf help` lists a command for it, use it and stop following this section.
 
 ## Issues
 
@@ -197,6 +182,10 @@ cfwf pr comments --repo <owner>/<repo> --pr <number>
 cfwf pr reply --repo <owner>/<repo> --pr <number> --comment-id <inline id> --body-file - <<'REPLY'
 <reply text>
 REPLY
+# Start a new inline review comment on a file and line (the head commit is read for you)
+cfwf pr review-comment --repo <owner>/<repo> --pr <number> --path <file> --line <n> --body-file - <<'COMMENT'
+<comment>
+COMMENT
 
 # Ask a blocking question: comment, then Blocked; the board is left as it is
 cfwf pr block --repo <owner>/<repo> --pr <number> --body-file - <<'QUESTION'
@@ -290,11 +279,11 @@ cfwf workflow list --repo <owner>/<repo>
 
 ## Raw API Calls
 
-Agents never call the GitHub REST or GraphQL API directly. Comments, labels, search, collaborators, the authenticated login, releases and tags, review threads and replies, run logs and the board all have `cfwf` commands (above). For anything else, follow [Operations Not Yet Available](#operations-not-yet-available-mandatory) or raise a `tool(cfwf):` issue as [Choosing a GitHub Tool](#choosing-a-github-tool-mandatory) describes.
+Agents never call the GitHub REST or GraphQL API directly. Comments, labels, search, collaborators, the authenticated login, releases and tags, review threads, replies and new inline review comments, run logs and the board all have `cfwf` commands (above). For anything else, raise a `tool(cfwf):` issue as [Choosing a GitHub Tool](#choosing-a-github-tool-mandatory) describes.
 
 ### Inline PR Review Comments
 
-To reply to an existing review comment thread, use `cfwf pr reply --repo <owner>/<repo> --pr <number> --comment-id <inline id> --body-file <file|->`, taking the `inline` id from `cfwf pr comments`. Starting a new inline review comment has no command yet (see [Operations Not Yet Available](#operations-not-yet-available-mandatory)); put the finding in a PR comment instead, naming the file and line.
+To reply to an existing review comment thread, use `cfwf pr reply --repo <owner>/<repo> --pr <number> --comment-id <inline id> --body-file <file|->`, taking the `inline` id from `cfwf pr comments`. To start a new inline review comment on a file and line, use `cfwf pr review-comment --repo <owner>/<repo> --pr <number> --path <file> --line <n> [--start-line <n>] [--side RIGHT|LEFT] --body-file <file|->`: it reads the PR's head commit itself (never pass a commit SHA), prints the same `inline` and `url` lines as `cfwf pr reply`, and exits 1 with a clear message when the line is not part of the diff; post once and check `cfwf pr comments` before posting again.
 
 ## GitHub State Lags Behind Writes (MANDATORY)
 
