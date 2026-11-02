@@ -13,6 +13,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
+- AI instructions: the `cfwf` commands for labels, plans, blocking questions, comment bodies, closing and reopening, sub-issues, PR label sync, search and listing repositories and workflows are now described as available; only starting a new inline review comment remains unavailable
 ### Deprecated
 ### Removed
 ### Deployment Changes
