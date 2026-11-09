@@ -11,9 +11,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ## [Unreleased]
 ### Security
 ### Added
-- ai/global github-cli instructions: `cfwf issue view --comments` (issue plus comments in one read) and `cfwf comment view --comment-id` (one comment by id)
 ### Fixed
-- ai/global coverage ratchet: the AI Coverage phase has Code Tester measure coverage and report the figures, and the Orchestrator only compares and decides; a build tool missing from the main session means delegate, never run raw build, test or coverage commands
 ### Changed
 ### Deprecated
 ### Removed
