@@ -13,6 +13,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
+- npm instructions: run npm ci before committing when node_modules is missing, and bump a transitive dependency with npm update <package> --package-lock-only
 ### Deprecated
 ### Removed
 ### Deployment Changes
