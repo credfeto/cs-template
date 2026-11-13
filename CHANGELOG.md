@@ -12,9 +12,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Security
 ### Added
 ### Fixed
-- Plan First: a board status that cannot be read (rate limit, network error) is retried on the next run instead of re-blocking the issue
 ### Changed
-- npm instructions: run npm ci before committing when node_modules is missing, and bump a transitive dependency with npm update <package> --package-lock-only
 - SDK - Updated DotNet SDK to 11.0.100
 ### Deprecated
 ### Removed
