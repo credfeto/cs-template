@@ -18,7 +18,7 @@ In an interactive session, a question, decision, approval or manual step that ne
   > - **Q12.** <yes/no question>
   ```
 
-- **P3.** Use exactly one of these markers, keeping the emoji and the bold label together on the line so the status still reads correctly without colour. Always write the marker as the literal emoji character, never as a GitHub shortcode, because the block is read in a terminal, which shows a shortcode as literal text, while the character displays the same in a terminal and on GitHub:
+- **P3.** Use exactly one of these markers, keeping the emoji and the bold label together on the line so the status still reads correctly without colour. Write each marker as the emoji character, never a GitHub shortcode, because a terminal shows a shortcode as plain text while the character displays on GitHub too:
   - `🛑 **NEEDS YOU:**`: the work is stopped until the human answers.
   - `⚠️ **NEEDS YOU:**`: a question is open, but the agent can carry on with other work in the meantime.
   - `✅ **NEEDS YOU:** nothing right now.`: nothing is outstanding.
