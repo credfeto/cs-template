@@ -36,7 +36,7 @@ Whenever writing, fixing, or reviewing code, best-effort use any MCP IDE integra
 
 - Best-effort, not blocking: if no MCP is configured for the language, or a configured one fails to connect, skip this check for that step and continue with the language's normal build/analyzer tooling.
 - If working on a PR, comment on it naming the tool and why it was unavailable (not configured, or configured but failed to connect), so a human can see the gap. Never add `Blocked` for this alone.
-- For SQL files, ignore unresolved table, column and other object warnings that arise only because no matching data source is attached to the IDE; syntax errors and every other inspection still count.
+- For SQL, including SQL embedded in another language's string literals (e.g. Dapper or ADO.NET queries in C#), ignore unresolved table, column and other object warnings that arise only because the IDE's data source does not match the branch's schema (none is attached, or it predates objects this branch's migration scripts create); syntax errors and every other inspection still count, and every object name must still match the schema defined in the repository's [migration scripts or DACPAC](sql.instructions.md#database-schema-management-dacpac--migration-scripts-mandatory).
 - Applies to every code-touching role: Code Writer, Code Fixer, Code Tester, Code Reviewer, CI Debugger, Repo Auditor, Orchestrator (only for the Phase B and C reviews it runs itself), and Phases A-C (Simplify, Code Review, Security Review) of the [PR Workflow AI Review Loop](agent-roles.instructions.md#pr-workflow-ai-review-loop).
 
 ## Dead Code
