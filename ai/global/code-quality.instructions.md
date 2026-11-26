@@ -36,7 +36,7 @@ Whenever writing, fixing, or reviewing code, best-effort use any MCP IDE integra
 
 - Best-effort, not blocking: if no MCP is configured for the language, or a configured one fails to connect, skip this check for that step and continue with the language's normal build/analyzer tooling.
 - If working on a PR, comment on it naming the tool and why it was unavailable (not configured, or configured but failed to connect), so a human can see the gap. Never add `Blocked` for this alone.
-- Applies to every code-touching role: Code Writer, Code Fixer, Code Tester, Code Reviewer, CI Debugger, Repo Auditor, Orchestrator, and Phases A-C (Simplify, Code Review, Security Review) of the [PR Workflow AI Review Loop](agent-roles.instructions.md#pr-workflow-ai-review-loop).
+- Applies to every code-touching role: Code Writer, Code Fixer, Code Tester, Code Reviewer, CI Debugger, Repo Auditor, Orchestrator (only for the Phase B and C reviews it runs itself), and Phases A-C (Simplify, Code Review, Security Review) of the [PR Workflow AI Review Loop](agent-roles.instructions.md#pr-workflow-ai-review-loop).
 
 ## Dead Code
 
